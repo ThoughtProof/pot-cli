@@ -1,0 +1,6 @@
+node_modules/
+dist/
+blocks/
+*.log
+.DS_Store
+.potrc.json
