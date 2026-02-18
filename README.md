@@ -7,10 +7,15 @@ No AI can verify itself — so they verify each other.
 [![npm version](https://img.shields.io/npm/v/pot-cli.svg)](https://www.npmjs.com/package/pot-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Patent Pending](https://img.shields.io/badge/Patent-Pending-blue.svg)](https://thoughtproof.ai)
+[![Benchmark](https://img.shields.io/badge/vs_Majority_Vote-10:0-brightgreen.svg)](MAJORITY-VOTE-TEST.md)
 
 ## What is this?
 
 pot-cli sends your question to multiple AI models from different providers, has them debate adversarially, and synthesizes a verified consensus. Think peer review for AI — not "ask 3 models and pick the best."
+
+### Benchmark: PoT Pipeline vs Majority Vote — 10:0
+
+In 10 controlled tests across factual, code, strategic, and compliance questions, the PoT pipeline caught fabricated statistics, hallucinated citations, and factual errors **in every single case**. Simple majority voting (asking the same models without adversarial critique) passed them all. [Full results →](MAJORITY-VOTE-TEST.md)
 
 **Pipeline:**
 ```
