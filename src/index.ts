@@ -24,6 +24,7 @@ program
   .option('--verbose', 'Show detailed progress')
   .option('--lang <language>', 'Language (de|en)', 'de')
   .option('--context <refs>', 'Reference previous blocks (e.g., "5,8,9" or "last" or "all")')
+  .option('--multi-turn', 'Enable multi-turn cross-examination (3 rounds: interrogation → defense → verdict)')
   .action(async (question: string, options) => {
     await askCommand(question, options);
   });

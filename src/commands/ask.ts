@@ -6,6 +6,7 @@ import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
 import { extractAndVerifyClaims } from '../pipeline/verifier.js';
+import { runMultiTurnCritic } from '../pipeline/multi-turn-critic.js';
 import { Block, Provider } from '../types.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
@@ -136,7 +137,7 @@ function parseContextOption(contextOption: string, storage: BlockStorage): { ref
 
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; multiTurn?: boolean }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -241,20 +242,38 @@ export async function askCommand(
       }
     }
 
-    // Step 3: Run critic (with verification results if available)
-    spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
-    const critique = await runCritic(
-      critic.provider,
-      critic.model,
-      proposals,
-      language,
-      isDryRun,
-      contextText,
-      verificationReport
-    );
-    
-    if (options.verbose) {
-      console.log(chalk.dim('✓ Critic completed'));
+    // Step 3: Run critic (single-turn or multi-turn cross-examination)
+    let critique;
+    if (options.multiTurn) {
+      spinner.text = `Running Multi-Turn Cross-Examination (3 rounds)...`;
+      critique = await runMultiTurnCritic(
+        critic.provider,
+        critic.model,
+        generators.map(g => ({ provider: g.provider, model: g.model })),
+        proposals,
+        language,
+        isDryRun,
+        contextText,
+        verificationReport,
+        (step) => { spinner.text = step; }
+      );
+      if (options.verbose) {
+        console.log(chalk.dim('✓ Multi-turn cross-examination completed (3 rounds)'));
+      }
+    } else {
+      spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
+      critique = await runCritic(
+        critic.provider,
+        critic.model,
+        proposals,
+        language,
+        isDryRun,
+        contextText,
+        verificationReport
+      );
+      if (options.verbose) {
+        console.log(chalk.dim('✓ Critic completed'));
+      }
     }
 
     // Step 4: Run synthesizer
