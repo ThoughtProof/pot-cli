@@ -1,3 +1,0 @@
-- Initializing ThoughtProof pipeline...
-
-✓ Generators completed

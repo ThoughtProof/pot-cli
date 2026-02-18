@@ -5,8 +5,6 @@ import { BlockStorage } from '../storage/blocks.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
-import { extractAndVerifyClaims } from '../pipeline/verifier.js';
-import { runMultiTurnCritic } from '../pipeline/multi-turn-critic.js';
 import { Block, Provider } from '../types.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
@@ -137,7 +135,7 @@ function parseContextOption(contextOption: string, storage: BlockStorage): { ref
 
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; multiTurn?: boolean }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -202,78 +200,19 @@ export async function askCommand(
       console.log(chalk.dim('\n✓ Generators completed'));
     }
 
-    // Step 2.5: Web Verification (if search provider configured)
-    let verificationReport: string | undefined;
-    const searchConfig = config.search;
-    if (searchConfig && !isDryRun) {
-      try {
-        spinner.text = '🔍 Verifying factual claims via web search...';
-        // Use the first generator as extractor (fast, cheap)
-        const extractor = generators[0];
-        // Create search provider from config
-        const { OpenAIProvider } = await import('../providers/openai.js');
-        const searchProvider = new OpenAIProvider(
-          'search',
-          searchConfig.baseUrl || 'https://api.perplexity.ai',
-          searchConfig.apiKey
-        );
-        const searchModel = searchConfig.model || 'sonar';
-
-        const verification = await extractAndVerifyClaims(
-          extractor.provider,
-          extractor.model,
-          searchProvider,
-          searchModel,
-          proposals,
-          language
-        );
-        verificationReport = verification.summary;
-
-        if (options.verbose) {
-          console.log(chalk.dim('✓ Web verification completed'));
-          const confirmed = verification.results.filter(r => r.status === 'confirmed').length;
-          const contradicted = verification.results.filter(r => r.status === 'contradicted').length;
-          console.log(chalk.dim(`  ✅ ${confirmed} confirmed, ❌ ${contradicted} contradicted, ❓ ${verification.results.length - confirmed - contradicted} inconclusive`));
-        }
-      } catch (error) {
-        if (options.verbose) {
-          console.log(chalk.dim(`⚠️ Web verification skipped: ${error instanceof Error ? error.message : 'unknown error'}`));
-        }
-      }
-    }
-
-    // Step 3: Run critic (single-turn or multi-turn cross-examination)
-    let critique;
-    if (options.multiTurn) {
-      spinner.text = `Running Multi-Turn Cross-Examination (3 rounds)...`;
-      critique = await runMultiTurnCritic(
-        critic.provider,
-        critic.model,
-        generators.map(g => ({ provider: g.provider, model: g.model })),
-        proposals,
-        language,
-        isDryRun,
-        contextText,
-        verificationReport,
-        (step) => { spinner.text = step; }
-      );
-      if (options.verbose) {
-        console.log(chalk.dim('✓ Multi-turn cross-examination completed (3 rounds)'));
-      }
-    } else {
-      spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
-      critique = await runCritic(
-        critic.provider,
-        critic.model,
-        proposals,
-        language,
-        isDryRun,
-        contextText,
-        verificationReport
-      );
-      if (options.verbose) {
-        console.log(chalk.dim('✓ Critic completed'));
-      }
+    // Step 3: Run critic
+    spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
+    const critique = await runCritic(
+      critic.provider,
+      critic.model,
+      proposals,
+      language,
+      isDryRun,
+      contextText
+    );
+    
+    if (options.verbose) {
+      console.log(chalk.dim('✓ Critic completed'));
     }
 
     // Step 4: Run synthesizer

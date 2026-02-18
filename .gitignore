@@ -5,3 +5,6 @@ blocks/
 *.log
 .DS_Store
 .npmrc
+benchmark-results/
+truthfulqa-50.json
+truthfulqa-benchmark.sh

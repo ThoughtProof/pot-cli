@@ -30,13 +30,6 @@ export interface PotConfig {
     deepseek?: string;
   };
   
-  // Search/verification provider (e.g., Perplexity Sonar for web-grounded fact-checking)
-  search?: {
-    apiKey: string;
-    baseUrl?: string; // defaults to https://api.perplexity.ai
-    model?: string; // defaults to 'sonar'
-  };
-  
   blockStoragePath: string;
   language: 'de' | 'en';
 }
