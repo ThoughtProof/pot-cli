@@ -170,6 +170,30 @@ pot-cli review src/api/routes.ts
 
 Same adversarial pipeline, but focused on code quality rather than bug fixing.
 
+### `pot-cli audit` — Compliance audit against frameworks
+
+```bash
+# Audit documents against DSGVO/GDPR
+pot-cli audit ./privacy-policy/ --framework dsgvo
+
+# Audit against SOC 2
+pot-cli audit ./security-docs/ --framework soc2
+
+# Audit against EU AI Act
+pot-cli audit ./ai-system-docs/ --framework eu-ai-act
+```
+
+**Built-in frameworks:** GBA (German healthcare QM), DSGVO/GDPR, ISO 9001, HIPAA, SOC 2, EU AI Act.
+
+4 AI models independently audit your documents, a critic checks if they missed anything, and you get a synthesized report with:
+- Gap analysis (covered vs missing requirements)
+- Compliance score (0-100%)
+- Top 5 critical gaps with severity ratings
+- Actionable recommendations
+- Risk assessment
+
+Works on single files or entire directories (reads up to 10 .md/.txt files).
+
 ## Commands
 
 | Command | Description |
