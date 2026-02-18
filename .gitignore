@@ -4,3 +4,4 @@ blocks/
 .potrc.json
 *.log
 .DS_Store
+.npmrc

@@ -4,6 +4,7 @@
 
 No AI can verify itself — so they verify each other.
 
+[![npm version](https://img.shields.io/npm/v/pot-cli.svg)](https://www.npmjs.com/package/pot-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Patent Pending](https://img.shields.io/badge/Patent-Pending-blue.svg)](https://thoughtproof.ai)
 
@@ -267,6 +268,14 @@ MIT — do whatever you want with it.
 ## Patent
 
 Patent pending: USPTO #63/984,669. Not to gatekeep — to protect the protocol from being swallowed by a single provider. The code is and will remain MIT.
+
+## Examples
+
+See the [`examples/`](examples/) folder for full output samples:
+
+- [Debug output](examples/example-debug-output.md) — Finding an async/await race condition
+- [Audit output](examples/example-audit-output.md) — SOC 2 compliance audit (score: 61/100)
+- [Ask output](examples/example-ask-output.md) — Microservices vs Monolith (4/4 consensus)
 
 ## Links
 
