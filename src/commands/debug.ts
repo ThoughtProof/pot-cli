@@ -40,7 +40,7 @@ function detectLanguage(filePath: string): string {
 
 export async function debugCommand(
   filePath: string,
-  options: { verbose?: boolean; lang?: string; error?: string }
+  options: { verbose?: boolean; lang?: string; error?: string; lines?: string }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -52,12 +52,36 @@ export async function debugCommand(
     process.exit(1);
   }
 
-  const code = readFileSync(resolved, 'utf8');
+  let code = readFileSync(resolved, 'utf8');
   const language = detectLanguage(resolved);
   const fileName = path.basename(resolved);
+  const totalLines = code.split('\n').length;
+
+  // Handle --lines flag (e.g. "50-120")
+  if (options.lines) {
+    const match = options.lines.match(/^(\d+)-(\d+)$/);
+    if (!match) {
+      console.error(chalk.red('Invalid --lines format. Use: --lines 50-120'));
+      process.exit(1);
+    }
+    const start = parseInt(match[1], 10);
+    const end = parseInt(match[2], 10);
+    const allLines = code.split('\n');
+    code = allLines.slice(start - 1, end).join('\n');
+    console.log(chalk.dim(`   Extracted lines ${start}-${end} of ${totalLines}\n`));
+  }
+
+  // Warn on large files
+  const codeLines = code.split('\n').length;
+  const MAX_RECOMMENDED_LINES = 500;
+  if (codeLines > MAX_RECOMMENDED_LINES) {
+    console.log(chalk.yellow(`⚠️  File has ${codeLines} lines. Recommended max: ${MAX_RECOMMENDED_LINES}.`));
+    console.log(chalk.yellow(`   Large files increase cost and may exceed context limits.`));
+    console.log(chalk.yellow(`   Tip: Use --lines 50-120 to focus on the relevant section.\n`));
+  }
 
   console.log(chalk.bold(`\n🐛 ThoughtProof Debug: ${fileName}`));
-  console.log(chalk.dim(`   Language: ${language} | ${code.split('\n').length} lines\n`));
+  console.log(chalk.dim(`   Language: ${language} | ${codeLines} lines${options.lines ? ` (of ${totalLines})` : ''}\n`));
 
   const errorContext = options.error
     ? `\nThe user reports this error:\n${options.error}\n`

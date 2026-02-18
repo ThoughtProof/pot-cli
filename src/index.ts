@@ -44,6 +44,7 @@ program
   .option('--verbose', 'Show detailed progress')
   .option('--lang <language>', 'Language (de|en)', 'de')
   .option('--error <message>', 'Error message or description of the bug')
+  .option('--lines <range>', 'Line range to analyze (e.g., "50-120")')
   .action(async (file: string, options) => {
     await debugCommand(file, options);
   });

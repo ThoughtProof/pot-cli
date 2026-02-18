@@ -145,7 +145,12 @@ pot-cli debug src/server.ts
 
 # With error context
 pot-cli debug src/auth.ts --error "TypeError: Cannot read property 'token' of undefined"
+
+# Focus on specific lines (recommended for large files)
+pot-cli debug src/server.ts --lines 50-120
 ```
+
+> ⚠️ **Large files:** pot-cli sends your code to the configured APIs. For files >500 lines, use `--lines` to focus on the relevant section. This saves cost and improves accuracy.
 
 **How it works:**
 1. Static analysis runs instantly (ruff, mypy, shellcheck, eslint — depending on language)

@@ -1,20 +1,30 @@
 {
   "name": "pot-cli",
   "version": "0.1.0",
-  "description": "ThoughtProof Proof-of-Thought CLI Tool",
+  "description": "Multi-model AI verification with adversarial critique. No AI can verify itself — so they verify each other.",
   "main": "dist/index.js",
   "bin": {
+    "pot-cli": "./dist/index.js",
     "pot": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "build": "tsc",
     "dev": "tsup src/index.ts --format esm --watch",
     "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
     "test": "node dist/index.js ask 'Test question' --dry-run"
   },
-  "keywords": ["proof-of-thought", "ai", "cli"],
-  "author": "",
+  "keywords": ["ai", "verification", "multi-model", "adversarial", "code-review", "debugging", "compliance", "audit", "llm", "cli", "byok"],
+  "author": "ThoughtProof <raul@thoughtproof.ai> (https://thoughtproof.ai)",
   "license": "MIT",
+  "homepage": "https://thoughtproof.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThoughtProof/pot-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ThoughtProof/pot-cli/issues"
+  },
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.0.0",

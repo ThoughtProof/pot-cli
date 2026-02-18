@@ -1,0 +1,7 @@
+src/
+tsconfig.json
+.potrc.json
+blocks/
+*.log
+.DS_Store
+.git
