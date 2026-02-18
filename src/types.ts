@@ -70,6 +70,7 @@ export interface Metadata {
   total_cost_usd: number;
   duration_seconds: number;
   model_diversity_index: number;
+  dissent_score?: number;
 }
 
 export interface APIResponse {

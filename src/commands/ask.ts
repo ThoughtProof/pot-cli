@@ -7,6 +7,42 @@ import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
 import { Block, Provider } from '../types.js';
 
+function calculateDissentScore(proposals: { content: string }[]): number {
+  // Measures how different proposals are from each other
+  // Uses Jaccard distance on word sets (simple but effective)
+  if (proposals.length < 2) return 0;
+  
+  const wordSets = proposals.map(p => {
+    const words = p.content.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 3); // skip small words
+    return new Set(words);
+  });
+  
+  let totalDistance = 0;
+  let pairs = 0;
+  
+  for (let i = 0; i < wordSets.length; i++) {
+    for (let j = i + 1; j < wordSets.length; j++) {
+      const intersection = new Set([...wordSets[i]].filter(w => wordSets[j].has(w)));
+      const union = new Set([...wordSets[i], ...wordSets[j]]);
+      const jaccard = union.size > 0 ? intersection.size / union.size : 0;
+      totalDistance += (1 - jaccard); // distance = 1 - similarity
+      pairs++;
+    }
+  }
+  
+  return pairs > 0 ? totalDistance / pairs : 0;
+}
+
+function getDissentLabel(score: number): string {
+  if (score < 0.3) return '🟢 Low (models largely agree)';
+  if (score < 0.5) return '🟡 Moderate (some disagreement)';
+  if (score < 0.7) return '🟠 High (significant disagreement — review carefully)';
+  return '🔴 Very High (models fundamentally disagree — treat with caution)';
+}
+
 function calculateModelDiversityIndex(models: string[]): number {
   const counts = new Map<string, number>();
   models.forEach(m => {
@@ -205,10 +241,11 @@ export async function askCommand(
       synthesis.model,
     ];
     const mdi = calculateModelDiversityIndex(modelList);
+    const dissentScore = calculateDissentScore(proposals);
 
     const block: Block = {
       id: '', // Will be set by storage
-      version: '0.1.0',
+      version: '0.2.0',
       timestamp: new Date().toISOString(),
       question,
       normalized_question: normalizedQuestion,
@@ -220,6 +257,7 @@ export async function askCommand(
         total_cost_usd: 0, // Would need to track from API responses
         duration_seconds: duration,
         model_diversity_index: mdi,
+        dissent_score: dissentScore,
       },
       context_refs: contextRefs.length > 0 ? contextRefs : undefined,
     };
@@ -233,6 +271,7 @@ export async function askCommand(
     console.log(synthesis.content);
     console.log(chalk.dim(`\n💾 Saved as ${blockId}`));
     console.log(chalk.dim(`📈 Model Diversity Index: ${mdi.toFixed(3)}`));
+    console.log(chalk.dim(`⚖️  Dissent Score: ${dissentScore.toFixed(3)} — ${getDissentLabel(dissentScore)}`));
     
   } catch (error) {
     spinner.fail('Pipeline failed');
