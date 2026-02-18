@@ -190,6 +190,28 @@ Same adversarial pipeline, but focused on code quality rather than bug fixing.
 - `--dry-run` — Test without API calls
 - `--error "msg"` — Error context for debug mode
 
+## Security & Privacy
+
+**Your code, your keys, your control.**
+
+- **No middleman:** pot-cli sends requests directly to the APIs you configure. We never see your code.
+- **BYOK:** You choose which providers get your data. Trust only Anthropic? Use only Anthropic.
+- **Local mode:** Point all generators at local models (Ollama, llama.cpp) for fully offline verification. Zero data leaves your machine.
+- **No telemetry:** pot-cli collects nothing. No analytics, no usage tracking, no phone home.
+
+⚠️ **For sensitive/proprietary code:** Use local models or review your providers' data retention policies. Code sent to cloud APIs is subject to each provider's terms of service.
+
+```bash
+# Example: fully local setup with Ollama
+{
+  "generators": [
+    { "name": "Llama", "model": "llama3.1:70b", "baseUrl": "http://localhost:11434/v1/chat/completions", "apiKey": "ollama" },
+    { "name": "Mistral", "model": "mistral-large", "baseUrl": "http://localhost:11434/v1/chat/completions", "apiKey": "ollama" },
+    { "name": "DeepSeek", "model": "deepseek-coder-v2", "baseUrl": "http://localhost:11434/v1/chat/completions", "apiKey": "ollama" }
+  ]
+}
+```
+
 ## Cost
 
 You pay your own API costs (BYOK). Typical costs:
