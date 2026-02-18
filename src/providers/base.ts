@@ -18,23 +18,64 @@ export abstract class BaseProvider implements Provider {
   protected async makeRequest(
     url: string,
     body: any,
-    headers: Record<string, string>
+    headers: Record<string, string>,
+    timeoutMs: number = 120000,
+    maxRetries: number = 1
   ): Promise<any> {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers,
-      },
-      body: JSON.stringify(body),
-    });
+    let lastError: Error | null = null;
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`API request failed: ${response.status} - ${error}`);
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      if (attempt > 0) {
+        // Exponential backoff: 2s, 4s
+        const backoffMs = 2000 * Math.pow(2, attempt - 1);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          const status = response.status;
+          
+          // Retry on 429 (rate limit), 500, 502, 503, 529 (overloaded)
+          if (attempt < maxRetries && [429, 500, 502, 503, 529].includes(status)) {
+            lastError = new Error(`API request failed: ${status} - ${error}`);
+            continue;
+          }
+          
+          throw new Error(`API request failed: ${status} - ${error}`);
+        }
+
+        return response.json();
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          lastError = new Error(`API request timed out after ${timeoutMs / 1000}s`);
+          if (attempt < maxRetries) continue;
+          throw lastError;
+        }
+        if (attempt < maxRetries && (error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT')) {
+          lastError = error;
+          continue;
+        }
+        throw error;
+      } finally {
+        clearTimeout(timeout);
+      }
     }
 
-    return response.json();
+    throw lastError || new Error('Request failed after retries');
   }
 
   protected estimateCost(tokens: number, model: string): number {

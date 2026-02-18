@@ -1,207 +1,190 @@
-# pot-cli v0.1
+# pot-cli — Proof of Thought
 
-**ThoughtProof Proof-of-Thought CLI Tool** — Multi-model AI pipeline for robust, critic-reviewed answers.
+**Multi-model AI verification with adversarial critique.**
 
-## What is ThoughtProof?
+No AI can verify itself — so they verify each other.
 
-ThoughtProof (PoT) is a protocol that combines multiple AI models in a structured pipeline:
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Patent Pending](https://img.shields.io/badge/Patent-Pending-blue.svg)](https://thoughtproof.ai)
 
-1. **3 Generators** (diverse models) generate independent proposals
-2. **Critic** (Red-Team) reviews all proposals for weaknesses
-3. **Synthesizer** combines insights into a final, robust answer
+## What is this?
 
-Each run creates a **Block** — a JSON artifact containing all stages + metadata.
+pot-cli sends your question to multiple AI models from different providers, has them debate adversarially, and synthesizes a verified consensus. Think peer review for AI — not "ask 3 models and pick the best."
 
----
-
-## Installation
-
-```bash
-cd pot-cli
-npm install
-npm run build
+**Pipeline:**
+```
+Your Question → 4 Generators → Adversarial Critic → Synthesizer → Epistemic Block
+                (different      (Red Team:           (consensus +
+                 providers)      finds flaws)          disagreement score)
 ```
 
-Make it globally available:
+**Why?** Because asking GPT to verify GPT is like letting Moody's rate its own bonds — we saw how that ended in 2008. Independent verification exists because the verifier shouldn't have a stake in the outcome.
+
+## Key Features
+
+- 🔑 **BYOK (Bring Your Own Key):** Your API keys, your data, no middleman
+- 🔀 **Model-neutral:** Works with any OpenAI-compatible endpoint + Anthropic
+- ⚔️ **Adversarial by design:** Critic role actively searches for flaws
+- 🔗 **Block chaining:** Outputs are hash-chained JSON documents (like git commits)
+- 📊 **Disagreement scoring:** Model Diversity Index quantifies how much models disagree
+- 🔄 **Deep mode:** 3 runs with rotated critic roles + meta-synthesis
+
+## Quick Start
 
 ```bash
-npm link
+# Install
+npm install -g pot-cli
+
+# Configure (copy and edit with your API keys)
+cp .potrc.json.example ~/.potrc.json
+
+# Run a verification
+pot-cli ask "Should a small business invest in AI automation?"
+
+# Deep analysis (3 runs, rotated critics, meta-synthesis)
+pot-cli deep "Is model-neutral verification a viable business?"
+
+# List all blocks
+pot-cli list
+
+# Show a specific block
+pot-cli show 42
 ```
-
-Now you can run `pot` from anywhere.
-
----
 
 ## Configuration
 
-pot uses **BYOK** (Bring Your Own Keys). Set environment variables:
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-export XAI_API_KEY="xai-..."
-export MOONSHOT_API_KEY="sk-..."
-export OPENAI_API_KEY="sk-..."  # Optional
-```
-
-Or create `~/.potrc.json`:
+Copy `.potrc.json.example` to `~/.potrc.json` and add your API keys:
 
 ```json
 {
-  "models": {
-    "generator1": "grok-beta",
-    "generator2": "moonshot-v1-8k",
-    "generator3": "claude-sonnet-4-20250514",
-    "critic": "claude-sonnet-4-20250514",
-    "synthesizer": "claude-sonnet-4-20250514"
-  },
+  "generators": [
+    { "name": "xAI", "model": "grok-4-1-fast", "apiKey": "YOUR_KEY" },
+    { "name": "Moonshot", "model": "kimi-k2.5", "apiKey": "YOUR_KEY" },
+    { "name": "Anthropic", "model": "claude-sonnet-4-5-20250929", "provider": "anthropic", "apiKey": "YOUR_KEY" },
+    { "name": "DeepSeek", "model": "deepseek-chat", "apiKey": "YOUR_KEY" }
+  ],
+  "critic": { "name": "Anthropic", "model": "claude-opus-4-6", "provider": "anthropic", "apiKey": "YOUR_KEY" },
+  "synthesizer": { "name": "Anthropic", "model": "claude-opus-4-6", "provider": "anthropic", "apiKey": "YOUR_KEY" },
   "blockStoragePath": "./blocks",
-  "language": "de"
+  "language": "en"
 }
 ```
 
-Check your config:
+**Supported providers:** Any OpenAI-compatible API (xAI, Moonshot, DeepSeek, OpenAI, Groq, Together, Ollama, etc.) + Anthropic native.
 
-```bash
-pot config
-```
+**Minimum:** 3 generators from different providers (model diversity requirement).
 
----
+## How It Works
 
-## Usage
+### Single Run (`pot-cli ask`)
 
-### 1. Ask a question
+1. **Normalize** — Standardize the question
+2. **Generate** — 4 models propose answers independently (in parallel)
+3. **Critique** — A different model plays Red Team, scoring and attacking each proposal
+4. **Synthesize** — Final model combines strengths, addresses weaknesses, outputs confidence score
 
-```bash
-pot ask "Should I invest in Bitcoin in 2026?"
-```
+### Deep Analysis (`pot-cli deep`)
 
-This will:
-- Run 3 generators in parallel
-- Run critic review
-- Synthesize final answer
-- Save as `blocks/PoT-001.json`
+Runs the pipeline 3 times with **rotated critic roles:**
+- Run 1: Generators A+B+C → Critic D
+- Run 2: Generators D+B+C → Critic A  
+- Run 3: Generators A+D+C → Critic B
 
-Options:
-- `--dry-run` — Test without calling APIs (fake responses)
-- `--verbose` — Show detailed progress
-- `--lang en` — Use English prompts (default: `de`)
+Then a **meta-synthesis** combines all 3 runs into a final consensus.
 
-Example:
+This eliminates single-critic bias. Every model gets to be both proposer and critic.
 
-```bash
-pot ask "Ist KI eine Blase?" --verbose
-```
+### Epistemic Blocks
 
-### 2. List all blocks
-
-```bash
-pot list
-```
-
-Output:
-
-```
-📚 3 Blocks found:
-
-PoT-001 │ 15.02.26, 21:30 │ Should I invest in Bitcoin? │ MDI: 0.67
-PoT-002 │ 15.02.26, 22:15 │ Ist KI eine Blase? │ MDI: 0.65
-PoT-003 │ 16.02.26, 09:00 │ Best strategy for... │ MDI: 0.70
-```
-
-### 3. Show a block
-
-```bash
-pot show 1
-```
-
-This displays:
-- Question
-- All 3 proposals
-- Critique
-- Final synthesis
-
-### 4. Check configuration
-
-```bash
-pot config
-```
-
-Shows:
-- Active models
-- API key status (masked)
-- Storage path
-- Language
-
----
-
-## Block Format
-
-Each block is saved as JSON:
+Each run produces a JSON block:
 
 ```json
 {
-  "id": "PoT-001",
-  "version": "0.1.0",
-  "timestamp": "2026-02-15T21:30:00Z",
-  "question": "Should I invest in Bitcoin in 2026?",
-  "normalized_question": "Should I invest in Bitcoin in 2026?",
-  "proposals": [
-    {"model": "grok-beta", "role": "generator", "content": "..."},
-    {"model": "moonshot-v1-8k", "role": "generator", "content": "..."},
-    {"model": "claude-sonnet-4", "role": "generator", "content": "..."}
-  ],
-  "critique": {"model": "claude-sonnet-4", "role": "critic", "content": "..."},
-  "synthesis": {"model": "claude-sonnet-4", "role": "synthesizer", "content": "..."},
+  "id": "PoT-042",
+  "question": "Is independent AI verification viable?",
+  "proposals": [...],
+  "critique": {...},
+  "synthesis": {
+    "content": "...",
+    "model": "claude-opus-4-6"
+  },
   "metadata": {
-    "total_tokens": 12500,
-    "total_cost_usd": 0.037,
-    "duration_seconds": 8.3,
-    "model_diversity_index": 0.67
+    "duration_seconds": 173,
+    "model_diversity_index": 0.750
   }
 }
 ```
 
----
+Blocks are hash-chained and can reference previous blocks via `--context`.
 
-## Model Diversity Index (MDI)
+## Benchmarks
 
-MDI measures how diverse your model selection is:
+Pipeline vs single-model across 6 controlled tests:
 
-```
-MDI = 1 - Σ(fraction_i)²
-```
+| Test | Pipeline | Solo | Winner |
+|------|----------|------|--------|
+| Market analysis | 4 | 1 | Pipeline |
+| Defensibility | 4 | 1 | Pipeline |
+| Architecture design | 5 | 1 | Pipeline |
+| Protocol design | 4 | 2 | Pipeline |
+| Benchmark design | 5 | 1 | Pipeline |
+| Block format | 5 | 1 | Pipeline |
+| **Total** | **27** | **7** | **Pipeline (3.9x)** |
 
-- **MDI = 1.0** → All different models
-- **MDI = 0.0** → All same model
+Single models are creative but optimistic. The adversarial critic makes them honest.
 
-Higher is better (more diverse perspectives).
+## Commands
 
----
+| Command | Description |
+|---------|-------------|
+| `pot-cli ask <question>` | Single verification run |
+| `pot-cli deep <question>` | 3-run deep analysis with meta-synthesis |
+| `pot-cli list` | List all blocks |
+| `pot-cli show <number>` | Display a specific block |
+| `pot-cli config` | Show current configuration |
+| `pot-cli audit` | Audit block integrity |
 
-## Development
+**Options:**
+- `--verbose` — Show progress details
+- `--lang en|de` — Output language
+- `--context last|all|5,8,9` — Chain with previous blocks
+- `--dry-run` — Test without API calls
 
-```bash
-npm run dev      # Watch mode
-npm run build    # Production build
-npm run test     # Dry-run test
-```
+## Cost
 
----
+You pay your own API costs (BYOK). Typical costs:
 
-## Roadmap
+| Mode | Duration | Cost |
+|------|----------|------|
+| `ask` (single) | ~30-60s | $0.10-0.50 |
+| `deep` (3 runs) | ~3-5 min | $0.50-2.00 |
 
-- [ ] Token/cost tracking from API responses
-- [ ] Custom prompts via config
-- [ ] Export to PDF/Markdown
-- [ ] Interactive mode (`pot chat`)
-- [ ] Support for more providers (Gemini, Mistral, ...)
+Best for high-stakes decisions where being wrong is expensive. Overkill for "What's the capital of France?"
 
----
+## Limitations
+
+- **Not a chatbot.** It's a verification protocol.
+- **Not cheap.** Multi-model means multi-cost.
+- **Not magic.** All models can be wrong about the same thing (unknown unknowns).
+- **61 blocks is promising data, not proof.** More testing needed.
+- **TypeScript/Node.js.** Python port welcome (PRs appreciated).
 
 ## License
 
-MIT
+MIT — do whatever you want with it.
+
+## Patent
+
+Patent pending: USPTO #63/984,669. Not to gatekeep — to protect the protocol from being swallowed by a single provider. The code is and will remain MIT.
+
+## Links
+
+- **Website:** [thoughtproof.ai](https://thoughtproof.ai)
+- **Docs:** [thoughtproof.ai/docs](https://thoughtproof.ai/docs)
+- **Demo:** [thoughtproof.ai/demo](https://thoughtproof.ai/demo)
 
 ---
 
-**Built with ❤️ for better AI reasoning.**
+*"No AI should verify itself — just as no surgeon operates without a second opinion."*
+
+**ThoughtProof™ — AI verification owned by no one, trusted by everyone.**

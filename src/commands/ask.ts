@@ -1,9 +1,7 @@
 import ora from 'ora';
 import chalk from 'chalk';
-import { getConfig } from '../config.js';
+import { getConfig, loadSystemContext, createProvidersFromConfig } from '../config.js';
 import { BlockStorage } from '../storage/blocks.js';
-import { AnthropicProvider } from '../providers/anthropic.js';
-import { XAIProvider, MoonshotProvider } from '../providers/openai.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
@@ -12,7 +10,24 @@ import { Block, Provider } from '../types.js';
 function calculateModelDiversityIndex(models: string[]): number {
   const counts = new Map<string, number>();
   models.forEach(m => {
-    const key = m.split('-')[0]; // Group by base model
+    // Group by provider family, not just first token
+    const lower = m.toLowerCase();
+    let key: string;
+    if (lower.includes('claude') || lower.includes('opus') || lower.includes('sonnet') || lower.includes('haiku')) {
+      key = 'anthropic';
+    } else if (lower.includes('gpt') || lower.includes('o1') || lower.includes('o3') || lower.includes('o4')) {
+      key = 'openai';
+    } else if (lower.includes('grok')) {
+      key = 'xai';
+    } else if (lower.includes('kimi') || lower.includes('moonshot')) {
+      key = 'moonshot';
+    } else if (lower.includes('deepseek')) {
+      key = 'deepseek';
+    } else if (lower.includes('gemini')) {
+      key = 'google';
+    } else {
+      key = lower.split('-')[0]; // Fallback
+    }
     counts.set(key, (counts.get(key) || 0) + 1);
   });
   
@@ -26,36 +41,112 @@ function calculateModelDiversityIndex(models: string[]): number {
   return 1 - sum;
 }
 
+function truncateText(text: string, maxWords: number): string {
+  const words = text.split(/\s+/);
+  if (words.length <= maxWords) return text;
+  return words.slice(0, maxWords).join(' ') + '...';
+}
+
+function parseContextOption(contextOption: string, storage: BlockStorage): { refs: string[]; contextText: string; lang: 'de' | 'en' } {
+  const refs: string[] = [];
+  const contextParts: string[] = [];
+
+  if (contextOption === 'last') {
+    const lastNum = storage.getLastBlockNumber();
+    if (lastNum === 0) {
+      throw new Error('No blocks found for --context last');
+    }
+    const block = storage.loadBlock(lastNum);
+    if (block) {
+      refs.push(block.id);
+      const truncated = truncateText(block.synthesis.content, 500);
+      contextParts.push(`[${block.id} Synthese]: ${truncated}`);
+    }
+  } else if (contextOption === 'all') {
+    const allBlocks = storage.list();
+    if (allBlocks.length === 0) {
+      throw new Error('No blocks found for --context all');
+    }
+    allBlocks.forEach(block => {
+      refs.push(block.id);
+      const truncated = truncateText(block.synthesis.content, 500);
+      contextParts.push(`[${block.id} Synthese]: ${truncated}`);
+    });
+  } else {
+    // Parse comma-separated numbers: "5,8,9"
+    const numbers = contextOption.split(',').map(s => parseInt(s.trim(), 10));
+    const blocks = storage.loadBlocks(numbers);
+    
+    if (blocks.length === 0) {
+      throw new Error(`No blocks found for context: ${contextOption}`);
+    }
+    
+    blocks.forEach(block => {
+      refs.push(block.id);
+      const truncated = truncateText(block.synthesis.content, 500);
+      contextParts.push(`[${block.id} Synthese]: ${truncated}`);
+    });
+  }
+
+  const lang: 'de' | 'en' = contextParts[0]?.includes('Synthese') ? 'de' : 'en';
+  const contextLabel = lang === 'de' ? 'KONTEXT AUS VORHERIGEN BLOCKS:' : 'CONTEXT FROM PREVIOUS BLOCKS:';
+  const contextText = contextParts.length > 0
+    ? `${contextLabel}\n${contextParts.join('\n\n')}\n`
+    : '';
+
+  return { refs, contextText, lang };
+}
+
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string }
 ): Promise<void> {
   const config = getConfig();
-  const language = (options.lang as 'de' | 'en') || config.language;
+  const storage = new BlockStorage(config.blockStoragePath);
   const isDryRun = options.dryRun || false;
+  
+  // Parse context if provided
+  let contextRefs: string[] = [];
+  let contextText: string | undefined;
+  let language = (options.lang as 'de' | 'en') || config.language;
+
+  // Load system context (always injected if present)
+  const systemContext = loadSystemContext();
+
+  if (options.context) {
+    try {
+      const parsed = parseContextOption(options.context, storage);
+      contextRefs = parsed.refs;
+      contextText = systemContext + (parsed.contextText || '');
+      // Use language from context if not explicitly set
+      if (!options.lang) {
+        language = parsed.lang;
+      }
+    } catch (error) {
+      console.error(chalk.red(error instanceof Error ? error.message : 'Context parsing failed'));
+      process.exit(1);
+    }
+  } else if (systemContext) {
+    // Even without --context, inject system context
+    contextText = systemContext;
+  }
   
   const spinner = ora('Initializing ThoughtProof pipeline...').start();
   const startTime = Date.now();
 
   try {
-    // Initialize providers
-    const anthropic = new AnthropicProvider(config.apiKeys.anthropic);
-    const xai = new XAIProvider(config.apiKeys.xai);
-    const moonshot = new MoonshotProvider(config.apiKeys.moonshot);
-
-    const providers: { provider: Provider; model: string }[] = [
-      { provider: xai, model: config.models.generator1 },
-      { provider: moonshot, model: config.models.generator2 },
-      { provider: anthropic, model: config.models.generator3 },
-    ];
+    // Initialize providers from config (handles both old and new format)
+    const { generators, critic, synthesizer } = createProvidersFromConfig(config);
 
     // Check availability (skip in dry-run)
     if (!isDryRun) {
-      const unavailable = providers.filter(p => !p.provider.isAvailable());
-      if (unavailable.length > 0) {
+      const unavailable = generators.filter(g => !g.provider.isAvailable());
+      if (unavailable.length > 0 || !critic.provider.isAvailable() || !synthesizer.provider.isAvailable()) {
         spinner.fail('Some API keys are missing');
         console.log(chalk.red('\nMissing API keys for:'));
-        unavailable.forEach(p => console.log(chalk.red(`  - ${p.provider.name}`)));
+        unavailable.forEach(g => console.log(chalk.red(`  - ${g.provider.name}`)));
+        if (!critic.provider.isAvailable()) console.log(chalk.red(`  - ${critic.provider.name} (critic)`));
+        if (!synthesizer.provider.isAvailable()) console.log(chalk.red(`  - ${synthesizer.provider.name} (synthesizer)`));
         console.log(chalk.yellow('\nSet environment variables or configure .potrc.json'));
         process.exit(1);
       }
@@ -66,21 +157,22 @@ export async function askCommand(
     const normalizedQuestion = question.trim();
 
     // Step 2: Run generators in parallel
-    spinner.text = 'Running 3 generators in parallel...';
-    const proposals = await runGenerators(providers, normalizedQuestion, language, isDryRun);
+    spinner.text = `Running ${generators.length} generators in parallel...`;
+    const proposals = await runGenerators(generators, normalizedQuestion, language, isDryRun, contextText);
     
     if (options.verbose) {
       console.log(chalk.dim('\n✓ Generators completed'));
     }
 
     // Step 3: Run critic
-    spinner.text = 'Running Red-Team critic...';
+    spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
     const critique = await runCritic(
-      anthropic,
-      config.models.critic,
+      critic.provider,
+      critic.model,
       proposals,
       language,
-      isDryRun
+      isDryRun,
+      contextText
     );
     
     if (options.verbose) {
@@ -90,12 +182,13 @@ export async function askCommand(
     // Step 4: Run synthesizer
     spinner.text = 'Synthesizing final answer...';
     const synthesis = await runSynthesizer(
-      anthropic,
-      config.models.synthesizer,
+      synthesizer.provider,
+      synthesizer.model,
       proposals,
       critique,
       language,
-      isDryRun
+      isDryRun,
+      contextText
     );
     
     if (options.verbose) {
@@ -128,9 +221,9 @@ export async function askCommand(
         duration_seconds: duration,
         model_diversity_index: mdi,
       },
+      context_refs: contextRefs.length > 0 ? contextRefs : undefined,
     };
 
-    const storage = new BlockStorage(config.blockStoragePath);
     const blockId = storage.save(block);
 
     spinner.succeed(chalk.green(`Block ${blockId} created in ${duration.toFixed(1)}s`));

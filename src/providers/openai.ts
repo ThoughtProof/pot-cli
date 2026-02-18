@@ -5,8 +5,9 @@ export class OpenAIProvider extends BaseProvider {
   name = 'OpenAI';
   protected baseUrl: string;
 
-  constructor(apiKey?: string, baseUrl?: string) {
+  constructor(apiKey?: string, baseUrl?: string, providerName?: string) {
     super(apiKey);
+    this.name = providerName || 'OpenAI';
     this.baseUrl = baseUrl || 'https://api.openai.com/v1/chat/completions';
   }
 
@@ -20,15 +21,17 @@ export class OpenAIProvider extends BaseProvider {
       {
         model,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 4096,
+        max_tokens: 8192,
       },
       {
         'Authorization': `Bearer ${this.apiKey}`,
       }
     );
 
-    const content = response.choices[0].message.content;
-    const tokens = response.usage.total_tokens;
+    const message = response.choices[0].message;
+    // Reasoning models (kimi-k2-thinking*) put output in reasoning_content, content may be empty
+    const content = message.content || message.reasoning_content || '';
+    const tokens = response.usage?.total_tokens || 0;
     const cost = this.estimateCost(tokens, model);
 
     return { content, tokens, cost };
@@ -47,6 +50,14 @@ export class MoonshotProvider extends OpenAIProvider {
   name = 'Moonshot';
   
   constructor(apiKey?: string) {
-    super(apiKey, 'https://api.moonshot.cn/v1/chat/completions');
+    super(apiKey, 'https://api.moonshot.ai/v1/chat/completions');
+  }
+}
+
+export class DeepSeekProvider extends OpenAIProvider {
+  name = 'DeepSeek';
+  
+  constructor(apiKey?: string) {
+    super(apiKey, 'https://api.deepseek.com/chat/completions');
   }
 }

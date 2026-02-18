@@ -2,6 +2,8 @@ import { Provider, Proposal, Critique, Synthesis } from '../types.js';
 
 const SYNTHESIZER_PROMPT_DE = `Du bist der Synthesizer. Kombiniere die 3 Proposals und die Kritik zu einer optimalen Antwort.
 
+{context}
+
 REGELN:
 - Nutze die Stärken aller Proposals
 - Adressiere die Kritikpunkte
@@ -16,6 +18,8 @@ KRITIK:
 {critique}`;
 
 const SYNTHESIZER_PROMPT_EN = `You are the Synthesizer. Combine the 3 proposals and critique into an optimal answer.
+
+{context}
 
 RULES:
 - Use the strengths of all proposals
@@ -36,7 +40,8 @@ export async function runSynthesizer(
   proposals: Proposal[],
   critique: Critique,
   language: 'de' | 'en' = 'de',
-  dryRun: boolean = false
+  dryRun: boolean = false,
+  contextText?: string
 ): Promise<Synthesis> {
   if (dryRun) {
     return {
@@ -51,7 +56,9 @@ export async function runSynthesizer(
     .join('\n\n');
 
   const template = language === 'de' ? SYNTHESIZER_PROMPT_DE : SYNTHESIZER_PROMPT_EN;
+  const contextSection = contextText || '';
   const prompt = template
+    .replace('{context}', contextSection)
     .replace('{proposals}', proposalsText)
     .replace('{critique}', critique.content);
 

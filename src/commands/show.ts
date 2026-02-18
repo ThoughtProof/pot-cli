@@ -28,6 +28,10 @@ export function showCommand(blockNumber: string): void {
   console.log(chalk.dim(`Duration: ${block.metadata.duration_seconds.toFixed(1)}s`));
   console.log(chalk.dim(`MDI: ${block.metadata.model_diversity_index.toFixed(3)}`));
   
+  if (block.context_refs && block.context_refs.length > 0) {
+    console.log(chalk.dim(`References: ${block.context_refs.join(', ')}`));
+  }
+  
   console.log(chalk.bold('\n❓ QUESTION:'));
   console.log(block.question);
 

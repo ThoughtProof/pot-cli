@@ -2,6 +2,8 @@ import { Provider, Proposal, Critique } from '../types.js';
 
 const CRITIC_PROMPT_DE = `Du bist ein brutaler Red-Team Analyst. Deine Aufgabe: Finde ALLE Schwächen in diesen 3 Proposals.
 
+{context}
+
 REGELN:
 - Bewerte jedes Proposal mit Score 1-10
 - Finde logische Fehler, fehlende Perspektiven, falsche Annahmen
@@ -12,6 +14,8 @@ PROPOSALS:
 {proposals}`;
 
 const CRITIC_PROMPT_EN = `You are a brutal Red-Team analyst. Your task: Find ALL weaknesses in these 3 proposals.
+
+{context}
 
 RULES:
 - Rate each proposal with score 1-10
@@ -27,7 +31,8 @@ export async function runCritic(
   model: string,
   proposals: Proposal[],
   language: 'de' | 'en' = 'de',
-  dryRun: boolean = false
+  dryRun: boolean = false,
+  contextText?: string
 ): Promise<Critique> {
   if (dryRun) {
     return {
@@ -42,7 +47,10 @@ export async function runCritic(
     .join('\n\n');
 
   const template = language === 'de' ? CRITIC_PROMPT_DE : CRITIC_PROMPT_EN;
-  const prompt = template.replace('{proposals}', proposalsText);
+  const contextSection = contextText || '';
+  const prompt = template
+    .replace('{context}', contextSection)
+    .replace('{proposals}', proposalsText);
 
   const response = await provider.call(model, prompt);
 

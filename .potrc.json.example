@@ -1,0 +1,42 @@
+{
+  "generators": [
+    {
+      "name": "xAI",
+      "model": "grok-4-1-fast",
+      "baseUrl": "https://api.x.ai/v1/chat/completions",
+      "apiKey": "YOUR_XAI_API_KEY"
+    },
+    {
+      "name": "Moonshot",
+      "model": "kimi-k2.5",
+      "baseUrl": "https://api.moonshot.ai/v1/chat/completions",
+      "apiKey": "YOUR_MOONSHOT_API_KEY"
+    },
+    {
+      "name": "Anthropic",
+      "model": "claude-sonnet-4-5-20250929",
+      "provider": "anthropic",
+      "apiKey": "YOUR_ANTHROPIC_API_KEY"
+    },
+    {
+      "name": "DeepSeek",
+      "model": "deepseek-chat",
+      "baseUrl": "https://api.deepseek.com/chat/completions",
+      "apiKey": "YOUR_DEEPSEEK_API_KEY"
+    }
+  ],
+  "critic": {
+    "name": "Anthropic",
+    "model": "claude-opus-4-6",
+    "provider": "anthropic",
+    "apiKey": "YOUR_ANTHROPIC_API_KEY"
+  },
+  "synthesizer": {
+    "name": "Anthropic",
+    "model": "claude-opus-4-6",
+    "provider": "anthropic",
+    "apiKey": "YOUR_ANTHROPIC_API_KEY"
+  },
+  "blockStoragePath": "./blocks",
+  "language": "en"
+}

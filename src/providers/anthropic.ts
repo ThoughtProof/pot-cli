@@ -5,6 +5,11 @@ export class AnthropicProvider extends BaseProvider {
   name = 'Anthropic';
   protected baseUrl = 'https://api.anthropic.com/v1/messages';
 
+  constructor(apiKey?: string, providerName?: string) {
+    super(apiKey);
+    this.name = providerName || 'Anthropic';
+  }
+
   async call(model: string, prompt: string): Promise<APIResponse> {
     if (!this.apiKey) {
       throw new Error('Anthropic API key not configured');
@@ -14,13 +19,14 @@ export class AnthropicProvider extends BaseProvider {
       this.baseUrl,
       {
         model,
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }],
       },
       {
         'x-api-key': this.apiKey,
         'anthropic-version': '2023-06-01',
-      }
+      },
+      300000 // 5 min timeout for Opus
     );
 
     const content = response.content[0].text;

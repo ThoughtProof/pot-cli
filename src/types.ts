@@ -1,17 +1,35 @@
+// New flexible generator config (BYOK)
+export interface GeneratorConfig {
+  name: string;
+  model: string;
+  provider?: 'anthropic'; // If set, use Anthropic Messages API (not OpenAI-compatible)
+  baseUrl?: string; // OpenAI-compatible endpoint (optional, defaults based on provider name)
+  apiKey: string;
+}
+
 export interface PotConfig {
-  models: {
+  // New flexible config
+  generators?: GeneratorConfig[];
+  critic?: GeneratorConfig;
+  synthesizer?: GeneratorConfig;
+  
+  // Legacy config (for backward compatibility) - will be migrated internally
+  models?: {
     generator1: string;
     generator2: string;
     generator3: string;
+    generator4: string;
     critic: string;
     synthesizer: string;
   };
-  apiKeys: {
+  apiKeys?: {
     anthropic?: string;
     openai?: string;
     xai?: string;
     moonshot?: string;
+    deepseek?: string;
   };
+  
   blockStoragePath: string;
   language: 'de' | 'en';
 }
@@ -26,6 +44,7 @@ export interface Block {
   critique: Critique;
   synthesis: Synthesis;
   metadata: Metadata;
+  context_refs?: string[];
 }
 
 export interface Proposal {

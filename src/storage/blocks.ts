@@ -81,4 +81,28 @@ export class BlockStorage {
     const blockId = `PoT-${num.toString().padStart(3, '0')}`;
     return this.load(blockId);
   }
+
+  loadBlock(number: number): Block | null {
+    return this.getByNumber(number);
+  }
+
+  loadBlocks(numbers: number[]): Block[] {
+    return numbers
+      .map(num => this.loadBlock(num))
+      .filter((block): block is Block => block !== null);
+  }
+
+  getLastBlockNumber(): number {
+    const files = this.listBlockFiles();
+    if (files.length === 0) return 0;
+
+    const numbers = files
+      .map(f => {
+        const match = f.match(/PoT-(\d+)\.json/);
+        return match ? parseInt(match[1], 10) : 0;
+      })
+      .filter(n => n > 0);
+
+    return numbers.length > 0 ? Math.max(...numbers) : 0;
+  }
 }
