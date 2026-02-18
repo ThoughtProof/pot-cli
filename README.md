@@ -133,22 +133,62 @@ Pipeline vs single-model across 6 controlled tests:
 
 Single models are creative but optimistic. The adversarial critic makes them honest.
 
+## Code Review & Debugging
+
+**This is a killer feature for developers.** Multiple AI models + static analysis review your code adversarially.
+
+### `pot-cli debug` — Multi-model code debugging
+
+```bash
+# Debug a file — 4 LLMs + static analysis find bugs
+pot-cli debug src/server.ts
+
+# With error context
+pot-cli debug src/auth.ts --error "TypeError: Cannot read property 'token' of undefined"
+```
+
+**How it works:**
+1. Static analysis runs instantly (ruff, mypy, shellcheck, eslint — depending on language)
+2. 4 LLM generators analyze the code independently
+3. Adversarial critic evaluates ALL proposals (including static analysis as anchor)
+4. Synthesizer produces the best fix with explanation
+
+**Why this beats single-model code review:**
+- GPT might miss what Claude catches (and vice versa)
+- Static analysis provides **deterministic ground truth** — LLMs can't gaslight the linter
+- The critic checks if proposed fixes introduce NEW bugs
+- You get a documented audit trail, not a chat message
+
+Supports: Python, TypeScript, JavaScript, Go, Rust, Java, C/C++, Ruby, PHP, Swift, Kotlin, Bash.
+
+### `pot-cli review` — Code review for PRs and files
+
+```bash
+# Review a file for quality, security, and best practices
+pot-cli review src/api/routes.ts
+```
+
+Same adversarial pipeline, but focused on code quality rather than bug fixing.
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `pot-cli ask <question>` | Single verification run |
 | `pot-cli deep <question>` | 3-run deep analysis with meta-synthesis |
+| `pot-cli debug <file>` | Multi-model code debugging with static analysis |
+| `pot-cli review <file>` | Adversarial code review |
+| `pot-cli audit` | Audit block integrity |
 | `pot-cli list` | List all blocks |
 | `pot-cli show <number>` | Display a specific block |
 | `pot-cli config` | Show current configuration |
-| `pot-cli audit` | Audit block integrity |
 
 **Options:**
 - `--verbose` — Show progress details
 - `--lang en|de` — Output language
 - `--context last|all|5,8,9` — Chain with previous blocks
 - `--dry-run` — Test without API calls
+- `--error "msg"` — Error context for debug mode
 
 ## Cost
 
