@@ -1,0 +1,70 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-086 created in 154.5s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Legal Activities in Germany — With Epistemic Caveats
+
+## The Meta-Point First
+
+Proposal 4 raised a legitimate strategic objection: a simple legal list seems like a poor fit for an epistemic consensus protocol. **However, the other proposals accidentally proved the opposite.** The sheer volume of disagreement between agents on supposedly "simple" legal facts — unlimited homebrewing vs. 200 liters, squatting as legal vs. criminal, Dignitas as German vs. Swiss — demonstrates exactly why multi-agent verification matters even for factual queries. Simple questions often aren't simple.
+
+That said, this answer should be treated as **illustrative, not as legal advice.** German law operates across federal, state (Länder), and municipal levels. "Completely legal everywhere in Germany at all times" is a higher bar than any single model can clear.
+
+---
+
+## Verified Legal Activities in Germany (High Confidence)
+
+1. **Drinking alcohol in public** — No federal open-container prohibition. Legal for ages 16+ (beer/wine) and 18+ (spirits). *Caveat:* Some municipalities have enacted local bans in specific zones (e.g., parts of Freiburg, Hamburg).
+
+2. **Prostitution** — Regulated and legal since the 2002 Prostitutionsgesetz, updated by the Prostituiertenschutzgesetz 2017. *Caveat:* Heavy municipal regulation; exploitation-related activities remain criminal.
+
+3. **Nude sunbathing (FKK)** — Legal in designated areas and widely tolerated parks (e.g., Munich's Englischer Garten). *Caveat:* Outside designated areas, §118 OWiG (public nuisance) or §183a StGB may apply.
+
+4. **Cannabis possession (since April 2024)** — Up to 25g in public, 50g at home, 3 plants for personal cultivation under the Konsumcannabisgesetz (KCanG). *Caveat:* Consumption near schools/playgrounds is restricted.
+
+5. **Autobahn driving without speed limit** — Roughly 70% of the network has no permanent speed limit (130 km/h recommended). *Caveat:* Temporary limits are frequent; liability in accidents increases at high speeds.
+
+6. **Homebrewing beer** — Up to **200 liters per year** tax-free for personal consumption (Biersteuergesetz §41). Must notify the Hauptzollamt. *(Proposal 1's "unlimited" claim was factually wrong.)*
+
+7. **Dual citizenship** — Legal since the 2024 StAG reform. Previously restricted for most non-EU nationals.
+
+8. **Recording police performing public duties (video)** — Generally permitted. *Caveat:* Audio recording of spoken words may trigger §201 StGB; publication raises personality rights issues under KUG.
+
+9. **Collecting rainwater** — No federal prohibition for personal use.
+
+10. **Running a home business** — Permitted in residential areas for quiet professions with minimal external traffic.
+
+---
+
+## Where Models Disagreed (Most Valuable Signal)
+
+| Topic | Disagreement | Resolution |
+|---|---|---|
+| **Homebrewing limits** | Proposal 1: "unlimited" vs. Proposal 3: "200 liters" | **200 liters is correct** — Biersteuergesetz §41 |
+| **Squatting** | Proposal 1: "legal if non-violent, §123 protects" | **Dangerously wrong** — §123 StGB *criminalizes* trespass. Proposal 1 inverted the statute's meaning |
+| **Euthanasia/Dignitas** | Proposal 1: "legal in Germany via Dignitas" | **Conflates jurisdictions** — Dignitas operates in Switzerland. German assisted suicide law (post-2020 BVerfG ruling) remains practically ambiguous |
+| **Online gambling limits** | Proposal 1: "€1 limit phased out" | **False** — €1,000/month deposit limit under GlüStV 2021 remains in force |
+| **Strategic value of the question** | Proposal 4: "don't answer, wrong use case" vs. others: answer directly | Both valid — but the disagreements themselves prove the use case for verification |
+
+**Why they disagreed:** Proposal 1 prioritized breadth over accuracy, generating confident-sounding but poorly verified claims with hallucinated citations. Proposal 4 operated at the strategic layer, ignoring that the platform context explicitly values Lite-tier volume. The factual models (1, 3) shared a permissiveness bias, understating restrictions.
+
+---
+
+## ThoughtProof Relevance
+
+This exercise is a live demonstration: four models produced meaningfully different answers to a "simple" question, with one generating dangerous misinformation (inverted statute, fabricated citations). An epistemic audit layer would have flagged these contradictions instantly — precisely the value proposition.
+
+**Confidence: 52%**
+
+Capped low because: (1) legal questions inherently vary by jurisdiction and time; (2) multiple models shared a permissiveness bias the critic identified; (3) several specific claims remain unverified against primary German legal sources.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-086
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.926 — 🔴 Very High (models fundamentally disagree — treat with caution)

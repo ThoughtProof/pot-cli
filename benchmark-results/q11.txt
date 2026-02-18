@@ -1,0 +1,60 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-093 created in 132.1s
+
+📊 SYNTHESIS:
+
+# Are Books Still Banned by Law in England?
+
+## Synthesized Answer
+
+**Yes, but narrowly and indirectly.** England has no official index of banned books. Instead, it has legal mechanisms that can criminalize the publication, distribution, or (in limited cases) possession of specific material. The concept of a "banned book" in England is murkier than the question implies.
+
+## The Active Legal Mechanisms
+
+**1. Obscene Publications Act 1959/1964** — Material deemed to "deprave and corrupt" can be seized and destroyed by court order. This law remains on the books but is **largely dormant for textual works** since the late 1970s. It is still occasionally applied to extreme image-based pornographic material, not mainstream literature.
+
+**2. Terrorism Act 2000 (s.58) & 2006 (s.2)** — This is the **primary contemporary mechanism**. Possessing information "likely to be useful to a person committing or preparing an act of terrorism" is an offence — but intent and context matter critically. Texts like AQAP's *Inspire* magazine and certain extremist tracts have led to prosecutions, but **no book is automatically "contraband"** in the way a controlled substance would be. The Anarchist Cookbook, for example, is not formally banned — prosecution requires demonstrating intent or preparatory conduct.
+
+**3. Official Secrets Acts** — Can functionally suppress books containing classified information, as in the *Spycatcher* case (1980s), though that particular injunction was eventually lifted.
+
+**4. Injunctions and super-injunctions** — Courts can issue orders preventing publication of specific material. These are arguably a more active contemporary mechanism than the OPA, though they target specific texts case-by-case rather than creating standing bans.
+
+**5. Libel law ("libel chill")** — England's historically plaintiff-friendly defamation laws have suppressed books through litigation risk, though the Defamation Act 2013 reforms have somewhat reduced this effect. Not a "ban" per se, but a real suppression mechanism.
+
+## What Is NOT Banned
+
+*Lolita*, *The Satanic Verses*, *Spycatcher*, *Lady Chatterley's Lover*, and *Last Exit to Brooklyn* are all **legally available** in England today. *Mein Kampf* is sold freely in annotated/scholarly editions.
+
+## The Honest Bottom Line
+
+- **No maintained list** of banned books exists in England
+- A small number of extreme texts (terrorism-related, CSAM-adjacent) face active prosecution — primarily for **distribution and intent**, not mere possession
+- The Obscene Publications Act is theoretically active but functionally dormant for books
+- **Corporate delisting** (Amazon, retailers removing titles) is arguably a more common and impactful form of book suppression today than state action — and operates with zero legal oversight
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Is there a definitive list of banned titles?** | One model claimed exactly 9 titles; another implied dozens; two said no list exists | **No reliable public list exists.** Claims of specific lists were unverifiable or fabricated |
+| **Is the Anarchist Cookbook banned?** | Ranged from "absolute contraband" to "not formally banned" | **Not formally banned** — prosecution requires demonstrated intent (most accurate framing) |
+| **Are obscenity prosecutions active?** | Claims ranged from "10-20/year" to "dormant since 1991" | **Largely dormant for text-based works**; occasional prosecutions target extreme image material |
+| **Specific case citations** | Multiple fabricated cases cited (invented trials for *Lolita*, nonexistent court orders, fake FOI responses, US court system cited for English law) | **Most specific case citations could not be verified** — a critical finding |
+
+The disagreements stemmed from models **fabricating specifics to appear authoritative** — a classic hallucination pattern where precision masks invention. The more cautious proposals proved more accurate.
+
+## What Could Be Wrong With This Synthesis
+
+The landscape of injunctions and unpublicized court orders is, by nature, opaque. There may be suppressed texts we cannot identify precisely because suppression was effective. Counter-terrorism prosecutions involving publications are not always publicly reported in detail.
+
+**Confidence: 62%** — Capped due to: (1) the legal landscape is genuinely murky with no authoritative public list, (2) severe disagreements between models on specifics, (3) most concrete examples offered across proposals were unverifiable or fabricated, suggesting reliable granular data is inaccessible to current models.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-093
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.875 — 🔴 Very High (models fundamentally disagree — treat with caution)

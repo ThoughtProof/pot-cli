@@ -5,6 +5,7 @@ import { BlockStorage } from '../storage/blocks.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
+import { extractAndVerifyClaims } from '../pipeline/verifier.js';
 import { Block, Provider } from '../types.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
@@ -200,7 +201,47 @@ export async function askCommand(
       console.log(chalk.dim('\n✓ Generators completed'));
     }
 
-    // Step 3: Run critic
+    // Step 2.5: Web Verification (if search provider configured)
+    let verificationReport: string | undefined;
+    const searchConfig = config.search;
+    if (searchConfig && !isDryRun) {
+      try {
+        spinner.text = '🔍 Verifying factual claims via web search...';
+        // Use the first generator as extractor (fast, cheap)
+        const extractor = generators[0];
+        // Create search provider from config
+        const { OpenAIProvider } = await import('../providers/openai.js');
+        const searchProvider = new OpenAIProvider(
+          'search',
+          searchConfig.baseUrl || 'https://api.perplexity.ai',
+          searchConfig.apiKey
+        );
+        const searchModel = searchConfig.model || 'sonar';
+
+        const verification = await extractAndVerifyClaims(
+          extractor.provider,
+          extractor.model,
+          searchProvider,
+          searchModel,
+          proposals,
+          language
+        );
+        verificationReport = verification.summary;
+
+        if (options.verbose) {
+          console.log(chalk.dim('✓ Web verification completed'));
+          const confirmed = verification.results.filter(r => r.status === 'confirmed').length;
+          const contradicted = verification.results.filter(r => r.status === 'contradicted').length;
+          console.log(chalk.dim(`  ✅ ${confirmed} confirmed, ❌ ${contradicted} contradicted, ❓ ${verification.results.length - confirmed - contradicted} inconclusive`));
+        }
+      } catch (error) {
+        if (options.verbose) {
+          console.log(chalk.dim(`⚠️ Web verification skipped: ${error instanceof Error ? error.message : 'unknown error'}`));
+        }
+      }
+    }
+
+    // Step 3: Run critic (with verification results if available)
     spinner.text = `Running Red-Team critic (${critic.model.split('-').slice(0,2).join('-')})...`;
     const critique = await runCritic(
       critic.provider,
@@ -208,7 +249,8 @@ export async function askCommand(
       proposals,
       language,
       isDryRun,
-      contextText
+      contextText,
+      verificationReport
     );
     
     if (options.verbose) {

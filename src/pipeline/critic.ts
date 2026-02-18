@@ -60,7 +60,8 @@ export async function runCritic(
   proposals: Proposal[],
   language: 'de' | 'en' = 'de',
   dryRun: boolean = false,
-  contextText?: string
+  contextText?: string,
+  verificationReport?: string
 ): Promise<Critique> {
   if (dryRun) {
     return {
@@ -76,8 +77,11 @@ export async function runCritic(
 
   const template = language === 'de' ? CRITIC_PROMPT_DE : CRITIC_PROMPT_EN;
   const contextSection = contextText || '';
+  const verificationSection = verificationReport 
+    ? `\n\n=== WEB VERIFICATION RESULTS ===\nThe following claims were checked against web sources BEFORE your analysis. Use these results to inform your critique:\n\n${verificationReport}\n=== END VERIFICATION ===\n`
+    : '';
   const prompt = template
-    .replace('{context}', contextSection)
+    .replace('{context}', contextSection + verificationSection)
     .replace('{proposals}', proposalsText);
 
   const response = await provider.call(model, prompt);
