@@ -75,7 +75,8 @@ export interface SynthesisBalance {
   score: number;                         // 0-1, 1 = perfectly balanced
   generator_coverage: SynthesisBalanceDetail[];
   dominated_by?: string;                 // model name if any generator >60% share
-  warning: boolean;
+  dominance_justified?: boolean;         // true if other generators had very low coverage (weak arguments)
+  warning: boolean;                      // only true if dominated AND not justified
 }
 
 export interface SynthesisVerification {

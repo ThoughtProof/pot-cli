@@ -4,11 +4,12 @@ const SYNTHESIZER_PROMPT_DE = `Du bist der Synthesizer. Kombiniere die Proposals
 
 {context}
 
-CONSTRAINTS — ZWINGEND EINZUHALTEN:
+TRANSPARENCY — ZWINGEND EINZUHALTEN:
 - Du MUSST jede Generator-Position (Proposal 1, 2, 3, ...) explizit adressieren
-- Du MUSST begründen, warum du eine Position über eine andere stellst
-- Minority-Positionen MÜSSEN im Output sichtbar bleiben mit ihren stärksten Argumenten
-- Du darfst nicht einfach einer Position folgen — zeige die Gewichtung explizit
+- Du MUSST dokumentieren, welche Argumente du VERWIRFST und WARUM
+- Wenn du eine Position stark gewichtest: begründe es mit dem Evaluation/Critique-Ergebnis
+- Dominanz ist OK wenn begründet — undokumentierte Dominanz ist das Problem
+- Füge am Ende einen kurzen "Synthesis Decisions" Block ein: welche Argumente übernommen, welche verworfen, warum
 
 REGELN:
 - Nutze die Stärken aller Proposals
@@ -42,11 +43,12 @@ const SYNTHESIZER_PROMPT_EN = `You are the Synthesizer. Combine the proposals an
 
 {context}
 
-CONSTRAINTS — MANDATORY:
+TRANSPARENCY — MANDATORY:
 - You MUST explicitly address each Generator position (Proposal 1, 2, 3, ...)
-- You MUST justify why you prioritize one position over another
-- Minority positions MUST remain visible in the output with their strongest arguments
-- You must NOT simply follow one position — show the weighting explicitly
+- You MUST document which arguments you REJECT and WHY
+- If you weight one position heavily: justify it with the Evaluation/Critique results
+- Dominance is OK when justified — undocumented dominance is the problem
+- Add a brief "Synthesis Decisions" section at the end: which arguments adopted, which rejected, why
 
 RULES:
 - Use the strengths of all proposals
@@ -113,9 +115,21 @@ export function computeSynthesisBalance(
   const score = Math.max(0, 1 - mad / ideal);
 
   // Domination check: any generator with share > 0.6?
+  // Per Perplexity critique: dominance at high evaluation score is legitimate.
+  // Flag only when dominance is combined with low coverage of other generators.
   let dominated_by: string | undefined;
+  let dominance_justified = false;
   shares.forEach((s, i) => {
-    if (s > 0.6) dominated_by = proposals[i].model;
+    if (s > 0.6) {
+      dominated_by = proposals[i].model;
+      // If the other generators have very low coverage (<0.15 each),
+      // the synthesizer likely had good reason (weak arguments).
+      // Mark as potentially justified.
+      const othersAvg = shares
+        .filter((_, j) => j !== i)
+        .reduce((a, b) => a + b, 0) / (N - 1);
+      dominance_justified = othersAvg < 0.15;
+    }
   });
 
   const details = proposals.map((p, i) => ({
@@ -128,7 +142,8 @@ export function computeSynthesisBalance(
     score: parseFloat(score.toFixed(4)),
     generator_coverage: details,
     dominated_by,
-    warning: !!dominated_by,
+    dominance_justified,
+    warning: !!dominated_by && !dominance_justified,
   };
 }
 
