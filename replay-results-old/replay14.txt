@@ -1,0 +1,90 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-028 created in 131.2s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Preventing Premature Male Baldness
+
+## Consensus Position (Confidence: 72%)
+
+**Men cannot fully prevent androgenetic alopecia (AGA), but early pharmaceutical intervention can delay significant loss by 5-20 years and preserve substantially more density than doing nothing.** The critical variable is timing: starting treatment before visible thinning yields dramatically better outcomes than waiting. Everything outside two FDA-approved drugs is either marginal or unproven.
+
+---
+
+## What Actually Works — Tiered by Evidence Quality
+
+### Tier 1: Strong Evidence (Confidence: 80%)
+
+**Finasteride (oral, 1mg/day)** — the only treatment targeting the root mechanism (DHT-mediated follicle miniaturization).
+
+- Stabilizes hair loss in ~80-85% of users at 2 years; some regrowth in ~65%
+- Long-term data (5-year Kaufman studies) show efficacy *declines somewhat* over time — this is not a permanent fix
+- Sexual side effects in ~2-4% of users; mostly reversible upon discontinuation
+- **Cost:** $10-30/month (US generic); varies globally
+- **Critical caveat the critique correctly flags:** The off-label low-dose protocols (0.25mg every other day, per P2) lack robust pharmacokinetic validation. Standard dosing is 1mg daily. Discuss alternatives with a physician, not Reddit.
+
+**Minoxidil (topical, 5%)** — extends hair growth phase, works through a different mechanism than finasteride.
+
+- Meaningful improvement in ~40-60% as monotherapy
+- Combined with finasteride: best available non-surgical outcome (exact combined efficacy is debated — claims of "90-95%" are upper-bound estimates, not consensus figures)
+- **Cost:** $15-40/month (Kirkland generic ~$8/month)
+
+### Tier 2: Emerging/Moderate Evidence (Confidence: 55%)
+
+- **Microneedling (1.5mm depth, weekly):** Small studies suggest enhanced results when combined with minoxidil. Evidence base is thin (small RCTs, limited replication). Low cost, low risk — reasonable to add but don't expect miracles.
+- **Dutasteride:** Stronger DHT inhibition than finasteride. Higher side-effect profile. Use only if finasteride fails after **12-18 months** (not 6 months as P3 suggested — the critique correctly identifies this as dangerously premature escalation).
+
+### Tier 3: Weak/No Evidence (Confidence: 85% that these don't work)
+
+- Saw palmetto, biotin megadoses, collagen supplements, "DHT-blocking" shampoos, caffeine shampoos: **No clinically meaningful evidence across multiple reviews.**
+- PRP injections: Heterogeneous results, below clinically visible thresholds in most meta-analyses, expensive ($500-2,000/session).
+- Low-level laser therapy: Marginal at best.
+
+**All three substantive proposals agree these are wastes of money.** This is the highest-confidence consensus point across the entire analysis.
+
+---
+
+## Critical Timing Framework
+
+| Window | Status | Optimal Action |
+|--------|--------|----------------|
+| Family history, no visible loss (teens-early 20s) | Monitor | Baseline photos annually; consult dermatologist if concerned |
+| Early thinning, Norwood I-II (20s-early 30s) | **Best intervention window** | Start finasteride + minoxidil |
+| Visible thinning, >30% loss (30s+) | Harder to recover | Same drugs for stabilization; consider FUE transplant ($2-15k depending on geography) |
+| Advanced loss | Maintenance only | Drugs maintain what's left; transplant for cosmetic restoration |
+
+---
+
+## What Goes Wrong (Consensus Failure Modes)
+
+1. **Waiting too long** — all three proposals agree this is the #1 mistake. Miniaturized follicles become unrecoverable.
+2. **Quitting too early** — both drugs require 6-12 months minimum to assess. Most men quit at month 3.
+3. **Spending on unproven alternatives** — average wasted spend estimated at $500-1,000+ before trying what works.
+4. **Side-effect panic (nocebo effect)** — well-documented that men told about sexual side effects report them at 3-5x the rate of uninformed controls (Mondaini 2007). Real risk exists but is amplified by online forums.
+5. **Skipping medical consultation** — self-diagnosing AGA when the cause may be thyroid dysfunction, iron deficiency, telogen effluvium, or alopecia areata leads to treating the wrong condition entirely.
+
+---
+
+## Flagged Blind Spots (No Proposal Addressed These)
+
+- **Ethnic/racial variation** in AGA patterns and treatment response
+- **Differential diagnosis** — not all "premature baldness" is androgenetic
+- **Drug interactions and contraindications** (liver disease, pregnancy exposure risk for partners handling crushed tablets)
+- **Adolescent safety** — finasteride in under-18s during hormonal development is controversial
+- **Long-term data gaps** — >10 year combo therapy outcomes are sparse
+- **Global regulatory and cost variation**
+
+---
+
+## Bottom Line
+
+**Start finasteride + minoxidil early if genetically predisposed. Budget $300-600/year. Ignore everything else unless a dermatologist specifically recommends it. Accept that this buys time, not permanence.**
+
+**Confidence: 72%** — High agreement on core pharmacological approach across proposals; uncertainty driven by inflated efficacy claims, citation reliability concerns, and significant blind spots around individual variation and long-term outcomes.
+
+💾 Saved as PoT-028
+📈 Model Diversity Index: 0.667

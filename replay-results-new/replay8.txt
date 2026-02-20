@@ -1,0 +1,71 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-100 created in 133.4s
+
+📊 SYNTHESIS:
+
+# How Knights Mounted Horses in Full Armor
+
+## Direct Answer
+
+A knight in full plate armor (20–25 kg / 45–55 lbs) could mount a horse using a stirrup, much like an unarmored rider — but it was meaningfully harder, so **mounting blocks and squire assistance were standard practical aids**, not signs of helplessness. The myth that knights needed cranes is Victorian/Hollywood fiction. The opposite myth — that armor changed nothing — is also wrong.
+
+## The Reality
+
+**Full plate armor weighed 20–25 kg (45–55 lbs)**, comparable to a modern soldier's fighting load, distributed across the entire body. This is the scholarly consensus (Metropolitan Museum of Art's Heilbrunn Timeline, the Wallace Collection, Tobias Capwell's published work). Proposals claiming 45–60 kg are roughly double the actual weight and should be disregarded.
+
+**Standard mounting methods, in order of frequency:**
+
+1. **Mounting block + stirrup (most common in non-combat settings):** Stone or wooden steps found at castles, tournament grounds, and staging areas. Knight places left foot in stirrup, uses the block's height to reduce the effort of swinging the right leg over the saddle's high cantle. This was practical, efficient, and spared the horse's back and saddle tree from asymmetric stress.
+
+2. **Stirrup-only mount (field conditions):** A fit, trained knight could mount from the ground using the stirrup alone. The 2011 University of Leeds study (Askew et al., *Proceedings of the Royal Society B*) confirmed armored men retained mobility, though at 1.9–2.3× the energy expenditure. Possible, but harder — not trivial.
+
+3. **Squire assistance:** A squire might hold the horse steady, offer a leg-up (interlocked hands as a step), or stabilize the knight during mounting. This was normal practice, especially for older knights, in battlefield remounts, or with heavier tournament armor.
+
+## Why Mounting Was Genuinely Harder (Not Impossible)
+
+Proposal 4's biomechanical insight deserves emphasis: **medieval war saddles had high cantles and pommels** designed for lance combat stability, making leg-swings more constrained than with modern saddles. Combined with 50 lbs of steel limiting hip flexion somewhat, plus the risk of:
+
+- **Saddle displacement** from asymmetric loading
+- **Muscle strain** at a catastrophic moment before combat
+- **Horse movement** — even trained warhorses could shift
+
+...mounting aids were **smart risk mitigation**, not proof of immobility.
+
+## The Crane Myth — Where It Comes From
+
+- Misinterpreting images of armor displayed on storage stands
+- Confusing **jousting/tournament armor** (30–35 kg, deliberately movement-restricting) with field battle armor
+- Victorian-era romanticization of medieval "primitiveness"
+- Mark Twain's *A Connecticut Yankee in King Arthur's Court* (1889) and Hollywood perpetuation
+
+## Critical Caveat: Enormous Variation
+
+No single answer covers all cases. Mounting difficulty varied dramatically by:
+- **Time period** (chain mail c. 1200 vs. full plate c. 1450 vs. maximilian armor c. 1520)
+- **Armor type** (field armor vs. tournament/jousting armor, which was far heavier and more restrictive)
+- **Individual factors** — a 25-year-old tournament champion vs. a 55-year-old lord
+- **Context** — leisurely departure from a castle vs. urgent battlefield remount under fire
+
+## Where Models Disagreed
+
+The core disagreement was **how difficult mounting actually was:**
+
+- **One model** claimed armor weighed 45–60 kg and made unassisted mounting essentially impossible (~90% required blocks). This was based on fabricated weight figures, hallucinated citations, and invented statistics. **Disregard entirely.**
+- **Another model** overcorrected, claiming it was trivially easy — "just like anyone else," taking "2–3 seconds." This understates the real physical challenge.
+- **Two models** landed in the balanced middle: possible unassisted for fit knights, but mounting blocks and squire help were standard practical aids. **This is the most defensible position.**
+
+The disagreement stems from different framing: myth-busting zeal (making armor sound easy) vs. dramatization (making it sound impossible), with the truth in between.
+
+**Confidence: 62%**
+
+The historical evidence base for *exact* mounting practices is thin — we're reconstructing from combat manuals, manuscript illustrations, and modern reenactment, none of which constitute definitive evidence of "standard" practice across centuries and regions. Weight figures are well-established; behavioral claims are educated inference.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-100
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.882 — 🔴 Very High (models fundamentally disagree — treat with caution)

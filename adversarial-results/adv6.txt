@@ -1,0 +1,71 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-137 created in 133.5s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Napoleon's Height and Military Strategy
+
+## Core Finding: The Premise Is False
+
+**Napoleon was not short.** All four models agree, and the historiographical record supports this consensus (Roberts, *Napoleon: A Life*, 2014; Dwyer, *Napoleon: The Path to Power*, 2007). His height had **zero strategic impact** because there was no unusual shortness to compensate for.
+
+## The Myth Explained
+
+Napoleon's recorded height of **5 pieds 2 pouces** was in French units. The French pouce (~2.707 cm) was longer than the English inch (2.54 cm). Converted properly, he stood approximately **5'6" to 5'7"** (168–170 cm). This made him **slightly above average** for early 19th-century French men, whose mean height was approximately 164–166 cm based on conscription records (economic historians Komlos and Baten).
+
+The myth's origins:
+1. **Unit confusion** — English-language sources took "5'2"" at face value without converting
+2. **British propaganda** — Cartoonist James Gillray's caricatures shrunk Napoleon for satirical effect
+3. **"Le Petit Caporal"** — A term of endearment from troops after Lodi (1796), though the "petit" carries some genuine ambiguity; dismissing any height connotation entirely is an oversimplification
+4. **Tall bodyguards** — The Old Guard Grenadiers had a minimum height requirement of ~5'10", creating a visual contrast
+
+## What Actually Shaped His Strategy
+
+Napoleon's military innovations were intellectual, not compensatory:
+
+- **Artillery expertise** — Trained as a gunner, he pioneered massed corps-level batteries that could concentrate devastating firepower on narrow fronts
+- **Corps system** — Semi-independent 25,000–30,000-man units that could march separately and converge within 48 hours, enabling the encirclement at Ulm (1805)
+- **Speed of maneuver** — The Grande Armée's faster march tempo allowed arriving before enemies expected, as at Austerlitz (1805)
+- **Central position doctrine** — Defeating separated enemy forces in detail before they could unite (*manoeuvre sur les derrières*)
+
+He commanded from horseback, as all commanders of his era did. Personal stature was irrelevant to dispatching orders, reading terrain, or calculating artillery ranges.
+
+## What Can Go Wrong With the Myth
+
+Accepting the false premise produces elaborate reasoning built on nonsense — attributing tactical genius to psychological overcompensation rather than studying the actual logistics, organizational reforms, and battlefield decisions that defined his campaigns. The "Napoleon Complex" is not a recognized clinical diagnosis and has no robust support in psychological literature.
+
+---
+
+## Where Models Disagreed
+
+| Point | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Exact height** | Range of 168–170 cm across proposals | Minor; all within plausible range. ~169 cm is the best central estimate |
+| **French average height** | One proposal claimed Napoleon was "exactly average" (1.68m); others said "slightly above" | Historical data (Komlos, Baten) puts the French male average at ~164–166 cm, making Napoleon **slightly above average**. Claims of "exactly average" overstate his ordinariness |
+| **Cosmetic adaptations** | One proposal claimed Napoleon wore "high-plumed hats" to appear taller | **Incorrect.** Napoleon's signature bicorne was notably plain compared to his marshals' elaborate headgear. His self-presentation was about simplicity and recognizability, not added height |
+| **Political vs. strategic impact** | All dismissed height effects entirely | Slight gap: while strategic impact was zero, Napoleon's awareness of British propaganda may have subtly influenced his iconographic choices (David's paintings, staged reviews). This is cosmetic, not strategic, but worth noting |
+
+**Why disagreements were minor:** This is a well-documented historical question with extensive scholarship. All models had access to the same corrective information in training data. The disagreements reflect rounding differences and editorial choices, not fundamental analytical divergence.
+
+## Unverified Claims Flagged by Critic (Removed from Synthesis)
+- ~~2007 exhumation~~ (no such event occurred)
+- ~~"Tackett, 2011" citation~~ (likely fabricated)
+- ~~Wellington quote about "ordinary stature"~~ (unconfirmed; they never met face-to-face)
+- ~~March cadence "60% speed edge"~~ (apples-to-oranges comparison of charge pace vs. standard march)
+
+## Recommendation
+
+Napoleon was average-to-above-average height. The myth is propaganda. His strategy was shaped by artillery science, organizational innovation, and operational tempo — not by inches.
+
+**Confidence: 82%**
+*(High consensus, well-documented historical question. Capped below 85% due to minor unresolvable uncertainties in exact measurements and French height averages from 200+ years ago.)*
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-137
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.881 — 🔴 Very High (models fundamentally disagree — treat with caution)

@@ -1,0 +1,56 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-158 created in 117.2s
+
+📊 SYNTHESIS:
+
+# What Color is a Mirror?
+
+## Answer: Mirrors are **green** — faintly, measurably, and reproducibly.
+
+A perfect mirror would reflect all visible wavelengths equally and have no color. Real mirrors aren't perfect. Standard household mirrors (soda-lime glass with aluminum or silver backing) reflect ~92–95% of visible light, but with a slight spectral bias: green wavelengths (~500–550nm) are reflected ~2–3% more efficiently than red or blue wavelengths.
+
+This bias has two compounding sources:
+1. **The metal coating itself** — Silver's reflectance dips in the blue/violet region (~93% at 400nm) and climbs above 500nm (~97–98%). It is *not* spectrally flat.
+2. **The glass substrate** — Soda-lime glass contains iron(III) oxide impurities that absorb more at both the blue/UV *and* red/IR ends of the spectrum, creating a broad transmission and reflection peak in the green.
+
+## The Decisive Experiment
+
+Place two mirrors face-to-face and look into the resulting tunnel. After ~10–20 reflections, the images acquire a distinct **greenish cast**. By ~30+ reflections, the tint is unmistakable. Each bounce compounds the tiny per-reflection bias, making the mirror's intrinsic color visible. This is reproducible by anyone with two bathroom mirrors and is well-documented in optics demonstrations.
+
+## Where Models Disagreed
+
+| Question | "No Color" (P1) | "Green" (P2, P3) | "Silver" (P4) |
+|----------|-----------------|-------------------|---------------|
+| Mirrors have spectral bias? | Own table proved YES, but claimed NO | YES | Claimed NO |
+| Mirror tunnel shows green? | Not addressed | YES — central evidence | Dismissed as "internet meme" |
+| What determines color? | Function (reflection) | Measured spectral reflectance | Coating material |
+
+**Why they disagreed:**
+- **P1 and P4** treated mirrors as *functionally* colorless or defined "color" as the material of the coating rather than the spectral profile of reflected light. P1's own reflectance table (showing non-uniform values across wavelengths) actually contradicted its thesis. P4 used circular reasoning ("silver because made of silver") and dismissed measurable green bias without counter-evidence.
+- **P2 and P3** grounded their answer in spectrophotometric data and the reproducible mirror-tunnel experiment. They disagreed slightly on mechanism — P2 emphasized glass absorption while P3 credited both coating and glass — but converged on the same answer.
+
+## What Can Go Wrong With This Answer
+
+1. **Construction-dependent caveat**: Ultra-low-iron glass mirrors (used in high-end optics, solar panels, some premium bathroom mirrors) show significantly less green bias. The "green" answer applies most strongly to standard soda-lime glass mirrors — which constitute the vast majority of mirrors people encounter.
+2. **Single-reflection imperceptibility**: For everyday use, the green tint is invisible. You will never notice it brushing your teeth. It only becomes apparent through compounding (mirror tunnels) or precise spectrophotometry.
+3. **Front-surface mirrors**: Astronomical or scientific mirrors without glass substrates have different spectral profiles (aluminum front-surface mirrors are more spectrally uniform). The green answer is specific to household mirrors.
+4. **No proposals cited specific published studies** — reflectance figures are in the right ballpark but none provided verifiable journal citations. The mirror-tunnel observation is well-documented in optics education but the specific percentage figures (93–94% green vs. 90–91% red) should be treated as approximate.
+5. **Philosophical framing matters**: If you mean "what color does a mirror *look*?" the answer is "whatever it reflects." If you mean "what is a mirror's intrinsic spectral bias?" the answer is green. The physics question has a definitive answer; the semantic question doesn't.
+
+## Bottom Line
+
+A standard household mirror is **faintly green** — approximately 2–3% more reflective at green wavelengths than red or blue, due to both the metal coating's spectral non-uniformity and the soda-lime glass substrate's iron impurities. You can verify this yourself with two mirrors and your own eyes.
+
+**Confidence: 72%**
+
+Confidence is capped below 85% because: (1) specific reflectance percentages were not traced to verified published sources across any proposal, (2) the answer is construction-dependent and "standard household mirror" covers a range of manufacturing specs, and (3) there is a legitimate semantic dimension to "what color" that admits multiple valid framings.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-158
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.834 — 🔴 Very High (models fundamentally disagree — treat with caution)

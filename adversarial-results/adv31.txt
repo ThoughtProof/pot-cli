@@ -1,0 +1,71 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-162 created in 152.3s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Are Amalgam Fillings Toxic? Should They Be Replaced?
+
+## Bottom Line
+
+**No, dental amalgam is not toxic at clinically significant levels for the general population, and routine replacement is unnecessary and can cause harm.** However, the full picture is more nuanced than any simple "safe/unsafe" framing allows, and the global regulatory trend is toward phase-down.
+
+## What the Evidence Actually Supports
+
+Amalgam fillings (~50% mercury) release approximately **1–5 µg/day of mercury vapor**. All four models agreed on this range, and it is broadly consistent with the published literature.
+
+**Critical correction flagged by the critic:** All proposals cited different WHO safety thresholds (30, 40, and 45 µg/day). The WHO Provisional Tolerable Weekly Intake for inorganic mercury is approximately **2 µg/kg body weight/week**, translating to roughly **20 µg/day for a 70 kg adult** — meaning the safety margin, while still real, is **smaller than any individual proposal claimed**. Even so, a person with multiple amalgam fillings remains below this threshold.
+
+Large-scale trials (including the NIH-funded Children's Amalgam Trials, ~1,000+ children, 5-year follow-up) found no measurable neurocognitive or renal differences between amalgam and composite groups. Every major regulatory body (FDA, ADA, WHO, EU SCENIHR) has assessed amalgam as safe for general use.
+
+## Risks of Routine Replacement
+
+- **Transient mercury spike:** Removal increases vapor exposure significantly (estimates range 3–40x transiently — the wide range reflects genuine measurement variability)
+- **Tooth damage:** Removal sacrifices healthy tooth structure and increases pulp exposure risk
+- **Cost:** ~$150–400+ per filling, typically not covered by insurance for elective removal
+- **Composite limitations:** Composites do bond adhesively (requiring *less* initial tooth removal than amalgam — correcting Proposal 3's error), but may have shorter longevity in large posterior restorations
+
+## When Replacement IS Indicated
+
+1. Restoration is failing (cracks, marginal breakdown, secondary caries)
+2. Verified mercury allergy (contact dermatitis/lichenoid reaction confirmed by patch testing)
+3. Full-coverage crown is planned anyway
+4. For **new** restorations in pregnant/breastfeeding women or children under 15 — use alternatives (precautionary, per EU policy)
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Why It Matters |
+|-------|-------------|----------------|
+| WHO safety threshold | 30 / 40 / 45 µg/day cited | **All likely wrong**; actual figure ~20 µg/day. Safety margin is real but overstated. |
+| Allergy prevalence | 0.01% to <1% | Patch-test positivity (1–3%) ≠ clinical reactions (~0.1%). Proposals confused different measures. |
+| Mercury spike during removal | 5–10x vs. 4–40x | Wide methodological variation in studies; the broader range is more honest |
+| EPA threshold (Proposal 4) | Cited 30 µg/m³ vs. actual RfC of 0.3 µg/m³ | Potentially a **100x error** — devastating if used to reassure patients |
+
+## Shared Blind Spots All Models Missed
+
+**1. Global phase-down trend:** Norway, Sweden, and Denmark have effectively banned amalgam. The EU banned it for children under 15 and pregnant women (2018) and is pursuing broader phase-out. "Completely safe" is hard to reconcile with "being actively phased out." The phase-down is partly environmental, but also precautionary.
+
+**2. Vulnerable subpopulations:** Genetic variants affecting mercury metabolism (CPOX4, APOE4, glutathione polymorphisms), autoimmune conditions, and renal impairment may create real subpopulation risks that "safe for the general population" masks.
+
+**3. Bioaccumulation:** Autopsy studies do show correlations between amalgam fillings and brain mercury levels. Long-term effects of decades of low-level accumulation remain genuinely uncertain.
+
+**4. One-sided conflict-of-interest analysis:** All proposals flagged "biological dentist" profit motives but none acknowledged that dental associations and amalgam manufacturers also have institutional and financial stakes in defending amalgam's safety record.
+
+**5. Patient autonomy:** A fully informed patient requesting removal is exercising their right to bodily autonomy — this isn't "malpractice" (as Proposal 2 suggested), provided informed consent is thorough.
+
+## Recommendation
+
+**Monitor intact amalgam fillings. Replace only for clinical indications or verified allergy. For new restorations, mercury-free alternatives are increasingly preferred and clinically appropriate.** Decisions should be individualized, not driven by fear or by blanket reassurance.
+
+Confidence: 72%
+
+*Capped below 85% because: (a) all models shared directional bias and fabricated different supporting numbers for the same thresholds; (b) genuine scientific uncertainty remains about long-term bioaccumulation and subpopulation risks; (c) the global regulatory trend toward phase-down introduces policy-level ambiguity that pure toxicology doesn't resolve.*
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-162
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.857 — 🔴 Very High (models fundamentally disagree — treat with caution)

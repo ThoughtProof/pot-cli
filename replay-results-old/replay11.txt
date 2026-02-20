@@ -1,0 +1,66 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-022 created in 130.6s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: What All Mothers Know
+
+## The Core Truth (Integrated)
+
+**Mothers operate under a unique, asymmetric accountability for their child's welfare — and this accountability manifests most viscerally through sleep deprivation, hypervigilant worry, and relentless contingency planning.**
+
+No single proposal captured the full picture, but together they triangulate something real. Proposal 2's framing (irrevocable accountability) is the structural skeleton. Proposal 3's sleep deprivation is the most concrete, physically verifiable manifestation. Proposal 4's perpetual worry is the psychological texture. Proposal 1's interruptions are a downstream symptom.
+
+## What Survives the Critique
+
+The red team was devastating — and largely correct. Here's what still stands after filtering:
+
+**1. The accountability asymmetry is real, but socially constructed — not biologically inevitable.**
+
+Proposal 2's insight is the strongest: mothers behave as though their child's welfare is *their* non-transferable problem, even unto death. The LIMRA insurance data direction is plausible (women do purchase life insurance at higher rates when they have dependents), even if the exact figures need verification. But the critique is right that this reflects **social role assignment and legal/institutional structures**, not some maternal essence. Fathers in primary caregiver roles exhibit identical patterns. The truth isn't "mothers are wired this way" — it's "society holds mothers accountable in ways it doesn't hold fathers, and mothers internalize this."
+
+**2. Sleep deprivation is the most falsifiable, concrete claim — and it partially survives.**
+
+Proposal 3 is right that early-infant sleep disruption is severe and widely underestimated. But the critique correctly demolishes the "universal" claim: cultures with postpartum confinement rituals, multigenerational households, and night help dramatically alter the experience. The honest version: **In atomized, nuclear-family settings without adequate support, primary caregivers (usually mothers) experience clinically significant sleep deprivation.** That's still important — it just describes a social failure, not a biological inevitability.
+
+**3. The worry is real but not uniquely maternal.**
+
+Neuroplasticity research (Hoekzema et al., 2017 — a real study) shows brain changes in *primary caregivers*, not exclusively birth mothers. The perpetual worry Proposal 4 describes is better understood as a **caregiving-role phenomenon amplified by social surveillance** ("where was the mother?") rather than a sex-linked trait.
+
+## What Collapses
+
+- **All "universal" claims.** Western nuclear-family isolation is not the human default. Communal child-rearing cultures distribute the load differently.
+- **Most specific citations.** The critique correctly flags likely hallucinated or unverifiable statistics across all proposals. Confidence in specific numbers: **~20%**.
+- **Biological essentialism.** Every proposal conflates "mother" with "primary caregiver" and treats social arrangements as natural law.
+- **The 99% / 90%+ claims.** Indefensible without rigorous sourcing.
+
+## The Honest Synthesis
+
+**What mothers know — stated without romanticization or essentialism:**
+
+Society assigns mothers disproportionate accountability for child welfare. This assignment is enforced through legal defaults, institutional design, social judgment, and internalized expectation. The result is a lived experience characterized by: (a) severe early sleep deprivation in unsupported settings, (b) persistent background-level anxiety about the child's wellbeing, and (c) contingency planning that assumes no one else will step in. Most mothers discover the *weight* of this accountability only after it begins — no amount of warning conveys it beforehand.
+
+This is not a celebration of maternal suffering. It is a description of a structural problem that cultures with better support systems have partially solved.
+
+## Recommendation
+
+**Best single proposal to build from: Proposal 2 (Kimi), score 7/10**, with Proposal 3's concreteness grafted in and the critique's corrections applied. Strip the essentialism, acknowledge the social construction, keep the structural insight about asymmetric accountability.
+
+## Confidence Levels
+
+| Claim | Confidence |
+|-------|-----------|
+| Mothers experience disproportionate accountability (socially assigned) | **85%** |
+| Early-infant sleep deprivation is severe for unsupported primary caregivers | **80%** |
+| These experiences are *biologically* maternal vs. role-driven | **25%** |
+| Specific statistics cited across proposals are accurate | **20%** |
+| Any single proposal captures a "universal" maternal truth | **35%** |
+
+**Overall synthesis confidence: 72%** — the phenomenon is real; the framing across all proposals was ideologically contaminated by gender essentialism and Western-centrism that the critique rightly identified.
+
+💾 Saved as PoT-022
+📈 Model Diversity Index: 0.667

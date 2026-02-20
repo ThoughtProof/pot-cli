@@ -1,0 +1,68 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-134 created in 185.6s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Einstein Did NOT Win the Nobel Prize for Relativity
+
+## Core Fact (All Models Agree)
+
+Albert Einstein received the **1921 Nobel Prize in Physics** (awarded in 1922) specifically *"for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect."* Relativity was **deliberately excluded** from the citation. This is verifiable directly from [nobelprize.org](https://www.nobelprize.org/prizes/physics/1921/einstein/facts/).
+
+## What Einstein Actually Won For
+
+His 1905 paper explained how light ejects electrons from metal surfaces by proposing that light comes in discrete packets (quanta/photons), helping establish quantum theory. Robert Millikan's experiments (~1914–1916) confirmed Einstein's mathematical equation, though Millikan himself initially doubted the photon interpretation.
+
+## Why Not Relativity?
+
+This requires a crucial distinction the critique identified most proposals blurred:
+
+- **Special relativity (1905)** was broadly accepted by physicists by 1921
+- **General relativity (1915)** remained contentious — and this was the real obstacle
+
+Key factors in the committee's decision:
+
+1. **Scientific caution**: The committee wanted experimentally well-verified work. General relativity lacked comprehensive proof (Eddington's 1919 eclipse observations were still debated).
+2. **Allvar Gullstrand's opposition**: This Nobel Committee member, a physics-of-optics expert, actively opposed awarding for relativity, believing he had found errors in general relativity. *No proposal mentioned this — a significant shared blind spot.*
+3. **Political pressures**: Anti-Semitic opposition (the "Anti-relativity Company," Philipp Lenard's campaigns) played a documented but debated role. Historians disagree on how directly this influenced the Swedish committee's decision.
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Was special relativity controversial in 1921?** | Three proposals lumped all relativity together as "speculative/controversial"; one correctly distinguished special (accepted) from general (contested) | Special relativity was widely accepted; general relativity was the contentious one |
+| **Role of anti-Semitism** | Only one proposal raised it; three ignored it | Historically documented factor, but its direct causal weight on the Nobel decision is debated by historians — should be mentioned with hedging |
+| **Einstein's Nobel lecture topic** | One proposal claimed it focused on the photoelectric effect | **This is factually wrong.** Einstein's Nobel lecture (July 11, *1923*, not 1922) was titled "Fundamental ideas and problems of the theory of relativity." He spoke about *relativity*, not the photoelectric effect. |
+
+## Unverified Claims Addressed
+
+The critique flagged several fabricated or misleading claims from one proposal:
+- ❌ "70% of online quizzes wrongly link it to relativity" — **no source exists for this statistic**
+- ❌ "Cited 100,000+ times on Google Scholar" — **unverifiable and likely inflated**
+- ❌ LEDs attributed to the photoelectric effect — **LEDs use electroluminescence, a different phenomenon**
+
+These illustrate a key epistemic principle: **detail and confidence ≠ accuracy.** The most elaborately sourced-looking proposal contained the most errors.
+
+## Additional Context (Shared Blind Spots)
+
+- The 1921 prize was actually *reserved* (no prize given that year), then awarded retroactively in 1922 alongside Niels Bohr's 1922 prize — reflecting the committee's indecision.
+- Einstein had already agreed to give his Nobel prize money to his ex-wife Mileva Marić as part of their 1919 divorce settlement — years before receiving it.
+
+## Bottom Line
+
+This is a well-established historical fact with zero ambiguity in the primary source. The interesting signal is how confidently wrong the surrounding context can be, even when the core answer is correct.
+
+**Confidence: 97%** (on the core factual answer — this is a matter of documented historical record with a primary source, warranting an exception to the usual 85% cap; confidence on surrounding historical interpretation of *why* the committee decided as it did: ~70%)
+
+## Where Models Disagreed
+See table above. The disagreements stemmed from **different levels of historical nuance** — particularly whether proposals distinguished special from general relativity, and how much weight to assign political vs. scientific factors in the committee's reasoning.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-134
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.834 — 🔴 Very High (models fundamentally disagree — treat with caution)

@@ -1,0 +1,78 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-170 created in 133.8s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Dental Implant Immediately After Extraction
+
+## The Direct Answer
+
+**Yes, it is clinically possible — but only in roughly 20-40% of extraction cases that meet strict criteria. For the majority of patients, a healing period of 8-16 weeks (early placement) or 3-6 months (delayed placement) produces more predictable outcomes.**
+
+Immediate placement is a **validated protocol, not an experimental one** — but it is technique-sensitive and case-dependent. The right question isn't "can I?" but "should I, given my specific anatomy and health?"
+
+## Where Models Disagreed (Most Valuable Signal)
+
+| Issue | Range Across Models | Likely Truth |
+|-------|-------------------|--------------|
+| **Eligibility rate** | 8% to 60% | **20-40%** in general practice; higher in specialty/academic settings with pre-screened patients |
+| **Immediate success (ideal cases)** | 85-98% | **92-97%** for well-selected cases — the low outlier (Proposal 1's "20-40% success") was flagged by the critic as a likely conflation of eligibility with success rate |
+| **Delayed success** | 95-99% | **96-98%** — all models converged here |
+| **Overall stance** | 3 against, 1 cautiously supportive | See synthesis below |
+
+**Why they disagreed:** Different risk framing (conservative practitioner bias vs. academic literature), confusion between eligibility rates and success rates, and one model relying on unverifiable personal clinical data (8% eligibility from the founder's own practice — not generalizable).
+
+## Critical Distinction Most Proposals Missed
+
+**Immediate placement ≠ immediate loading.** Even when an implant is placed the same day as extraction, patients typically wait 3-6 months before the final crown is attached. "Teeth-in-a-day" marketing obscures this. The implant still must osseointegrate.
+
+## The Full Timing Spectrum (A Blind Spot in All Proposals)
+
+The ITI classification recognizes **four** placement types — not just "immediate vs. delayed":
+
+- **Type 1 (Immediate):** Same day. Requires all criteria below. ~20-40% eligible.
+- **Type 2 (Early, 4-8 weeks):** Soft tissue healed, bone healing begun. **Increasingly favored in current literature** as optimal balance.
+- **Type 3 (Early-delayed, 12-16 weeks):** Substantial bone fill, soft tissue mature.
+- **Type 4 (Delayed, 3-6+ months):** Full bone healing. Highest success but may require grafting due to ridge resorption (up to 50% width loss at 6 months per Schropp et al. 2003).
+
+**The overlooked trade-off:** Waiting longer isn't purely "safer" — the alveolar ridge resorbs significantly after extraction, often necessitating bone grafting that wouldn't have been needed with earlier placement.
+
+## Requirements for Immediate Placement (All Must Be Met)
+
+1. **No active infection** — no pus, no significant periapical pathology
+2. **Intact socket walls** — at least 3 walls intact, adequate buccal plate
+3. **≥3-4mm bone beyond the apex** for primary stability
+4. **Insertion torque ≥35 Ncm** (confirmed intraoperatively)
+5. **Socket gap ≤1mm** (larger gaps require grafting)
+6. **Thick gingival biotype** — thin tissue raises recession risk, especially in the aesthetic zone
+7. **Patient factors:** Non-smoker, HbA1c <7%, no bisphosphonate use, no parafunction
+
+## What Goes Wrong When Criteria Aren't Met
+
+- **Failure to osseointegrate** — the most common failure mode
+- **Infection** from residual bacteria in a compromised socket
+- **Aesthetic failure** — gingival recession exposing implant threads or gray show-through (especially anterior maxilla)
+- **Bone loss** from thermal damage or compromised healing
+- **Cost:** A failed implant means $2,000-5,000+ in redo costs plus grafting
+
+## Bottom Line Recommendation
+
+**Don't choose your dentist based on who offers immediate placement — choose based on who correctly diagnoses when NOT to do it.** If your clinician recommends waiting 8-12 weeks (Type 2 early placement), that is increasingly the evidence-based sweet spot. If they insist on same-day and you have any risk factors, seek a second opinion.
+
+## Unverified Claims Flagged by Critic
+
+- Proposal 1's specific journal citations (Esposito 2022 n=5,000+; Chen & Buser 2014 n=1,200; Atieh 2010) could not be verified and may be hallucinated
+- Proposal 1's headline "20-40% success rate" almost certainly conflates eligibility with success — **do not rely on this figure**
+- Proposal 2's 8% eligibility figure reflects one practitioner's conservative criteria, not population data
+
+**Confidence: 68%**
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-170
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.869 — 🔴 Very High (models fundamentally disagree — treat with caution)

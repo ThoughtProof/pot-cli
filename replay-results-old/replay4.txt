@@ -1,0 +1,65 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-008 created in 128.4s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: The Emancipation Proclamation
+
+## Concrete Position
+
+The Emancipation Proclamation (effective January 1, 1863) was a **wartime executive order invoking presidential war powers** that declared enslaved people in Confederate-held territory "forever free," transformed the Union war effort into a war for abolition, and authorized Black military enlistment — but freed virtually no one on the day it was signed. Its power was contingent on Union military victory, and it did not abolish slavery nationwide.
+
+**Confidence: 88%** (high factual consensus across proposals on core claims; residual uncertainty on specific figures)
+
+---
+
+## What It Did
+
+1. **Declared ~3.5 million enslaved people legally free** in ten states in rebellion (the 1860 Census recorded ~3.95 million total enslaved; ~3.5 million resided in covered areas per Finkelman, *Slavery and the Founders*, 2001). Kimi's "3.1 million" figure is unsourced and likely hallucinated; Claude's "3–4 million" range is too imprecise. **Best estimate: ~3.5 million covered, ~425,000–500,000 excluded.**
+
+2. **Converted Union armies into instruments of liberation.** Freedom was enforced mile by mile as Union forces advanced — practically, only ~20,000–50,000 were freed in the immediate aftermath. (Proposals disagree: Grok cites Berlin et al. for ~20,000; Claude claims 50,000–100,000 without citation. The lower bound is better sourced; the true number is genuinely uncertain.)
+
+3. **Authorized Black military enlistment**, leading to ~200,000 Black soldiers and sailors serving by war's end — a point three of four proposals agree on and which was militarily decisive.
+
+4. **Blocked European intervention.** Britain and France, having abolished slavery, could not credibly recognize a slaveholding Confederacy once the Union explicitly framed the war as anti-slavery.
+
+## What It Did NOT Do
+
+- Free enslaved people in **border states** (Delaware, Maryland, Kentucky, Missouri) or **Union-controlled areas** — those required the 13th Amendment (ratified December 1865)
+- **Tennessee was entirely exempted** despite being a Confederate state (it had a Union military governor, Andrew Johnson). Specific Louisiana parishes and Virginia counties were also exempted. DeepSeek's conflation of Tennessee as "partially" exempted is incorrect.
+- Grant citizenship or voting rights (14th and 15th Amendments)
+- Abolish slavery as an institution — it was a military measure, not a constitutional change, and was theoretically reversible
+
+## Geographic Specifics
+
+**Applied to:** Texas, Arkansas, Mississippi, Alabama, Florida, Georgia, South Carolina, North Carolina, Virginia (except 48 counties), Louisiana (except 13 parishes)
+
+**Excluded:** Missouri, Kentucky, Maryland, Delaware, Tennessee (entirely), plus Union-occupied portions of Louisiana and Virginia
+
+## Critical Context All Proposals Missed
+
+The critique correctly identifies **universal blind spots** that weaken every proposal:
+
+- **The Preliminary Proclamation (September 22, 1862)** gave Confederate states 100 days to rejoin the Union — the EP didn't appear from nowhere
+- **The Confiscation Acts (1861 & 1862)** already authorized seizure of enslaved people used for Confederate military purposes, establishing legal precedent
+- **General Butler's "contraband" policy (1861)** created the practical framework
+- **Black agency**: Hundreds of thousands of enslaved people self-emancipated by fleeing to Union lines, *forcing* the political conditions that made the EP necessary. All proposals exhibit a top-down "Great Man" bias.
+
+## Correcting Specific Errors Across Proposals
+
+- **Grok's Taney/Prize Cases claim is wrong.** The *Prize Cases* (1863) concerned Lincoln's blockade authority, not the EP directly. Taney died in 1864 without ruling on the Proclamation.
+- **Kimi's "~50,000 freed per month by 1864"** is unsourced and almost certainly fabricated — liberation was tied to irregular military campaigns, not a steady rate.
+- **Claude's claim it was "NOT based on moral authority"** overstates the case — the *legal basis* was war powers, but Lincoln's rhetoric increasingly invoked moral framing.
+
+## Bottom Line
+
+The Emancipation Proclamation was a **strategically limited, legally contingent military order** that nonetheless achieved revolutionary consequences: it made slavery the central war issue, enlisted Black soldiers, blocked foreign intervention, and created an irreversible political trajectory toward the 13th Amendment. It freed no one by its own force on January 1, 1863 — Union armies did. But without it, those armies would not have been armies of liberation.
+
+**Confidence: 88%.** Core claims are well-established in historiography. Numerical precision on "immediately freed" remains genuinely uncertain (20,000–50,000 range). The deeper story — of Black self-emancipation forcing Lincoln's hand — is the most important thing every proposal underweighted.
+
+💾 Saved as PoT-008
+📈 Model Diversity Index: 0.667

@@ -1,0 +1,63 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-161 created in 122.6s
+
+📊 SYNTHESIS:
+
+# How Fast Does Gravity Travel? — Synthesized Answer
+
+## Concrete Position
+
+**Gravity propagates at the speed of light: c = 299,792,458 m/s in vacuum.** This is not a theoretical approximation — it is a direct prediction of General Relativity, confirmed by multi-messenger astronomical observation to extraordinary precision.
+
+## The Key Evidence: GW170817
+
+On August 17, 2017, LIGO/Virgo detected gravitational waves from a **neutron star merger** (not a black hole merger — correcting Proposal 4's error) 130 million light-years away. Crucially, the Fermi gamma-ray telescope detected an electromagnetic counterpart ~1.7 seconds later. This multi-messenger event is the gold standard measurement.
+
+**The actual published constraint** (Abbott et al., ApJL 848, L13, 2017): **−3 × 10⁻¹⁵ ≤ (v_GW − c)/c ≤ +7 × 10⁻¹⁶**
+
+This means gravitational waves and light travel at the same speed to roughly **one part in a quadrillion**. Note: Proposal 3's claim of "0.3%" precision is off by ~12 orders of magnitude, and Proposal 1's attribution of this constraint to GW150914 is wrong — GW150914 had no electromagnetic counterpart and therefore could not independently constrain the speed.
+
+## Important Subtlety: The 1.7-Second Gap
+
+All proposals somewhat oversimplified this. The 1.7-second delay between gravitational and electromagnetic signals is **not purely a speed measurement** — it's dominated by astrophysical source physics (the time needed for the gamma-ray jet to form and break through merger debris). The speed constraint depends on modeling assumptions about this source delay. The published bounds conservatively account for this, but it's a systematic uncertainty no proposal properly flagged.
+
+## What "Speed of Gravity" Actually Means
+
+This question is subtly ambiguous. What's been measured is the speed of **gravitational radiation** (waves). The static gravitational field doesn't "propagate" in the conventional sense — it already exists. Only **changes** in the gravitational field propagate at c. Practically: if the Sun vanished, both its light and gravitational influence would disappear from Earth simultaneously, ~8.3 minutes later.
+
+A historically important confusion (raised by Van Flandern, 2002) is that planetary orbits seem to "point" at where the Sun *is*, not where it *was* — suggesting instantaneous gravity. GR resolves this: for bound systems, velocity-dependent terms nearly perfectly cancel aberration effects, making gravity *appear* instantaneous while actually propagating at c.
+
+## What Could Go Wrong
+
+1. **Quantum gravity unknowns:** At Planck scales (10⁻³⁵ m), our theories break down. Energy-dependent dispersion or other exotic effects are conceivable but currently untestable (LHC reaches ~10⁴ GeV vs. the ~10¹⁹ GeV Planck scale).
+
+2. **Modified gravity theories:** Relativistic extensions of MOND (like TeVeS) and massive-graviton theories were severely constrained by GW170817. The graviton mass bound is now approximately m_g ≤ 7.7 × 10⁻²³ eV/c² (from LIGO/Virgo analyses), implying negligible speed deviation.
+
+3. **Future surprises:** A statistically significant (≥5σ) arrival-time anomaly in a future multi-messenger event would challenge GR. No current evidence points this direction.
+
+4. **Lab-scale limitations:** Terrestrial experiments (torsion balances, atom interferometers) cannot approach the 10⁻¹⁵ precision of astronomical observations, so tightening this bound will require more astrophysical events.
+
+## Where Models Disagreed
+
+All four proposals agreed on the core answer (c), but disagreed on **precision figures and factual details**:
+- **GW170817 precision:** Ranged from ~10⁻¹⁵ (Proposals 1, 4) to 10⁻¹⁸ or 10⁻¹⁹ (Proposal 2) to 0.3% (Proposal 3). The published figure is ~10⁻¹⁵. Proposal 2's tighter figures conflate raw arrival-time ratios with actual speed constraints (ignoring source physics). Proposal 3's figure is catastrophically wrong.
+- **Nature of GW170817:** Three proposals correctly identified neutron star merger; Proposal 4 incorrectly called it a black hole merger.
+- **Citation accuracy:** Proposal 1 cited papers that don't support the claims attributed to them (Long et al. tested short-range gravity, not propagation speed; GW150914 had no EM counterpart for speed measurement).
+
+These disagreements stem from model hallucination and imprecise sourcing rather than genuine scientific uncertainty.
+
+## Bottom Line
+
+For any practical, engineering, or scientific purpose: **gravity travels at c = 299,792,458 m/s.** The residual uncertainty (~10⁻¹⁵) is far below any conceivable practical relevance.
+
+**Confidence: 82%** (core claim extremely well-established; confidence capped due to quantum gravity unknowns and subtleties around static vs. radiative gravity that remain theoretically unresolved)
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-161
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.857 — 🔴 Very High (models fundamentally disagree — treat with caution)

@@ -1,0 +1,58 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-150 created in 169.7s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: The Tongue Taste Map — Myth, Reality, and Development
+
+## The Core Truth (All Models Agree)
+
+The classic "tongue map" — discrete zones for sweet (tip), bitter (back), sour (sides), salty (edges) — **is a myth**. All regions of the tongue detect all five established basic tastes (sweet, salty, sour, bitter, umami). What exists are modest **regional differences in sensitivity**, not exclusive zones.
+
+## The Historical Error
+
+David Hänig's 1901 study (*Zur Psychophysik des Geschmackssinnes*) measured slight regional sensitivity variations. **Edwin Boring, in 1942**, replotted this data in *Sensation and Perception in the History of Experimental Psychology* without Hänig's baseline, creating the visual impression of discrete zones. This was a misrepresentation, not a mistranslation. The myth then propagated through textbooks well into the 2000s–2010s.
+
+*Note: Multiple models misattributed Boring to 1901 or called this a "mistranslation" — both errors flagged by the critique.*
+
+## How Taste Detection Actually Develops
+
+**Embryonic patterning (weeks 4–8):** Tongue epithelium forms with cranial neural-crest mesenchyme. Shh and Wnt/β-catenin signaling gradients specify where papillae form — fungiform (anterior), foliate (lateral), circumvallate (posterior). These are structural "real estate," not taste-specific zones. *Important nuance: anterior tongue epithelium is ectoderm-derived (first pharyngeal arch), while posterior is endoderm-derived.*
+
+**Innervation and maturation (weeks 8–15):** Three cranial nerves (VII/chorda tympani — anterior; IX/glossopharyngeal — posterior; X/vagus — epiglottis/pharynx) innervate the papillae. BDNF from axons is required for taste bud maturation — without innervation, placodes form but buds fail to mature.
+
+**Receptor cell differentiation:** Within each taste bud, individual Type II receptor cells predominantly express receptors for **one** taste quality (T1R2/T1R3 for sweet, T1R1/T1R3 for umami, T2Rs for bitter). However, the *bud as a unit* detects multiple tastes because it contains diverse cell types. This is a key distinction several models got wrong — individual cells are mostly narrowly tuned, but taste buds are generalists.
+
+**Postnatal refinement:** Taste receptor cells regenerate approximately every 10–14 days (though recent research suggests some cells persist longer). Taste bud density is highest in early childhood and declines with age. Genetic variation (e.g., TAS2R38 polymorphisms) affects sensitivity uniformly across the tongue, not by zone.
+
+## Where Models Disagreed
+
+| Topic | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Taste bud count** | 2,000–8,000 vs. 5,000–10,000 vs. 10,000 vs. 20,000 at birth | The literature gives ~5,000–10,000 for adults; the "20,000 at birth declining 50%" claim lacks strong primary sourcing |
+| **Cell-level tuning** | Cells as generalists vs. one-quality-per-cell vs. "20–40% broadly tuned" | Mainstream view: Type II cells are predominantly narrowly tuned; the bud is the generalist unit. The "20–40%" figure is unverified |
+| **Historical attribution** | Boring in 1901 (wrong) vs. mistranslation (oversimplified) vs. 1901 zone theory | Hänig (1901) showed variations; Boring (1942) created the misleading visualization |
+| **Developmental mechanisms** | One model cited "~25 semaphorin/NT combinations" biasing receptor expression | Likely fabricated — no primary source supports this specific claim |
+
+## What Can Go Wrong
+
+- **Clinically:** Chorda tympani damage causes significant loss of anterior taste buds, with permanent threshold elevation — undermining any "zone" theory since all modalities are affected together
+- **Beyond the tongue:** Taste buds also exist on the soft palate, epiglottis, and pharynx — the tongue-centric map ignores this entirely
+- **Frontier science:** Active research on additional taste modalities (fat/oleogustus, kokumi) may further complicate any "mapping" model
+- **Epistemically:** This myth persists because it's visually intuitive. All four AI models agreed on the headline but diverged significantly on supporting details — consensus masked factual disagreement in the specifics
+
+## For ThoughtProof
+
+This question demonstrates that **multi-agent agreement on conclusions can coexist with wildly inconsistent supporting evidence**. Recency-weighted citation tracking and cell-level disagreement flagging would catch cases where confident consensus rests on shaky details.
+
+**Confidence: 78%** — Core myth-debunking is well-established science; developmental details carry more uncertainty; specific numerical claims vary across sources.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-150
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.879 — 🔴 Very High (models fundamentally disagree — treat with caution)

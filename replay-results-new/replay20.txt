@@ -1,0 +1,77 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-129 created in 125.9s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Is Sleeping With a Fan On Dangerous?
+
+## Bottom Line
+
+**No — for the vast majority of healthy adults, sleeping with an electric fan on is safe and often beneficial.** The "fan death" myth has no scientific basis. However, there are a handful of real (minor) risks and one genuinely important safety caveat involving extreme heat.
+
+## What the Evidence Actually Supports
+
+All four models agree on the core conclusion, and this aligns with mainstream sleep medicine: fans improve thermal comfort, provide white noise that aids sleep continuity, and pose no suffocation or hypothermia risk in normal bedrooms.
+
+**What fans actually do while you sleep:**
+- Move ambient air across skin, facilitating evaporative and convective cooling
+- Help the body reach the lower core temperature that promotes deeper sleep (the mechanism is well-established; the exact magnitude of temperature drop is uncertain — see disagreements below)
+- Generate consistent background noise that masks disruptions
+
+## Real (But Minor) Risks
+
+1. **Dry mouth/throat/sinuses** — Constant airflow over mucous membranes causes drying. Prevalence is genuinely uncertain (models disagreed: 5–30%). *Mitigation: indirect airflow, oscillation, water on nightstand.*
+
+2. **Allergen circulation** — A dusty fan aerosolizes particles directly into your breathing zone for 7–8 hours. For people with asthma or allergies, this is the most concrete concern. *Mitigation: clean fan blades weekly.*
+
+3. **Mild overnight dehydration** — Two models estimated ~200–300mL extra fluid loss, which is directionally plausible but the precision is unverified. *Mitigation: keep water nearby.*
+
+4. **Muscle stiffness** — Sustained direct airflow on one body part (neck, shoulder) may cause minor morning stiffness. *Mitigation: don't aim the fan directly at your body.*
+
+## The One Genuinely Important Warning
+
+**In extreme heat (ambient temperature above ~35°C/95°F) with low humidity, fans can become counterproductive.** When air temperature exceeds skin temperature, a fan accelerates heat *gain* rather than heat loss. Public health agencies including the WHO have flagged this. During dangerous heat waves, seek air conditioning — a fan is not a substitute.
+
+## Who Should Be Cautious
+
+- **Infants under 12 months** — immature thermoregulation
+- **Frail elderly (75+)** — impaired thirst response, cardiovascular vulnerability
+- **Severe asthmatics** — allergen mobilization risk
+- **Anyone during extreme heat events** — fans can worsen heat stress above 35°C
+
+## Why the "Fan Death" Myth Persists
+
+The best explanation (from Proposal 3): elderly or vulnerable people who die during heat waves often had fans running. The heat killed them; the fan was an inadequate intervention, not the cause. Correlation was mistaken for causation, and in South Korea this became embedded in cultural belief. No autopsy or investigation has ever attributed a death to fan airflow itself.
+
+---
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Why It Matters |
+|---|---|---|
+| **Core temperature drop** | P2: 0.3°C vs. P3: 0.5–1.1°C (2–4x difference) | Neither sourced reliably; both likely conflate skin and core cooling |
+| **Dry throat prevalence** | P1: 5–10% vs. P3: 15–30% (3–6x range) | Both unsourced — honest answer is "common but we don't know the rate" |
+| **Fire risk quantification** | P1 and P2 offered precise numbers; P3 and P4 didn't | The critic found the precise numbers unverifiable — the qualitative point (negligible with UL-certified fans) is sound |
+| **Heat wave danger** | P4 highlighted it prominently; P1 ignored it entirely | This is a real, documented risk and should not be omitted |
+
+## Addressing the Critic's Key Findings
+
+The critic identified **8–10 likely fabricated or unverifiable citations** across all proposals — fake journal references, invented statistics, and at least one base-rate calculation off by two orders of magnitude. **The directional conclusion (fans are safe) is robust, but the specific numbers used to support it are unreliable.** I have excluded all unverifiable statistics from this synthesis and flagged genuine uncertainty rather than manufacturing false precision.
+
+## Recommendation
+
+Use the fan. Point it indirectly, clean it regularly, keep water nearby. The only real danger is using a fan *instead of* air conditioning during extreme heat events.
+
+**Confidence: 78%**
+
+The high confidence reflects universal model agreement on the core safety conclusion, supported by basic physiology and the absence of any documented fan-caused deaths. Deducted from 85% cap due to: pervasive citation fabrication across all models, unresolved quantitative disagreements, and limited examination of edge cases (sealed rooms, uncertified electrical products).
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-129
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.887 — 🔴 Very High (models fundamentally disagree — treat with caution)

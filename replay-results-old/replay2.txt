@@ -1,0 +1,79 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-004 created in 111.5s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Do All Chinese People Speak the Same Language?
+
+## Concrete Position
+
+**No.** Mandarin Chinese (Putonghua) is the official national language and the closest thing to a universal lingua franca, but it is not spoken fluently by all Chinese people. The claim of universality fails on demographic, geographic, generational, and definitional grounds.
+
+**Confidence: 88%** — High confidence on the "no" answer; moderate uncertainty on exact penetration numbers due to methodological conflicts in available data.
+
+---
+
+## The Numbers (With Honest Uncertainty)
+
+Available data points conflict, which is itself a critical finding:
+
+- **2020 PRC Census (self-reported):** 80.7% claim Mandarin fluency (~1.14B)
+- **Government promotion claims:** up to 91% "some ability"
+- **Independent proficiency estimates:** ~70% conversational fluency
+
+**The gap matters.** Self-reported ability, receptive comprehension, and tested conversational fluency are different constructs. Treating 80.7% and 70% as contradictions is a taxonomic mismatch, not a factual disagreement. The honest range: **70–81% speak Mandarin with meaningful fluency; ~90%+ have some exposure.** That still leaves **140–420 million people** with limited or no functional Mandarin — a population larger than most countries.
+
+---
+
+## Why "All" Is Definitively Wrong
+
+**Three populations break universality:**
+
+1. **Regional language speakers (largest group):** Cantonese (~80M), Wu/Shanghainese (~80M), Min/Hokkien (~70M), Hakka (~45M), plus Xiang, Gan, and others. Especially among those 60+, these are often primary and sometimes sole spoken languages. Many are **not mutually intelligible** with Mandarin (though degree varies — Sichuan dialect is largely intelligible; Cantonese is not).
+
+2. **Ethnic minorities:** 55 recognized minority groups with distinct non-Sinitic languages — Uyghur (~10M), Tibetan (~6M), Mongolian (~6M), Zhuang (~16M). Mandarin proficiency varies dramatically, with some remote communities at <50%.
+
+3. **Generational and rural gaps:** Urban youth under 30 approach 95%+ Mandarin fluency. Rural elderly in southern and western provinces may be 30–50%. The trajectory is toward universality, but it hasn't arrived.
+
+---
+
+## Critical Nuance Most Answers Miss
+
+**Written vs. spoken:** Written Chinese (simplified characters on the mainland, traditional in HK/Taiwan) is substantially more universal than any spoken form. A Cantonese speaker and a Mandarin speaker who can't understand each other verbally can often communicate in writing. For product, policy, or tech applications, this distinction is essential.
+
+**"Chinese people" is undefined in the question.** PRC citizens? Ethnic Chinese globally (including ~50M diaspora)? Greater China (PRC + Taiwan + HK + Macau)? The answer shifts meaningfully with scope. Taiwan adds Hokkien and Mandarin with distinct political framing; Hong Kong adds Cantonese-dominant with rising Mandarin; diaspora communities speak everything from Hokkien to English.
+
+**This is a dynamic question, not a static one.** China's Mandarin promotion campaign (compulsory since 2000) is historically unprecedented in scale. The 2000-to-2020 data shows rapid convergence. Younger cohorts are dramatically more Mandarin-proficient than older ones. The trend line points toward near-universality within a generation — but "near" ≠ "all."
+
+---
+
+## Practical Implications
+
+| Context | Recommendation |
+|---------|---------------|
+| Government/legal/education | Mandarin is the safe default — 100% of official systems use it |
+| National consumer products | Mandarin reaches ~80%+; add Cantonese for southern/HK markets |
+| Elderly demographic targeting | Budget for regional language support — Mandarin alone may reach only 30–50% |
+| Minority regions (Xinjiang, Tibet) | Mandarin-only approaches carry both communication gaps AND political sensitivity |
+| True universal reach (95%+) | Mandarin + Cantonese + Wu + Min + Hakka minimum |
+
+---
+
+## What Can Go Wrong
+
+- **Assuming Mandarin = universal** alienates ~200M+ people and misreads southern/minority markets
+- **Assuming total fragmentation** overstates the problem — Mandarin works for the vast majority in formal contexts
+- **Ignoring the political dimension** of language policy risks both cultural insensitivity and misunderstanding resistance dynamics
+
+## One-Sentence Takeaway
+
+**Mandarin is China's lingua franca spoken with meaningful fluency by 70–80% of the population, but "all Chinese people speak the same language" is false — and will remain false for at least another generation.**
+
+**Confidence: 88%**
+
+💾 Saved as PoT-004
+📈 Model Diversity Index: 0.667

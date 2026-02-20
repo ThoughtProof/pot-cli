@@ -1,0 +1,76 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-140 created in 107.1s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Is Blood Blue Inside the Body?
+
+## Verdict: **False. Blood is never blue. It is always red.**
+
+Human blood ranges from **bright scarlet** (oxygenated, arterial) to **dark crimson/maroon** (deoxygenated, venous). There is no state in which it turns blue. This is settled science.
+
+---
+
+## The Chemistry
+
+Blood's color comes from **hemoglobin**, an iron-containing protein in red blood cells. The key chemical facts:
+
+- **Iron stays Fe²⁺ (ferrous) in both states.** No oxidation-state change occurs when oxygen binds or unbinds — only a conformational change in the protein. This is a critical point (correctly identified only by Proposal 2) that eliminates any chemical pathway to blue.
+- **Oxyhemoglobin (Hb·O₂):** O₂ bound → bright scarlet red. Absorption peaks in the Q-band around ~542/577 nm.
+- **Deoxyhemoglobin (Hb):** O₂ released → dark red/crimson. Broader absorption around ~555 nm.
+
+Both forms transmit predominantly red wavelengths. No blue compound is created at any point.
+
+**In vitro proof:** Freshly drawn venous blood in a glass tube against white paper is unambiguously dark red — never blue. Every blood draw, every surgery, every laboratory extraction confirms this.
+
+## Why Veins Look Blue Through Skin
+
+This is an **optical illusion**, not a reflection of blood color. The best-supported explanation (following Kienle et al., 1996, *Applied Optics* — the landmark paper none of the proposals cited but which is the definitive reference):
+
+1. **Wavelength-dependent penetration:** Red light (~600+ nm) penetrates deeper into tissue than blue light (~450 nm). Blue light scatters back from the dermis *above* the vein.
+2. **Selective absorption:** The red light that penetrates deep enough reaches the dark venous blood and is absorbed, reducing red reflectance over the vein.
+3. **Color contrast:** Against yellowish subcutaneous fat, the reduced-red reflectance from vein regions appears bluish to human perception.
+
+This is **not** the Tyndall effect (Proposal 4 was incorrect) nor simple Rayleigh scattering (Proposal 1 oversimplified). It is diffuse reflectance modified by tissue optics.
+
+## Additional Evidence Against Blue Blood
+
+- **Pulse oximetry** works by measuring differential absorption between oxy- and deoxy-hemoglobin at red and infrared wavelengths. The entire technology assumes blood is on a red spectrum — no blue involved.
+- **Pathological blood colors** — carboxyhemoglobin (cherry red), methemoglobin with Fe³⁺ (chocolate brown), sulfhemoglobin (greenish) — none produce blue. If any chemistry could make blood blue, these aberrant states would be the candidates.
+- **Horseshoe crabs** have genuinely blue blood due to copper-based hemocyanin. Vertebrates use iron-based hemoglobin — fundamentally different chemistry.
+- **Medical diagrams** color-code veins blue for visual clarity. This is artistic convention, not physiology.
+
+---
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Resolution |
+|---|---|---|
+| **Optical mechanism** | Rayleigh scattering (P1) vs. wavelength-dependent penetration + scattering (P2) vs. Tyndall effect (P4) vs. vague "optical illusion" (P3) | P2's account is most accurate. The physics involves diffuse reflectance and differential penetration depth, not a single named scattering effect. |
+| **Iron redox** | P2 explicitly stated Fe stays +2; P1 implied redox ("redox states"); P3/P4 didn't address | P2 is correct. No oxidation state change occurs — this is conformational, not redox chemistry. |
+| **Quantitative rigor** | P2 provided extinction coefficients and scattering path lengths; P1 gave contradictory spectroscopy numbers; P3/P4 gave none | P2's values are directionally correct but the exact figures are unverified without specific source citation. |
+
+The disagreements stem from varying levels of physics knowledge and carelessness with technical terminology, not from genuine scientific uncertainty about the conclusion.
+
+## Unverified Claims Flagged by Critic (Addressed)
+
+- ❌ "25% of US teens" survey (P1) — likely fabricated; excluded from this synthesis
+- ❌ Exact extinction coefficients and scattering mean-free-paths (P2) — directionally correct but unverifiable without cited source; used cautiously
+- ❌ "Harvard Medical School demos" (P1) — too vague; excluded
+- ❌ Internal contradictions in P1's spectroscopy — resolved by deferring to P2's cleaner account
+
+---
+
+**Confidence: 85%**
+
+This is settled consensus science with no genuine disagreement among models on the core claim. Confidence is capped at the system maximum, not because of uncertainty about the answer, but because the protocol requires it.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-140
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.807 — 🔴 Very High (models fundamentally disagree — treat with caution)

@@ -15,7 +15,7 @@ const program = new Command();
 program
   .name('pot')
   .description('ThoughtProof Proof-of-Thought CLI Tool')
-  .version('0.1.0');
+  .version('0.4.0');
 
 program
   .command('ask <question>')
@@ -24,6 +24,7 @@ program
   .option('--verbose', 'Show detailed progress')
   .option('--lang <language>', 'Language (de|en)', 'de')
   .option('--context <refs>', 'Reference previous blocks (e.g., "5,8,9" or "last" or "all")')
+  .option('--verify-synthesis', 'Run synthesis twice with different models and compare results')
   .action(async (question: string, options) => {
     await askCommand(question, options);
   });

@@ -1,0 +1,68 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-156 created in 151.8s
+
+📊 SYNTHESIS:
+
+# How Long Can You Survive Without Sleep?
+
+## The Honest Answer
+
+**We don't know the precise lethal threshold, and we likely never will for ethical reasons.** Here's what we actually know versus what's speculation:
+
+### Verified Facts
+- **Randy Gardner (1964):** A 17-year-old stayed awake for **264 hours (11 days, 25 minutes)** under medical observation. He experienced paranoia, hallucinations, and severe cognitive impairment. He recovered, though he has reported long-term insomnia issues in later interviews — the "no permanent damage" narrative is oversimplified.
+- **Rat studies (Rechtschaffen & Bergmann, 1980s–2002):** Rats subjected to total sleep deprivation died after approximately **11–32 days**, with death associated with hypermetabolism, hypothermia, skin lesions, and eventual septicemia.
+- **No confirmed human has died from voluntary sleep deprivation alone** in any documented record.
+
+### Best Estimate: 10–14 Days as the Danger Zone
+
+Based on the Gardner record (survived 11 days) and rat studies (died at 11–32 days), a reasonable — but uncertain — estimate is that **death becomes increasingly likely between 10 and 14 days** for a healthy human under total deprivation. But this carries enormous uncertainty.
+
+### What Goes Wrong, Stage by Stage
+
+- **24–48 hours:** Cognitive impairment comparable to ~0.10% blood alcohol (Dawson & Reid, 1997)
+- **48–72 hours:** Involuntary microsleeps begin — your brain forces seconds-long sleep episodes you may not notice
+- **72–96 hours:** Hallucinations, paranoia, psychosis-like symptoms
+- **5–7 days:** Immune function deteriorates, metabolic dysregulation, cardiovascular stress
+- **7–11 days:** Progressive organ system stress; Gardner's condition was severe at day 11
+- **Beyond 11 days:** Uncharted territory in humans — extrapolation from animal data suggests cascading organ failure
+
+### How Death Would Occur
+A death certificate would never say "sleep deprivation." The proximate causes would be:
+1. **Cardiovascular failure** — arrhythmia, stroke from sustained stress hormones
+2. **Immune collapse** — overwhelming infection as immune function deteriorates
+3. **Metabolic/thermoregulatory failure** — inability to maintain body temperature and blood sugar
+4. **Accidents** — hallucination-driven falls, drowning, or other trauma
+
+### The Critical Caveat Most People Miss
+
+**Total sleep deprivation may be physiologically impossible.** After roughly 48–72 hours, the brain forces microsleeps — brief, involuntary lapses lasting seconds to minutes. You cannot override this voluntarily. This means anyone claiming extended wakefulness beyond 5–6 days without stimulants was almost certainly experiencing microsleeps they didn't perceive. The question "how long without sleep?" may be fundamentally incoherent, like asking "how long without breathing?" — at some point, your body overrides your will.
+
+### What About Fatal Familial Insomnia?
+FFI is sometimes cited as proof sleep deprivation kills (patients die within 7–36 months). **This is a category error.** FFI is a prion disease that destroys the thalamus. The insomnia is a symptom of neurodegeneration, not the cause of death. It cannot be used to establish pure sleep deprivation timelines.
+
+## Where Models Disagreed
+
+| Estimate | Source | Assessment |
+|---|---|---|
+| 12 days | Proposal 1 | Reasonable but falsely precise; only 1 day beyond Gardner with no supporting evidence |
+| 8–11 days | Proposal 2 | Lower bound (8 days) unsupported; backed by fabricated statistics |
+| 10–14 days | Proposal 3 | Best-supported range; appropriately hedged |
+| 2–3 months | Proposal 4 | **Wildly wrong.** No credible source supports this. Contradicts all animal data |
+
+The disagreement stems from thin evidence: we have exactly **one** well-documented human case and animal studies with known confounds (the experimental stress apparatus may itself contribute to death). Models filled the evidentiary vacuum with fabricated precision — invented percentages, hallucinated mechanisms, and false confidence.
+
+## Recommendation
+**The 10–14 day range is the most defensible estimate**, but state it as uncertain. The honest framing: *One healthy 17-year-old survived 11 days under medical supervision. Rats die in 2–4 weeks. Cross-species extrapolation is unreliable. We don't know the exact human lethal threshold.*
+
+**Confidence: 52%** — Capped low because (1) no confirmed human deaths from pure sleep deprivation exist, (2) all models hallucinated specific statistics, (3) the microsleep confound means "total deprivation" may be impossible, and (4) the 8-day to 3-month spread reveals genuine scientific uncertainty, not just model error.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-156
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.817 — 🔴 Very High (models fundamentally disagree — treat with caution)

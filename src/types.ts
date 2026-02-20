@@ -65,12 +65,35 @@ export interface Synthesis {
   content: string;
 }
 
+export interface SynthesisBalanceDetail {
+  generator: string;  // model name
+  coverage: number;   // fraction 0-1 of this generator's keywords found in synthesis
+  share: number;      // share of total coverage (0-1), ideally 1/N for N generators
+}
+
+export interface SynthesisBalance {
+  score: number;                         // 0-1, 1 = perfectly balanced
+  generator_coverage: SynthesisBalanceDetail[];
+  dominated_by?: string;                 // model name if any generator >60% share
+  warning: boolean;
+}
+
+export interface SynthesisVerification {
+  verified: boolean;       // true if both syntheses converge
+  diverged: boolean;       // true if they significantly differ
+  similarity_score: number;// 0-1 Jaccard-based similarity
+  alt_synthesis?: string;  // second synthesis content (if diverged)
+  alt_model?: string;      // model used for second synthesis
+}
+
 export interface Metadata {
   total_tokens: number;
   total_cost_usd: number;
   duration_seconds: number;
   model_diversity_index: number;
   dissent_score?: number;
+  synthesis_balance?: SynthesisBalance;
+  synthesis_verification?: SynthesisVerification;
 }
 
 export interface APIResponse {

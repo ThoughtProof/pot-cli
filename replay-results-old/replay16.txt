@@ -1,0 +1,71 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-032 created in 109.7s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: First European Expedition to America
+
+## Position
+
+**Leif Erikson and the Norse, circa 1021 CE** — approximately 470 years before Columbus's 1492 voyage.
+
+**Confidence: 96%**
+
+---
+
+## The Core Answer
+
+The first verified European expedition to reach the Americas was Norse, led by Leif Erikson around 1000 CE. This is established by **independent convergence** of two evidence streams:
+
+**Archaeological evidence (decisive):**
+- L'Anse aux Meadows, Newfoundland — Norse settlement site discovered in 1960, excavated by Helge and Anne Stine Ingstad
+- Carbon-dated precisely to **1021 CE** by Kuitems et al., *Nature*, 2021, using a solar storm marker (Miyake event) in tree rings — the single most precise dating evidence available
+- Norse artifacts: iron slag from smelting, building foundations, butternuts (not native to Newfoundland, indicating further southward exploration)
+- **UNESCO World Heritage Site since 1978** — this is not contested fringe archaeology
+
+**Documentary evidence (corroborating):**
+- *Saga of the Greenlanders* and *Saga of Erik the Red* (written ~1200s, describing events ~1000 CE) describe Leif Erikson's deliberate expedition from Greenland to "Vinland"
+- The sagas were written ~200 years after events — a legitimate caveat — but L'Anse aux Meadows independently confirms their core claims
+- Thorfinn Karlsefni's follow-up expedition further undermines any claim that the Norse voyage was a one-off accident rather than a deliberate exploratory effort with return voyages
+
+---
+
+## Why Columbus Is the Wrong Answer (and Why It Keeps Appearing)
+
+Two of the four proposals argued for Columbus by **redefining the question**. This is the key failure mode:
+
+- Proposal 1 claimed Norse voyages weren't "expeditions" and asserted "99% academic consensus" for Columbus — both fabricated. The Norse voyages involved planned outbound journeys, return trips, and follow-up expeditions. The claim of "no return voyages" is factually false.
+- Proposal 2 inserted "sustained contact" into the question, then answered *that* different question. The original asks who was **first**, not who had the most lasting impact.
+
+**Columbus's 1492 voyage was historically transformative** — it triggered the Columbian Exchange, permanent colonization, and reshaped global civilization. But historical impact ≠ chronological primacy. The question asks who was first, not who mattered most.
+
+The Columbus myth persists because of centuries of cultural reinforcement (Columbus Day, nationalist narratives, the fact that Norse evidence wasn't archaeologically confirmed until 1960). This is precisely the type of confident-but-wrong consensus an epistemic verification system must catch.
+
+---
+
+## What Can Go Wrong With This Answer
+
+1. **Definition of "expedition":** If narrowly defined as "state-sponsored voyage of exploration resulting in permanent settlement," one could argue neither Norse nor Columbus fully qualifies on the first attempt. But by any standard reading — organized, deliberate voyage to unknown territory — the Norse qualify.
+
+2. **Earlier, undiscovered expeditions:** Irish monks (St. Brendan legends, 6th century), Basque whalers, or unknown contacts could predate the Norse. **Zero archaeological evidence** supports any of these. The 4% uncertainty in my confidence accounts for possible future discoveries.
+
+3. **Saga reliability:** Written ~200 years post-events, the sagas alone would be weak evidence. But they don't stand alone — L'Anse aux Meadows validates them independently. Attack the sagas and the archaeology still holds.
+
+4. **Indigenous peoples:** Humans reached the Americas ~15,000+ years ago via Beringia. The question specifies "European expedition," so this isn't a counterargument — but it's essential context. No European "discovered" an inhabited continent.
+
+5. **Semantic ambiguity in "America":** Whether meaning North America, the Caribbean, or the Western Hemisphere, the Norse were first by any geographic definition. Columbus reached the Bahamas (1492), South America (1498), and Central America (1502) — all after 1021 CE.
+
+---
+
+## For Epistemic Systems: The Meta-Lesson
+
+The split across proposals — two wrong, two right, on a relatively straightforward historical question — demonstrates why multi-agent verification matters. Proposal 1's confident wrongness (authoritative tone, structured citations, fabricated consensus number) is the most dangerous output type: it has the **appearance** of rigor while being factually incorrect. A single-agent system passing that output would fail its users. Cross-agent disagreement is the signal that triggers deeper scrutiny.
+
+**Answer: Leif Erikson, Norse expedition, ~1021 CE. Confidence: 96%.**
+
+💾 Saved as PoT-032
+📈 Model Diversity Index: 0.667

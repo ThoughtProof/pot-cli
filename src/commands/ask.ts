@@ -4,8 +4,8 @@ import { getConfig, loadSystemContext, createProvidersFromConfig } from '../conf
 import { BlockStorage } from '../storage/blocks.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
-import { runSynthesizer } from '../pipeline/synthesizer.js';
-import { Block, Provider } from '../types.js';
+import { runSynthesizer, runDualSynthesizer, computeSynthesisBalance } from '../pipeline/synthesizer.js';
+import { Block, Provider, SynthesisBalance, SynthesisVerification } from '../types.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
   // Measures how different proposals are from each other
@@ -135,7 +135,7 @@ function parseContextOption(contextOption: string, storage: BlockStorage): { ref
 
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; verifySynthesis?: boolean }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -215,21 +215,46 @@ export async function askCommand(
       console.log(chalk.dim('✓ Critic completed'));
     }
 
-    // Step 4: Run synthesizer
-    spinner.text = 'Synthesizing final answer...';
-    const synthesis = await runSynthesizer(
-      synthesizer.provider,
-      synthesizer.model,
-      proposals,
-      critique,
-      language,
-      isDryRun,
-      contextText
-    );
-    
+    // Step 4: Run synthesizer (with optional verify-synthesis dual-run)
+    let synthVerification: SynthesisVerification | undefined;
+    let synthesis;
+
+    if (options.verifySynthesis && !isDryRun) {
+      spinner.text = 'Synthesizing final answer (dual-model verification)...';
+      // Use critic model as the secondary synthesizer for cross-verification
+      const dualResult = await runDualSynthesizer(
+        synthesizer.provider,
+        synthesizer.model,
+        critic.provider,
+        critic.model,
+        proposals,
+        critique,
+        language,
+        contextText
+      );
+      synthesis = dualResult.primary;
+      synthVerification = dualResult.verification;
+    } else {
+      spinner.text = 'Synthesizing final answer...';
+      synthesis = await runSynthesizer(
+        synthesizer.provider,
+        synthesizer.model,
+        proposals,
+        critique,
+        language,
+        isDryRun,
+        contextText
+      );
+    }
+
     if (options.verbose) {
       console.log(chalk.dim('✓ Synthesizer completed'));
     }
+
+    // Step 4b: Compute Synthesis Balance Score
+    const synthesisBalance: SynthesisBalance = isDryRun
+      ? { score: 1, generator_coverage: [], warning: false }
+      : computeSynthesisBalance(proposals, synthesis.content);
 
     // Step 5: Create and save block
     spinner.text = 'Saving block...';
@@ -245,7 +270,7 @@ export async function askCommand(
 
     const block: Block = {
       id: '', // Will be set by storage
-      version: '0.2.0',
+      version: '0.4.0',
       timestamp: new Date().toISOString(),
       question,
       normalized_question: normalizedQuestion,
@@ -258,6 +283,8 @@ export async function askCommand(
         duration_seconds: duration,
         model_diversity_index: mdi,
         dissent_score: dissentScore,
+        synthesis_balance: synthesisBalance,
+        synthesis_verification: synthVerification,
       },
       context_refs: contextRefs.length > 0 ? contextRefs : undefined,
     };
@@ -272,6 +299,26 @@ export async function askCommand(
     console.log(chalk.dim(`\n💾 Saved as ${blockId}`));
     console.log(chalk.dim(`📈 Model Diversity Index: ${mdi.toFixed(3)}`));
     console.log(chalk.dim(`⚖️  Dissent Score: ${dissentScore.toFixed(3)} — ${getDissentLabel(dissentScore)}`));
+
+    // Display Synthesis Balance Score
+    const balanceEmoji = synthesisBalance.score > 0.75 ? '🟢' : synthesisBalance.score > 0.5 ? '🟡' : '🔴';
+    console.log(chalk.dim(`${balanceEmoji} Synthesis Balance Score: ${synthesisBalance.score.toFixed(3)}`));
+    if (synthesisBalance.warning && synthesisBalance.dominated_by) {
+      console.log(chalk.yellow(`⚠️  Balance Warning: "${synthesisBalance.dominated_by}" dominates the synthesis (>60% share)`));
+    }
+
+    // Display Synthesis Verification result
+    if (synthVerification) {
+      if (synthVerification.verified) {
+        console.log(chalk.green(`✅ Synthesis Verified — both models converge (similarity: ${synthVerification.similarity_score.toFixed(3)})`));
+      } else {
+        console.log(chalk.yellow(`⚠️  Synthesis Diverged — models produced different results (similarity: ${synthVerification.similarity_score.toFixed(3)})`));
+        if (synthVerification.alt_synthesis) {
+          console.log(chalk.dim(`\n📊 ALT SYNTHESIS (${synthVerification.alt_model}):\n`));
+          console.log(chalk.dim(synthVerification.alt_synthesis));
+        }
+      }
+    };
     
   } catch (error) {
     spinner.fail('Pipeline failed');

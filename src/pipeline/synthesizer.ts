@@ -1,8 +1,14 @@
-import { Provider, Proposal, Critique, Synthesis } from '../types.js';
+import { Provider, Proposal, Critique, Synthesis, SynthesisBalance, SynthesisVerification } from '../types.js';
 
 const SYNTHESIZER_PROMPT_DE = `Du bist der Synthesizer. Kombiniere die Proposals und die Kritik zu einer optimalen Antwort.
 
 {context}
+
+CONSTRAINTS — ZWINGEND EINZUHALTEN:
+- Du MUSST jede Generator-Position (Proposal 1, 2, 3, ...) explizit adressieren
+- Du MUSST begründen, warum du eine Position über eine andere stellst
+- Minority-Positionen MÜSSEN im Output sichtbar bleiben mit ihren stärksten Argumenten
+- Du darfst nicht einfach einer Position folgen — zeige die Gewichtung explizit
 
 REGELN:
 - Nutze die Stärken aller Proposals
@@ -36,6 +42,12 @@ const SYNTHESIZER_PROMPT_EN = `You are the Synthesizer. Combine the proposals an
 
 {context}
 
+CONSTRAINTS — MANDATORY:
+- You MUST explicitly address each Generator position (Proposal 1, 2, 3, ...)
+- You MUST justify why you prioritize one position over another
+- Minority positions MUST remain visible in the output with their strongest arguments
+- You must NOT simply follow one position — show the weighting explicitly
+
 RULES:
 - Use the strengths of all proposals
 - Address the critique points explicitly — especially any UNVERIFIED claims flagged by the critic
@@ -63,6 +75,107 @@ PROPOSALS:
 
 CRITIQUE:
 {critique}`;
+
+// ---------- Synthesis Balance Score ----------
+
+function extractKeywords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^a-zäöüß0-9\s]/g, '')
+    .split(/\s+/)
+    .filter(w => w.length > 4);
+}
+
+export function computeSynthesisBalance(
+  proposals: Proposal[],
+  synthesisContent: string
+): SynthesisBalance {
+  const synthesisWords = new Set(extractKeywords(synthesisContent));
+  const N = proposals.length;
+
+  // For each proposal, count how many of its keywords appear in the synthesis
+  const coverageRaw = proposals.map(p => {
+    const kw = extractKeywords(p.content);
+    if (kw.length === 0) return { model: p.model, hits: 0, total: 0 };
+    const hits = kw.filter(w => synthesisWords.has(w)).length;
+    return { model: p.model, hits, total: kw.length };
+  });
+
+  const coverageScores = coverageRaw.map(c => (c.total > 0 ? c.hits / c.total : 0));
+  const totalCoverage = coverageScores.reduce((a, b) => a + b, 0);
+
+  // Share = fraction of total coverage this generator owns
+  const shares = coverageScores.map(c => (totalCoverage > 0 ? c / totalCoverage : 1 / N));
+
+  // Balance score: 1 - mean absolute deviation from ideal (1/N each)
+  const ideal = 1 / N;
+  const mad = shares.reduce((a, s) => a + Math.abs(s - ideal), 0) / N;
+  const score = Math.max(0, 1 - mad / ideal);
+
+  // Domination check: any generator with share > 0.6?
+  let dominated_by: string | undefined;
+  shares.forEach((s, i) => {
+    if (s > 0.6) dominated_by = proposals[i].model;
+  });
+
+  const details = proposals.map((p, i) => ({
+    generator: p.model,
+    coverage: coverageScores[i],
+    share: shares[i],
+  }));
+
+  return {
+    score: parseFloat(score.toFixed(4)),
+    generator_coverage: details,
+    dominated_by,
+    warning: !!dominated_by,
+  };
+}
+
+// ---------- Synthesis Verification (dual-run) ----------
+
+export function computeSynthesisSimilarity(a: string, b: string): number {
+  const setA = new Set(extractKeywords(a));
+  const setB = new Set(extractKeywords(b));
+  const intersection = new Set([...setA].filter(w => setB.has(w)));
+  const union = new Set([...setA, ...setB]);
+  return union.size > 0 ? intersection.size / union.size : 0;
+}
+
+export async function runDualSynthesizer(
+  primaryProvider: Provider,
+  primaryModel: string,
+  secondaryProvider: Provider,
+  secondaryModel: string,
+  proposals: Proposal[],
+  critique: Critique,
+  language: 'de' | 'en' = 'de',
+  contextText?: string
+): Promise<{ primary: Synthesis; verification: SynthesisVerification }> {
+  const primary = await runSynthesizer(
+    primaryProvider, primaryModel, proposals, critique, language, false, contextText
+  );
+  const secondary = await runSynthesizer(
+    secondaryProvider, secondaryModel, proposals, critique, language, false, contextText
+  );
+
+  const similarity = computeSynthesisSimilarity(primary.content, secondary.content);
+  const CONVERGE_THRESHOLD = 0.35;
+  const verified = similarity >= CONVERGE_THRESHOLD;
+  const diverged = !verified;
+
+  const verification: SynthesisVerification = {
+    verified,
+    diverged,
+    similarity_score: parseFloat(similarity.toFixed(4)),
+    alt_model: secondary.model,
+    ...(diverged ? { alt_synthesis: secondary.content } : {}),
+  };
+
+  return { primary, verification };
+}
+
+// ---------- Core runSynthesizer ----------
 
 export async function runSynthesizer(
   provider: Provider,

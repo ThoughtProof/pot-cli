@@ -1,0 +1,63 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-151 created in 103.7s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: The Spider-Swallowing Myth
+
+## Concrete Position
+
+**The claim that humans swallow 8 spiders per year in their sleep is completely false.** The realistic number is effectively zero. All four models agree on this, and the consensus is correct.
+
+## Why It's False
+
+**Spider behavior actively prevents this:**
+- Spiders detect vibrations, airflow, and body heat through specialized sensory structures (trichobothria). A breathing, moving, warm human registers as a predator — something to flee, not approach.
+- Spiders are predators of insects. They have zero biological reason to enter a human mouth. The warm, moist, CO₂-rich environment of a mouth would be a deterrent, not an attractant.
+
+**No evidence supports it:**
+- No peer-reviewed entomological study has ever documented a spider voluntarily entering a sleeping human's mouth. No sleep laboratory research has incidentally recorded such an event.
+
+**If spiders are found near sleeping humans,** it's because bedrooms contain prey insects (mosquitoes, gnats) and sheltered crevices — not because humans attract them.
+
+## The Origin: Honestly, We Don't Know for Certain
+
+This is where the critique was most valuable. Three of four proposals confidently attributed the myth to "Lisa Holst, a columnist who wrote a 1993 magazine article." One proposal attributed it to folklorist Jan Harold Brunvand.
+
+**The critical truth: The "Lisa Holst" origin story is itself unverified and likely a meta-myth.** No one has ever located the original article. No magazine has been definitively identified. Snopes itself has noted the difficulty of tracing this. The honest answer is: **the precise origin of the myth is unknown and disputed.** It gained traction in the early internet era (1990s), but attributing it to a specific person or article with confidence is, ironically, repeating misinformation while debunking misinformation.
+
+---
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Why It Matters |
+|-------|-------------|----------------|
+| **Myth origin** | P1 said Brunvand; P3/P4 said Lisa Holst; P2 hedged | **None are confirmed.** This reveals all models confabulating plausible-sounding origin stories. |
+| **Supporting citations** | P1 cited "Cloudsley-Thompson, 1995" (likely confused with Foelix); P2 fabricated a "University of Michigan 2014" study with 2,400 subjects | **These citations don't appear to exist.** This is the most dangerous failure mode — false evidence marshaled for a true conclusion. |
+| **Specificity of statistics** | P1 gave spider density "~1-5/m²" and "probability <10⁻⁶ per night"; P2 claimed a "200-Hz drone" | **Unverifiable precision.** None of these figures can be traced to actual sources. |
+
+The disagreements stem from a shared pathology: **models are so confident the myth is false (correctly) that they fabricate authoritative-sounding evidence to support the debunking.** This is "fighting misinformation with misinformation."
+
+## What Could Go Wrong With This Answer
+
+- Someone sleeping outdoors in a tropical, spider-dense environment has a non-zero (but still vanishingly small) probability of incidental arthropod contact
+- The universal negative ("no sleep study has ever documented this") is impossible to verify exhaustively
+- Regional and species-level variation exists — most research focuses on common household spiders in temperate climates
+
+## Key Takeaway
+
+The myth is false. But **how** these models debunked it reveals a critical insight: consensus on the conclusion was unanimous and correct, yet the supporting evidence contained fabricated citations, confused attributions, and a widely-repeated meta-myth presented as established fact. Correct answers built on unreliable evidence are still epistemically fragile.
+
+**Confidence: 82%**
+
+High confidence that the core claim is false (all models agree, consistent with known entomology). Docked from 85% because: (1) the origin story cannot be verified, (2) multiple fabricated citations across proposals indicate shared hallucination patterns, and (3) the universal negative about sleep studies remains formally unverifiable.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-151
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.883 — 🔴 Very High (models fundamentally disagree — treat with caution)

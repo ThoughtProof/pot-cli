@@ -1,0 +1,61 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-016 created in 141.3s
+
+📊 SYNTHESIS:
+
+# How Knights Mounted Horses in Full Plate Armor
+
+**Short answer:** They climbed on under their own power — using stirrups, mounting blocks, or a squire's boost. The "crane hoisting a helpless knight" image is a persistent myth with no basis in period sources.
+
+---
+
+## The Core Reality
+
+A full suit of 15th-century battle plate weighed **roughly 45–60 lbs**, distributed across the entire body. This is comparable to a modern infantry combat load, though distributed differently (circumferential vs. backpack-heavy). Well-fitted plate armor was articulated at every joint. Knights could run, climb, fight on foot, and — yes — mount a horse.
+
+## The Three Practical Methods
+
+**1. Stirrup and spring (everyday method)**
+Left foot in stirrup, grip the saddle's high pommel or cantle, push off with the right leg, swing over. The war saddle's raised front and back provided excellent handholds. This is fundamentally the same technique anyone uses to mount a horse — just with extra weight.
+
+**2. Mounting block (common infrastructure)**
+Stone or wooden steps, found at castles, manors, tournament grounds, and carried in baggage trains. These reduced the vertical lift needed and conserved energy before combat. *Important caveat:* mounting blocks served all riders, not just armored knights — their existence doesn't prove knights *needed* them, only that they were practical.
+
+**3. Squire assistance (battlefield standard)**
+A squire steadied the horse, cupped hands for a leg-up, or braced the knight during mounting. This was about **efficiency and speed**, not helplessness. Why exhaust yourself before a fight when help is available?
+
+## The Horse's Role (Overlooked by Most Accounts)
+
+Warhorses — destriers and coursers — were extensively trained animals. They were conditioned to **stand motionless** during mounting, tolerate the noise of armor, and in some traditions, position themselves to facilitate the rider. The horse was an active participant, not a passive platform. This training was a critical and underappreciated part of the equation.
+
+## Why the Myth Persists
+
+**Tournament armor ≠ battle armor.** Specialized jousting harnesses could reach 70–90+ lbs and were deliberately rigid, sometimes bolted to the saddle. Victorian-era historians examining these museum pieces in the 19th century mistakenly generalized from tournament extremes to all armored combat. (Unfortunately, no proposal — and I must be honest here — identified a *specific* Victorian source by name. The attribution to "Victorian myths" is widely repeated in modern historiography but the precise origin is poorly traced.)
+
+**Hollywood did the rest.** The image of a clumsy, immobilized knight is comedic and memorable. An athletic, nimble warrior is less entertaining.
+
+## What Could Actually Go Wrong
+
+- **Mud and terrain:** Slippery ground made the push-off treacherous. Chronicles mention falls during mounting.
+- **Fatigue and injury:** Mounting fresh before a tournament is very different from mounting after hours of fighting or marching. Age, wounds, and exhaustion mattered enormously.
+- **Time pressure:** Even 20–30 seconds of vulnerability during mounting could be fatal in combat. Enemies exploited this — the real danger wasn't *inability* to mount, but the *window of vulnerability* while doing so.
+- **Horse behavior:** Even trained warhorses could spook or shift. An armored man mid-mount on a moving horse faced genuine danger.
+
+## What Varied (and We Should Acknowledge)
+
+Practices differed across **time** (1350–1550 spans dramatic changes in armor design), **geography** (English, French, Italian, and German traditions differed), **wealth** (a duke with retainers had different options than a poor knight-bachelor), and **individual fitness** (not every knight was 25 and athletic — many fought into their 40s and 50s). Treating "knights mounting horses" as a single uniform practice flattens important variation.
+
+## Honest Epistemic Note
+
+The primary evidence for mounting practices is **fragmentary**. We have period illustrations, some chronicle references, combat manuals that focus on fighting rather than mounting, and modern reenactment data. No medieval source provides systematic documentation of mounting techniques. The consensus above is well-supported but should be held with appropriate humility rather than false precision.
+
+**Confidence: 82%** on the core claim (self-mounting was standard, crane myth is false). Lower confidence (~60%) on specific details like typical mounting times, force calculations, or percentage breakdowns — these are modern estimates, not historical data.
+
+**Bottom line:** Knights were professional fighters wearing well-engineered equipment. They mounted horses competently, using the same practical aids available to any rider. The crane story says more about Victorian imagination than medieval reality.
+
+💾 Saved as PoT-016
+📈 Model Diversity Index: 0.667

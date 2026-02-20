@@ -1,0 +1,58 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-119 created in 113.2s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Who Led the First European Expedition to America?
+
+## Clear Recommendation: **Leif Erikson, c. 1000 CE**
+
+Norse explorer Leif Erikson led the first verified European expedition to reach America, approximately 471–492 years before Columbus. The evidence is decisive:
+
+**Archaeological proof:** L'Anse aux Meadows in Newfoundland — a UNESCO World Heritage Site since 1978, excavated 1961–1968 — confirms Norse presence in North America. A 2021 study (Kuitems et al., *Nature*, published October 2021) used solar-storm-dated tree rings to pinpoint the occupation to **1021 CE**, transforming saga-based estimates into precise scientific dating.
+
+**Literary sources:** The *Saga of the Greenlanders* and *Saga of Erik the Red* describe Norse voyages to "Vinland." Importantly, the Saga of the Greenlanders records that **Bjarni Herjólfsson** first sighted the land and Erikson subsequently organized a deliberate expedition — a detail only one proposal captured, and which strengthens the case that this was an intentional, organized voyage, not an accidental landfall.
+
+**Christopher Columbus** departed Spain on August 3, 1492, making landfall October 12, 1492 in the Bahamas. He completed **four** voyages (1492, 1493, 1498, 1502) before his death in 1506. His achievement was initiating sustained European-American contact and the Columbian Exchange — an epochal event, but a different claim than "first."
+
+## Where Models Disagreed — and Why
+
+The proposals split 2-2: Grok and Kimi argued Columbus; Claude and DeepSeek argued Erikson. Crucially, **all four agree on the same underlying facts** — Norse reached America ~1000 CE, Columbus arrived 1492, Columbus triggered lasting contact. The disagreement is entirely **definitional**: does "first" mean chronologically first, or first to generate sustained impact?
+
+The Columbus proposals quietly reframed the question. Grok claimed Columbus led "the first documented European expedition" while simultaneously acknowledging Norse precedent — a self-contradiction. Kimi was more honest, explicitly qualifying with "sustained, widely-recognized contact," but this answers a different question than the one asked.
+
+**The plain reading of "first European expedition to America" is chronological.** Erikson is the correct answer. Columbus is the correct answer to "Who initiated lasting European contact with the Americas?" — an important but distinct question.
+
+## Addressing Critique Points on Factual Errors
+
+- **Grok's "87 men"**: Misleading precision. Estimates range 86–120; "~90" (as Kimi used) is more defensible.
+- **Grok's "33 days"**: Inaccurate. Canary Islands departure ~September 6 to October 12 landfall = ~36 days.
+- **Grok's "three voyages"**: Wrong. Columbus made **four** voyages.
+- **DeepSeek's "contemporaneous written records"**: Problematic. The sagas were written down in the 13th century, ~200–250 years after the events. They preserve oral tradition, not contemporaneous documentation.
+- **All proposals' shared blind spot**: Columbus never set foot on the North American mainland. His voyages reached the Caribbean, Central America, and South America.
+
+## What Could Undermine This Answer
+
+1. **Definition of "expedition"**: If you require state-sponsored, colonization-intent missions, Columbus fits better. But Norse voyages involved organized, crewed ships crossing the Atlantic — that qualifies as an expedition by any reasonable standard.
+2. **Earlier unknown contacts**: Irish monks (Saint Brendan legends), Basque fishermen, or others may have preceded the Norse. None have archaeological confirmation.
+3. **Pre-Columbian Polynesian contact**: Genetic and botanical evidence (sweet potato distribution) suggests Polynesian-South American contact, but these weren't European expeditions.
+
+## The Number That Matters
+
+**471 years** (1021 CE to 1492) — the confirmed gap between Norse and Columbian arrival, longer than the entire existence of the United States.
+
+---
+
+**Where Models Disagreed:** On the definition of "first," not on facts. This is a definitional dispute masquerading as a factual one — exactly the kind of interpretive nuance multi-agent verification is designed to surface.
+
+**Confidence: 82%** — High factual agreement across all models; the archaeological and documentary evidence for Norse priority is robust. Confidence docked from maximum because: (1) L'Anse aux Meadows confirms Norse presence in Newfoundland specifically, and linking it conclusively to Erikson personally (vs. other Norse) relies on saga interpretation; (2) earlier undocumented European voyages remain theoretically possible.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-119
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.856 — 🔴 Very High (models fundamentally disagree — treat with caution)

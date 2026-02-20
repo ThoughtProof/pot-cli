@@ -1,0 +1,80 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-146 created in 130.2s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Diamonds Are NOT Made From Coal
+
+## The Core Truth
+
+**The coal-to-diamond premise is false.** Diamonds form from **pure carbon sources** — never from coal as a bulk material. The science is clear, though models overstated the absolutism.
+
+## Natural Diamond Formation
+
+Diamonds crystallize in Earth's mantle along the **carbon phase boundary** (the Berman-Simon line), where diamond becomes thermodynamically stable over graphite:
+
+| Parameter | Range | Notes |
+|-----------|-------|-------|
+| **Temperature** | 900–1,300°C | Standard lithospheric mantle range |
+| **Pressure** | 4.5–6 GPa (45–60 kbar) | ~650,000–870,000 psi ✅ (conversion verified) |
+| **Depth** | 140–190 km | Some superdeep diamonds form at 400–700 km |
+| **Age** | 1–3.3 billion years | Most gem diamonds are Archean |
+
+**Carbon source:** Primordial mantle carbon or subducted oceanic crust carbonates — **not** plant-derived coal, which is only 100–400 million years old and forms at <5 km depth.
+
+## Synthetic Diamond Production
+
+**HPHT (High Pressure High Temperature):** 1,300–1,600°C at 5–6 GPa using **purified graphite** (99.9%+ carbon). First achieved by GE in December 1954 (Bundy, Hall, Strong & Wentorf, *Nature* 176, 1955). Gem-quality stones take days to weeks.
+
+**CVD (Chemical Vapor Deposition):** 700–1,200°C at low pressure using methane gas. Carbon atoms deposit layer by layer. No compression involved.
+
+Both methods require **pure carbon feedstock**, not coal.
+
+## Why Coal Fails
+
+Coal contains 0.5–5% sulfur, up to ~45% volatile matter (in lignite), plus nitrogen and ash. These impurities **poison diamond nucleation**, yielding graphite or amorphous carbon instead.
+
+## Critical Nuance the Models Missed
+
+**Addressing the shared overclaim:** Three proposals stated coal can "never" or "0%" become diamond. This is **rhetorically satisfying but scientifically imprecise.** Carbon atoms don't "remember" their origin. If you *extracted and purified* carbon from coal, then subjected that pure carbon to HPHT conditions, you could produce diamond. What's true: **coal as-is** is an impractical, unreliable feedstock that would fail in any real production scenario. The distinction matters for scientific integrity.
+
+## Where the Myth Comes From
+
+The 1978 *Superman* film (Reeve compresses coal into diamond) popularized the imagery, though the myth predates it. The elemental confusion — both coal and diamond contain carbon — plus the motivational appeal of "pressure creates diamonds" keeps it alive.
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Natural formation temperature** | P1 cited 1,300–1,600°C (actually HPHT synthesis numbers); P3/P4 cited 900–1,300°C | **900–1,300°C is correct** for natural formation; P1 conflated natural and synthetic |
+| **Absolutism ("never/0%")** | P1, P2, P3 all overclaimed impossibility | **Shared bias** — coal-as-material won't work, but purified carbon from coal could. Important distinction |
+| **Natural vs. synthetic conflation** | P2 mixed timeframes and sources incoherently | Natural processes ≠ synthetic methods; must be addressed separately |
+| **Strategic relevance** | P4 argued this question is wrong for ThoughtProof | **P4 misread the assignment** and contradicted ThoughtProof's own Lite-volume strategy |
+
+**Why they disagreed:** Different proposals prioritized rhetorical clarity over scientific precision. The "never" claims stem from pedagogical instinct (debunking myths forcefully) rather than strict accuracy. P2's errors arose from excessive brevity without verification.
+
+## Unverified Claims Flagged by Critic (Excluded from Synthesis)
+
+- "Taylor & Green, *Rev. Geophys.* 1988" — likely hallucinated citation
+- "150M+ carats/year, GIA 2023" — unconfirmed figure
+- Soviet coal trial data, FTC coal-kit warnings — unsubstantiated
+- "$2M press" cost — unsourced
+
+These were stripped from this synthesis.
+
+## Recommendation
+
+For anyone asking: **Use graphite or methane for diamond synthesis. Coal is the wrong material.** The phase diagram of carbon is the definitive reference — diamond is thermodynamically stable only within specific P-T conditions, and reaching those conditions requires pure carbon feedstock.
+
+**Confidence: 82%**
+*(High factual agreement across models on core science; docked for shared overclaim bias on absolutism and multiple unverified citations in source proposals)*
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-146
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.910 — 🔴 Very High (models fundamentally disagree — treat with caution)

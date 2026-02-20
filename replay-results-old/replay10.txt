@@ -1,0 +1,74 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-020 created in 117.4s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: What You'll See at 123 Sesame Street
+
+## The Position
+
+**You will see nothing meaningful, because 123 Sesame Street is a fictional address.** If you physically attempt the trip, your outcome depends on where you actually go — and none of the options deliver what the question implies.
+
+**Confidence: 95%**
+
+---
+
+## What Actually Happens
+
+**Scenario 1 — You navigate to Kaufman Astoria Studios (34-12 36th Street, Astoria, Queens, NY):**
+This is where the Sesame Street set has been housed since 1992 (previously Reeves Teletape Studios in Manhattan, 1969–1992). You will encounter an industrial studio building, security gates, and staff who will turn you away. The set inside is a semi-permanent standing set — not routinely disassembled — but you won't see it without authorization.
+
+**Scenario 2 — You try to GPS "123 Sesame Street":**
+Geocoding services will either return an error, a default location, or possibly a real address on an actual street named "Sesame Street" somewhere in the U.S. (which cannot be ruled out — see below). You will not arrive at a fictional TV neighborhood.
+
+**Scenario 3 — You visit Sesame Place (Langhorne, PA or San Diego, CA):**
+These theme parks contain physical recreations of the street, including the 123 building facade, Hooper's Store, and costumed performers (Big Bird, Elmo, etc.). This is the closest approximation to "visiting" the address, but it's a commercial recreation, not the fictional location itself.
+
+---
+
+## The In-Universe Answer (For Completeness)
+
+Within the show's canon since 1969, 123 Sesame Street is primarily associated with **Big Bird**, who nests in the adjacent lot. Other characters occupy nearby addresses (Oscar's trash can, the Fix-It Shop, etc.). Proposal 1 was correct about the fictional answer but catastrophically wrong to present it as physical reality — stating "100% Big Bird" while simultaneously admitting "no actual residents exist" in the same paragraph. That self-contradiction is exactly the kind of high-confidence failure an epistemic protocol must catch.
+
+---
+
+## What the Critique Correctly Identified
+
+The red-team analysis exposed critical problems I've corrected for:
+
+1. **The hallucinated Queens address** (Proposal 4's "64-70 9th Avenue") — likely fabricated. I've replaced it with the verifiable Kaufman Astoria Studios address.
+
+2. **Unverified absolute claims** — Multiple proposals stated "0 municipal records in any U.S. jurisdiction." This is an unverified assertion. There are tens of thousands of streets in America; a real "Sesame Street" with a "123" address may exist somewhere. I've flagged this uncertainty rather than asserting a false absolute.
+
+3. **The fabricated statistics** (Proposal 1's "95%+ of exterior scenes" cited to a non-existent database) — removed entirely.
+
+4. **The semi-permanent set** — Proposal 2 incorrectly stated the set is "disassembled into flats and props." The Sesame Street set is a long-standing installation at the studio.
+
+5. **The 3-vs-1 agent disagreement** — The critique rightly noted that the most interesting finding is that Proposal 1 gave a fundamentally different answer than Proposals 2–4. In a real ThoughtProof audit, this divergence would be flagged: one agent answered in-universe while three answered in-reality. The consensus mechanism would surface this as a **framing disagreement**, not a factual one, and route to the appropriate interpretation based on the requester's intent.
+
+---
+
+## Honest Uncertainty
+
+| Claim | Confidence |
+|---|---|
+| 123 Sesame Street is fictional (TV show) | 99% |
+| Kaufman Astoria Studios is the current filming location | 95% |
+| No real "123 Sesame Street" exists anywhere in the U.S. | **60%** — unverified, and no proposal checked |
+| You'd be turned away at the studio | 90% |
+| Big Bird is the canonical primary resident (in-fiction) | 90% |
+
+---
+
+## The Stand
+
+**Don't go.** The address is fictional. The studio is private. The theme park is a paid recreation. The only honest answer separates what's true in a TV show from what's true in the physical world — and flags the difference clearly.
+
+The question's real value is as a calibration test: can a system distinguish fictional common knowledge from verifiable physical reality, and can it resist confidently hallucinating one into the other? Proposal 1 failed that test. The consensus of the remaining three — corrected for their individual errors — holds.
+
+💾 Saved as PoT-020
+📈 Model Diversity Index: 0.667

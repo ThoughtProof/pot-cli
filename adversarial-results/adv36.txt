@@ -1,0 +1,63 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-167 created in 130.7s
+
+📊 SYNTHESIS:
+
+# Should You Brush Your Teeth Immediately After Eating?
+
+## Answer: No. Wait at least 30 minutes, especially after acidic foods or drinks.
+
+All four models agree on direction, and this aligns with mainstream dental guidance. The core mechanism is well-established: acidic foods temporarily soften enamel (hydroxyapatite begins dissolving below pH 5.5 — **verified**), and brushing during that window abrades the softened surface. Saliva naturally remineralizes enamel over 20–60 minutes.
+
+## Recommended Protocol
+
+1. **Rinse with plain water immediately** after eating (dilutes acid, raises pH)
+2. **Chew sugar-free gum** if available (stimulates saliva ~10x, accelerating remineralization)
+3. **Wait 30–60 minutes** before brushing — longer for highly acidic meals
+4. **Brush with soft-bristle brush** and fluoride toothpaste (1,450 ppm F — **verified** standard)
+5. **Consider brushing before breakfast** instead of after — increasingly recommended and avoids the timing problem entirely
+
+## What Can Go Wrong If You Ignore This
+
+- Chronic enamel thinning → sensitivity, yellowing (exposed dentin), higher cavity risk
+- Damage is **permanent** — enamel doesn't regenerate
+- Long-term consequences may require restorations ($400–$2,500/tooth depending on procedure)
+
+## Where Models Disagreed
+
+| Issue | Range Across Models | Assessment |
+|---|---|---|
+| **Wait time** | 30 min to 60 min | Genuine uncertainty — depends on meal acidity and individual saliva flow. 30 min is reasonable minimum; 60 min is conservative for highly acidic meals |
+| **Brush type** | One model said "medium," others said "soft" or unspecified | **Soft-bristle is correct.** The "medium" recommendation from Proposal 2 contradicts ADA and BDA guidance — this is a factual error |
+| **Brush before breakfast** | Only one model suggested this | This is genuinely useful, actionable advice supported by increasing clinical consensus |
+| **ADA's specific position** | Cited as "30 min," "30-60 min," and "at least 60 min" | The ADA's public guidance generally says 30-60 minutes. Claims of a strict 60-minute minimum likely overstate their position |
+
+## Critical Caveats the Critic Identified (Addressing Directly)
+
+**1. Citation quality was poor across proposals.** Multiple models presented specific-sounding citations (author names, journal volumes, precise percentages) that **could not be independently verified**. The directional advice is sound, but the precise numbers (e.g., "48% higher wear," "57μm loss per session," "2-3x more enamel") should be treated as illustrative, not confirmed.
+
+**2. The in vitro vs. in vivo gap is real.** Most erosion research uses pure acid baths on enamel specimens — far more aggressive than eating a normal mixed meal containing proteins, fats, and calcium that buffer acid. The real-world risk from brushing after a typical lunch is likely **lower** than lab studies suggest.
+
+**3. Caries risk vs. erosion risk tradeoff.** All models focused on erosion but underweighted that **delaying brushing extends bacterial acid exposure from sugars**. For high-caries-risk individuals, earlier brushing may actually be preferable. The optimal timing genuinely depends on your individual risk profile.
+
+**4. Fluoride toothpaste may partially offset the risk.** Modern fluoride toothpaste provides some protective effect even on slightly softened enamel — a nuance all models omitted.
+
+**5. The "30-minute rule" lacks definitive RCT evidence.** It's extrapolated from physiology (Stephan curve) and in situ studies, not long-term clinical trials with hard endpoints. A 2021 British Dental Journal review noted the evidence remains "inconclusive" for specific waiting times.
+
+## Bottom Line
+
+**Rinse immediately, brush later.** The practical takeaway — brush when you wake up and before bed, rinse with water after meals, wait 30+ minutes if you must brush post-meal — is well-supported. But the evidence is less iron-clad than any individual model made it appear. The direction is right; the precision of the numbers is overstated.
+
+**Confidence: 72%**
+
+The direction of advice (wait before brushing after acidic foods) is well-supported by dental physiology and mainstream clinical guidance. Confidence is capped below 85% because: (1) specific quantitative claims across proposals were largely unverifiable, (2) the in vitro to real-world extrapolation gap is significant, (3) the erosion-vs-caries tradeoff introduces genuine individual variability that a universal recommendation cannot capture, and (4) all models exhibited shared framing bias (erosion-only focus).
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-167
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.819 — 🔴 Very High (models fundamentally disagree — treat with caution)

@@ -1,0 +1,63 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-148 created in 137.2s
+
+📊 SYNTHESIS:
+
+# Synthesized Answer: Do Birds Reject Baby Birds Due to Human Scent?
+
+## Clear Position
+
+**No. This is a durable myth.** Touching a baby bird will not cause its parents to abandon it due to human scent. However — and this is the critical nuance most explanations get wrong — the reason is **not** that birds can't smell. The reason is that **birds don't use olfaction for offspring recognition or parental care decisions.**
+
+## The Science: Birds Can Smell More Than You Think
+
+The outdated narrative ("birds have no sense of smell") has been substantially revised over the past two decades:
+
+- **Olfactory receptor genes:** Birds possess ~100–600+ functional OR genes depending on species (Steiger et al., 2008, *Proc. R. Soc. B*). For comparison, humans have ~400 functional OR genes.
+- **Specialized smellers:** Turkey vultures detect ethyl mercaptan (carrion marker) at remarkable distances. Petrels navigate thousands of ocean kilometers using dimethyl sulfide (DMS) plumes from phytoplankton — well-documented by Nevitt et al. (1995, 2008). Kiwis forage underground prey by smell alone.
+- **Even songbirds use scent:** Emerging research suggests some passerines use olfactory cues in mate choice (MHC compatibility via preen gland secretions), though this field is still developing.
+
+**The key distinction:** Birds use smell for navigation, foraging, and possibly mate assessment — but **not** as a parental recognition test. The evolutionary investment in offspring is too great to abandon over a novel scent. This is the strongest argument: parental care represents massive caloric and reproductive cost. No bird species has been documented abandoning viable offspring because of human odor.
+
+## Field Evidence
+
+Ornithologists handle nestlings routinely for banding and research. Abandonment rates in these contexts are negligible and, when they occur, correlate with other stressors (nest structural damage, repeated disturbance, injury) rather than scent. Cornell Lab of Ornithology and the Audubon Society both confirm this in their public guidance.
+
+## Why the Myth Actually Causes Harm
+
+The myth backfires in practice:
+
+- **Unnecessary "rescues":** A significant percentage of fledglings brought to wildlife rehabilitation centers were healthy birds whose parents were nearby. Feathered juveniles hopping on the ground are *supposed* to be there — they're learning to fly.
+- **Worse outcomes in captivity:** Hand-reared chicks have substantially lower survival rates than parent-raised birds.
+- **Paralysis when help is needed:** People avoid touching genuinely injured nestlings, fearing they'll "doom" them with scent, leading to preventable deaths from exposure or dehydration.
+- **Legal risk (U.S.):** Most passerines are protected under the Migratory Bird Treaty Act; unauthorized possession can carry fines up to $15,000.
+
+## What To Actually Do
+
+If you find a baby bird: **Is it feathered and hopping?** Leave it alone — parents are nearby. **Is it naked, nest destroyed, or parents absent 2+ hours?** A gentle return to the nest or nearby sheltered spot is appropriate. The parents will not reject it.
+
+## Where Models Disagreed
+
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Can birds smell?** | Three proposals said birds have poor/vestigial olfaction; one said birds are strong smellers | Modern research supports significant avian olfactory capability. The "birds can't smell" framing is outdated. |
+| **Why the myth is wrong** | Some said "because birds can't smell you"; one said "because smell isn't used for parental decisions" | The latter is more accurate and more scientifically robust. |
+| **Specific statistics** | Abandonment rates (<5%), rescue percentages (40%), rehab mortality (>60%) appeared across proposals | These figures are commonly cited in wildlife rehabilitation contexts but **none could be traced to specific verified publications.** Treat as directional, not precise. |
+| **Citation reliability** | One proposal provided many specific citations (several likely hallucinated); others ranged from moderate to none | Specific study citations should be independently verified before reuse. |
+
+## Bottom Line
+
+Birds can smell — but they don't use smell as a paternity test or offspring-recognition mechanism. The "human scent rejection" myth should be retired and replaced with honest guidance: minimize handling wildlife to reduce stress and injury, not because of imaginary olfactory rejection.
+
+**Confidence: 82%**
+The core claim (birds don't reject offspring due to human scent) is well-established across ornithological literature. Confidence is slightly below cap because specific statistics cited across proposals remain unverified, and the nuances of avian olfaction are still an active research area.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-148
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.829 — 🔴 Very High (models fundamentally disagree — treat with caution)

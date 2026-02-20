@@ -1,0 +1,67 @@
+- Initializing ThoughtProof pipeline...
+
+✓ Generators completed
+✓ Critic completed
+✓ Synthesizer completed
+✔ Block PoT-159 created in 124.7s
+
+📊 SYNTHESIS:
+
+# Can You Fold a Piece of Paper More Than 7 Times?
+
+## Clear Answer
+
+**For a standard sheet of paper (A4/Letter) folded by hand: No. The practical limit is 6–7 folds.** This is not a "myth" — it's an engineering constraint rooted in exponential mathematics. However, it is not a fundamental law of physics: with sufficiently long or thin material and mechanical assistance, the limit can be exceeded.
+
+## The Physics
+
+Each fold doubles the number of layers and halves the available area:
+
+| Folds | Layers | Thickness (from 0.1mm paper) |
+|-------|--------|------------------------------|
+| 6 | 64 | ~6.4 mm |
+| 7 | 128 | ~12.8 mm |
+| 8 | 256 | ~25.6 mm |
+
+Two things kill you simultaneously:
+1. **Exponential thickness growth** — bending a 12.8mm-thick stack through 180° requires enormous force
+2. **Exponential area shrinkage** — by fold 7, the remaining foldable surface is roughly 2–5 cm² (depending on fold direction), too small to grip and manipulate
+
+Bending resistance scales steeply with thickness (proportional to t³ in idealized beam theory, though real paper folding involves fiber fracture, delamination, and interlayer friction — making the actual scaling harder to pin down precisely). The exact force required at fold 7–8 is **not well-established in peer-reviewed literature**; estimates of ~100–225 lbs (450–1000N) appear across sources but none are rigorously cited.
+
+**Important caveat the models flagged:** Most people actually fail at **fold 5 or 6**, not 7. The "7" figure is the popularized ceiling; your actual experience with a standard sheet will likely top out at 6.
+
+## The Exception That Proves the Rule
+
+**Britney Gallivan (2002)** derived the mathematical formula for minimum paper length needed for *n* single-direction folds:
+
+**L = (πt/6)(2ⁿ + 4)(2ⁿ − 1)**
+
+Using a ~1.2 km roll of thin toilet paper, she achieved **12 folds** — by hand, in a shopping mall corridor, with family assistance. No forklift, no mechanical sled. The key insight: you need exponentially more *length*, not just more strength.
+
+The **MythBusters** (likely 2007, not 2005 as one model claimed) achieved **11 folds** using a football-field-sized sheet and a forklift in an airplane hangar.
+
+## Where Models Disagreed
+
+**Core framing conflict:** Three models (P1, P2, P4) correctly framed the 7-fold limit as real for standard conditions. One model (P3) called it a "myth" and labeled the standard claim "FALSE" — despite agreeing on the same underlying facts. This is a rhetorical framing error, not a factual one. Calling a practically true claim "false" because extreme exceptions exist is epistemically misleading.
+
+**Force estimates:** Models cited 100–200 lbs, ~1000N, and 400–500N for human capability and fold resistance. None provided peer-reviewed sources. These figures are plausible approximations but should not be treated as verified.
+
+**Scaling law:** One model claimed resistance scales as thickness², another as thickness³. Neither sourced the claim. Real paper folding is messier than idealized beam theory.
+
+**Unverified claims flagged by critique:** Gallivan using a "forklift" (likely confused with MythBusters), folding "gold foil 14 times" (unconfirmed), "400 rolls" of toilet paper (unverified specific), MythBusters "S3E6, 2005" (wrong — likely Season 5, 2007), a "sled" apparatus (no evidence), and specific fiber shear stress values (unsourced).
+
+## Bottom Line
+
+- **Standard paper, by hand: 6–7 folds maximum.** This is real and reproducible.
+- **With extreme dimensions or mechanical aid: 11–12 folds demonstrated.**
+- **The limit is geometric/engineering, not a fundamental physical law** — but that doesn't make it a "myth." It makes it a well-understood constraint.
+- **Force estimates in all proposals are unsourced approximations.** Treat them as rough guides, not facts.
+
+**Confidence: 78%** — High agreement on core answer (6–7 folds for standard paper), but force estimates are unverified, exact empirical ceiling may be 5–6 for most people, and peripheral historical details had multiple errors across models.
+
+⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
+
+💾 Saved as PoT-159
+📈 Model Diversity Index: 0.667
+⚖️  Dissent Score: 0.811 — 🔴 Very High (models fundamentally disagree — treat with caution)
