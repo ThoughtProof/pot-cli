@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/logo.jpg" alt="ThoughtProof" width="200">
+</p>
+
 # pot-cli — Proof of Thought
 
 **Multi-model AI verification with adversarial critique.**
