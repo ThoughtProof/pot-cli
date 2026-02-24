@@ -87,6 +87,14 @@ export interface SynthesisVerification {
   alt_model?: string;      // model used for second synthesis
 }
 
+export interface DPRResult {
+  score: number;
+  total_objections: number;
+  preserved: number;
+  false_consensus: boolean;
+  objection_keywords: string[];
+}
+
 export interface Metadata {
   total_tokens: number;
   total_cost_usd: number;
@@ -95,6 +103,7 @@ export interface Metadata {
   dissent_score?: number;
   synthesis_balance?: SynthesisBalance;
   synthesis_verification?: SynthesisVerification;
+  dpr?: DPRResult;
 }
 
 export interface APIResponse {

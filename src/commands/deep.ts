@@ -5,6 +5,7 @@ import { BlockStorage } from '../storage/blocks.js';
 import { runGenerator } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer } from '../pipeline/synthesizer.js';
+import { computeDPR } from '../metrics/dpr.js';
 import { Block, Provider, Proposal, Critique } from '../types.js';
 
 function calculateModelDiversityIndex(models: string[]): number {
@@ -194,6 +195,10 @@ ${r.synthesis.content}
       }))
     );
 
+    // Compute DPR across all critiques vs meta-synthesis
+    const combinedCritique = runResults.map(r => r.critique.content).join('\n\n');
+    const dpr = computeDPR(combinedCritique, metaSynthesis.content, false);
+
     const block: Block = {
       id: '',
       version: '0.1.0',
@@ -218,6 +223,7 @@ ${r.synthesis.content}
         total_cost_usd: 0,
         duration_seconds: duration,
         model_diversity_index: mdi,
+        dpr,
       },
     };
 
@@ -237,6 +243,15 @@ ${r.synthesis.content}
     console.log(chalk.dim(`\n💾 Saved as ${blockId}`));
     console.log(chalk.dim(`📈 Model Diversity Index: ${mdi.toFixed(3)}`));
     console.log(chalk.dim(`🔬 ${numRuns} runs × (3 generators + 1 critic + 1 synthesis) + 1 meta-synthesis`));
+
+    // Display DPR
+    if (dpr.total_objections > 0) {
+      const dprEmoji = dpr.score > 0.6 ? '🟢' : dpr.score > 0.4 ? '🟡' : '🔴';
+      console.log(chalk.dim(`${dprEmoji} Dissent Preservation Rate: ${dpr.score.toFixed(3)} (${dpr.preserved}/${dpr.total_objections} objections preserved across ${numRuns} runs)`));
+      if (dpr.false_consensus) {
+        console.log(chalk.red(`⚠️  FALSE CONSENSUS detected — meta-synthesizer discarded critic objections (DPR ${dpr.score.toFixed(2)} < 0.40)`));
+      }
+    }
 
   } catch (error) {
     spinner.fail('Deep pipeline failed');

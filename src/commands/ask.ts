@@ -5,6 +5,7 @@ import { BlockStorage } from '../storage/blocks.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer, runDualSynthesizer, computeSynthesisBalance } from '../pipeline/synthesizer.js';
+import { computeDPR } from '../metrics/dpr.js';
 import { Block, Provider, SynthesisBalance, SynthesisVerification } from '../types.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
@@ -256,6 +257,9 @@ export async function askCommand(
       ? { score: 1, generator_coverage: [], warning: false }
       : computeSynthesisBalance(proposals, synthesis.content);
 
+    // Step 4c: Compute DPR (Dissent Preservation Rate)
+    const dpr = computeDPR(critique.content, synthesis.content, synthesisBalance.warning);
+
     // Step 5: Create and save block
     spinner.text = 'Saving block...';
     const duration = (Date.now() - startTime) / 1000;
@@ -285,6 +289,7 @@ export async function askCommand(
         dissent_score: dissentScore,
         synthesis_balance: synthesisBalance,
         synthesis_verification: synthVerification,
+        dpr,
       },
       context_refs: contextRefs.length > 0 ? contextRefs : undefined,
     };
@@ -305,6 +310,15 @@ export async function askCommand(
     console.log(chalk.dim(`${balanceEmoji} Synthesis Balance Score: ${synthesisBalance.score.toFixed(3)}`));
     if (synthesisBalance.warning && synthesisBalance.dominated_by) {
       console.log(chalk.yellow(`⚠️  Balance Warning: "${synthesisBalance.dominated_by}" dominates the synthesis (>60% share)`));
+    }
+
+    // Display DPR
+    if (dpr.total_objections > 0) {
+      const dprEmoji = dpr.score > 0.6 ? '🟢' : dpr.score > 0.4 ? '🟡' : '🔴';
+      console.log(chalk.dim(`${dprEmoji} Dissent Preservation Rate: ${dpr.score.toFixed(3)} (${dpr.preserved}/${dpr.total_objections} objections preserved)`));
+      if (dpr.false_consensus) {
+        console.log(chalk.red(`⚠️  FALSE CONSENSUS detected — synthesizer discarded critic objections (DPR ${dpr.score.toFixed(2)} < 0.40)`));
+      }
     }
 
     // Display Synthesis Verification result
