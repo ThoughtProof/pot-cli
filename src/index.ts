@@ -8,14 +8,14 @@ import { reviewCommand } from './commands/review.js';
 import { auditCommand } from './commands/audit.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
-import { configCommand } from './commands/config.js';
+import { configCommand, addProviderCommand } from './commands/config.js';
 
 const program = new Command();
 
 program
   .name('pot')
   .description('ThoughtProof Proof-of-Thought CLI Tool')
-  .version('0.4.0');
+  .version('0.5.0');
 
 program
   .command('ask <question>')
@@ -84,11 +84,23 @@ program
     showCommand(number);
   });
 
-program
+const configCmd = program
   .command('config')
-  .description('Show current configuration')
+  .description('Manage pot configuration');
+
+configCmd
+  .command('show', { isDefault: true })
+  .description('Show current configuration (default)')
   .action(() => {
     configCommand();
+  });
+
+configCmd
+  .command('add-provider <name> <model> <apiKey>')
+  .description('Add or update a provider in ~/.potrc.json')
+  .option('--base-url <url>', 'Custom base URL for OpenAI-compatible endpoints (e.g. http://localhost:11434/v1 for Ollama)')
+  .action((name: string, model: string, apiKey: string, options) => {
+    addProviderCommand(name, model, apiKey, options);
   });
 
 program.parse();

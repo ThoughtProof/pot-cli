@@ -1,39 +1,75 @@
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { PotConfig, GeneratorConfig, Provider } from './types.js';
 import { AnthropicProvider } from './providers/anthropic.js';
 import { OpenAIProvider } from './providers/openai.js';
 
 // Default base URLs for known providers
-const DEFAULT_BASE_URLS: Record<string, string> = {
+export const DEFAULT_BASE_URLS: Record<string, string> = {
   'xai': 'https://api.x.ai/v1/chat/completions',
   'grok': 'https://api.x.ai/v1/chat/completions',
   'moonshot': 'https://api.moonshot.ai/v1/chat/completions',
   'kimi': 'https://api.moonshot.ai/v1/chat/completions',
   'deepseek': 'https://api.deepseek.com/chat/completions',
   'openai': 'https://api.openai.com/v1/chat/completions',
+  'google': 'https://generativelanguage.googleapis.com/v1beta/openai',
+  'gemini': 'https://generativelanguage.googleapis.com/v1beta/openai',
+  'mistral': 'https://api.mistral.ai/v1/chat/completions',
+  'groq': 'https://api.groq.com/openai/v1/chat/completions',
 };
 
-const DEFAULT_CONFIG: PotConfig = {
-  models: {
-    generator1: 'grok-4-1-fast',
-    generator2: 'kimi-k2.5',
-    generator3: 'claude-sonnet-4-5-20250929',
-    generator4: 'deepseek-chat',
-    critic: 'claude-opus-4-6',
-    synthesizer: 'claude-opus-4-6',
-  },
-  apiKeys: {
-    anthropic: process.env.ANTHROPIC_API_KEY,
-    openai: process.env.OPENAI_API_KEY,
-    xai: process.env.XAI_API_KEY,
-    moonshot: process.env.MOONSHOT_API_KEY,
-    deepseek: process.env.DEEPSEEK_API_KEY,
-  },
-  blockStoragePath: './blocks',
-  language: 'de',
-};
+// Known provider presets: env var → { name, model, baseUrl? }
+const PROVIDER_PRESETS: Array<{
+  envVar: string;
+  name: string;
+  model: string;
+  baseUrl?: string;
+  isAnthropic?: boolean;
+}> = [
+  { envVar: 'ANTHROPIC_API_KEY', name: 'Anthropic', model: 'claude-sonnet-4-6', isAnthropic: true },
+  { envVar: 'XAI_API_KEY',       name: 'xAI',       model: 'grok-4-1-fast',     baseUrl: DEFAULT_BASE_URLS['xai'] },
+  { envVar: 'OPENAI_API_KEY',    name: 'OpenAI',    model: 'gpt-4o',             baseUrl: DEFAULT_BASE_URLS['openai'] },
+  { envVar: 'DEEPSEEK_API_KEY',  name: 'DeepSeek',  model: 'deepseek-chat',      baseUrl: DEFAULT_BASE_URLS['deepseek'] },
+  { envVar: 'MOONSHOT_API_KEY',  name: 'Moonshot',  model: 'kimi-k2-turbo-preview', baseUrl: DEFAULT_BASE_URLS['moonshot'] },
+  { envVar: 'MISTRAL_API_KEY',   name: 'Mistral',   model: 'mistral-large-latest',  baseUrl: DEFAULT_BASE_URLS['mistral'] },
+  { envVar: 'GROQ_API_KEY',      name: 'Groq',      model: 'llama-3.3-70b-versatile', baseUrl: DEFAULT_BASE_URLS['groq'] },
+  { envVar: 'GOOGLE_API_KEY',    name: 'Google',    model: 'gemini-2.0-flash',    baseUrl: DEFAULT_BASE_URLS['google'] },
+];
+
+/**
+ * Build default config by auto-detecting available providers from env vars.
+ * No hardcoded model mix — user's environment determines what's available.
+ * Roles are assigned by position: all except last two = generators,
+ * second-to-last = critic, last = synthesizer. With <2 providers, all roles overlap.
+ */
+function buildDefaultConfig(): PotConfig {
+  const detected: GeneratorConfig[] = [];
+
+  for (const preset of PROVIDER_PRESETS) {
+    const apiKey = process.env[preset.envVar];
+    if (apiKey) {
+      detected.push({
+        name: preset.name,
+        model: preset.model,
+        apiKey,
+        ...(preset.isAnthropic ? { provider: 'anthropic' as const } : { baseUrl: preset.baseUrl }),
+      });
+    }
+  }
+
+  if (detected.length === 0) {
+    // No API keys set — return empty shell (will error at runtime with helpful message)
+    return { generators: [], blockStoragePath: './blocks', language: 'de' };
+  }
+
+  // Auto-assign roles by position (mirrors pot-sdk v0.2 assignRoles logic)
+  const generators = detected;
+  const critic = detected.length >= 2 ? detected[detected.length - 2] : detected[0];
+  const synthesizer = detected[detected.length - 1];
+
+  return { generators, critic, synthesizer, blockStoragePath: './blocks', language: 'de' };
+}
 
 /**
  * Migrate old config format to new format
@@ -45,8 +81,11 @@ function migrateConfig(config: PotConfig): PotConfig {
   }
 
   // Otherwise, migrate from old format
-  const models = config.models || DEFAULT_CONFIG.models!;
-  const apiKeys = config.apiKeys || DEFAULT_CONFIG.apiKeys!;
+  // Legacy migration: models/apiKeys from old .potrc.json format
+  const models = config.models || {
+    generator1: '', generator2: '', generator3: '', generator4: '', critic: '', synthesizer: ''
+  };
+  const apiKeys = config.apiKeys || {};
 
   const generators: GeneratorConfig[] = [
     {
@@ -145,14 +184,12 @@ export function createProvidersFromConfig(config: PotConfig): {
 } {
   const migrated = migrateConfig(config);
 
-  if (!migrated.generators || migrated.generators.length < 3) {
-    throw new Error('Config must have at least 3 generators (model diversity requirement)');
-  }
-
-  // Check name uniqueness for diversity
-  const names = new Set(migrated.generators.map(g => g.name));
-  if (names.size < 3) {
-    throw new Error('Generators must have at least 3 different provider names for model diversity');
+  if (!migrated.generators || migrated.generators.length === 0) {
+    throw new Error(
+      'No providers configured.\n' +
+      'Set at least one API key env var (ANTHROPIC_API_KEY, OPENAI_API_KEY, XAI_API_KEY, etc.)\n' +
+      'or add providers to ~/.potrc.json via: pot config add-provider'
+    );
   }
 
   const generators = migrated.generators.map(g => ({
@@ -183,7 +220,9 @@ export function loadConfig(): PotConfig {
     if (existsSync(path)) {
       try {
         const fileConfig = JSON.parse(readFileSync(path, 'utf-8'));
-        const merged = { ...DEFAULT_CONFIG, ...fileConfig };
+        // Merge file config with env-var defaults (file takes precedence)
+        const defaults = buildDefaultConfig();
+        const merged = { ...defaults, ...fileConfig };
         return migrateConfig(merged);
       } catch (error) {
         console.error(`Failed to parse config at ${path}`);
@@ -191,7 +230,8 @@ export function loadConfig(): PotConfig {
     }
   }
 
-  return migrateConfig(DEFAULT_CONFIG);
+  // No config file — build from environment
+  return buildDefaultConfig();
 }
 
 export function saveConfig(config: PotConfig): void {

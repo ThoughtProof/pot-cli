@@ -1,10 +1,78 @@
 import chalk from 'chalk';
-import { getConfig } from '../config.js';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
+import { getConfig, DEFAULT_BASE_URLS } from '../config.js';
+import type { GeneratorConfig } from '../types.js';
 
 function maskApiKey(key?: string): string {
   if (!key) return chalk.red('❌ Not set');
   if (key.length < 8) return chalk.yellow('⚠️  Too short');
   return chalk.green(`✓ ${key.substring(0, 6)}...${key.substring(key.length - 4)}`);
+}
+
+/**
+ * pot config add-provider <name> <model> <apiKey> [--base-url <url>]
+ * Adds or updates a provider in ~/.potrc.json
+ */
+export function addProviderCommand(
+  name: string,
+  model: string,
+  apiKey: string,
+  options: { baseUrl?: string }
+): void {
+  const configPath = join(homedir(), '.potrc.json');
+  let fileConfig: any = {};
+
+  if (existsSync(configPath)) {
+    try {
+      fileConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
+    } catch {
+      console.error(chalk.red('Failed to read ~/.potrc.json'));
+      process.exit(1);
+    }
+  }
+
+  // Determine baseUrl
+  const nameLower = name.toLowerCase();
+  const baseUrl = options.baseUrl || DEFAULT_BASE_URLS[nameLower];
+  const isAnthropic = nameLower === 'anthropic' || model.toLowerCase().startsWith('claude');
+
+  const newProvider: GeneratorConfig = {
+    name,
+    model,
+    apiKey,
+    ...(isAnthropic ? { provider: 'anthropic' as const } : { baseUrl: baseUrl || DEFAULT_BASE_URLS['openai'] }),
+  };
+
+  // Initialize generators array if needed
+  if (!fileConfig.generators) fileConfig.generators = [];
+
+  // Replace if name already exists, otherwise append
+  const existingIdx = fileConfig.generators.findIndex((g: GeneratorConfig) =>
+    g.name.toLowerCase() === name.toLowerCase()
+  );
+  if (existingIdx >= 0) {
+    fileConfig.generators[existingIdx] = newProvider;
+    console.log(chalk.yellow(`Updated provider: ${name}`));
+  } else {
+    fileConfig.generators.push(newProvider);
+    console.log(chalk.green(`✅ Added provider: ${name} (${model})`));
+  }
+
+  // Auto-assign critic/synthesizer to last two providers
+  const gens = fileConfig.generators;
+  if (gens.length >= 2) {
+    fileConfig.critic = gens[gens.length - 2];
+    fileConfig.synthesizer = gens[gens.length - 1];
+  } else {
+    fileConfig.critic = gens[0];
+    fileConfig.synthesizer = gens[0];
+  }
+
+  writeFileSync(configPath, JSON.stringify(fileConfig, null, 2));
+  console.log(chalk.dim(`Saved to ${configPath}`));
+  console.log(chalk.dim(`Run ${chalk.white('pot config')} to verify.`));
 }
 
 export function configCommand(): void {
