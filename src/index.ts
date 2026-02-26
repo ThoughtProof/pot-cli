@@ -6,6 +6,7 @@ import { deepCommand } from './commands/deep.js';
 import { debugCommand } from './commands/debug.js';
 import { reviewCommand } from './commands/review.js';
 import { auditCommand } from './commands/audit.js';
+import { securityAuditCommand } from './commands/security-audit.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
 import { configCommand, addProviderCommand } from './commands/config.js';
@@ -68,6 +69,16 @@ program
   .option('--framework <fw>', 'Framework: gba, dsgvo, iso9001, hipaa, soc2, eu-ai-act', 'gba')
   .action(async (target: string, options) => {
     await auditCommand(target, options);
+  });
+
+program
+  .command('security-audit <target>')
+  .description('Static security analysis on a code repo (local path or GitHub URL)')
+  .option('--json', 'Output structured JSON instead of human-readable report')
+  .option('--tp-vc', 'Generate a TP-VC attestation JSON alongside the report')
+  .option('--verbose', 'Show per-file scan progress')
+  .action(async (target: string, options) => {
+    await securityAuditCommand(target, options);
   });
 
 program
