@@ -181,3 +181,101 @@ export async function callModel(
 export function listModels(): string[] {
   return Object.keys(MODELS);
 }
+
+// ─── Structured Output (Instructor-style, no deps) ───────────────────────────
+
+/**
+ * Call a model and parse the response into a typed structure.
+ * Retries up to `retries` times if parsing fails.
+ *
+ * Usage:
+ *   const result = await callModelStructured('grok', messages, {
+ *     parse: (text) => {
+ *       const m = text.match(/Verdict:\s*(vulnerability|false_positive)/i);
+ *       if (!m) throw new Error('No verdict found');
+ *       return { verdict: m[1].toLowerCase(), confidence: parseFloat(text.match(/Confidence:\s*([\d.]+)/)?.[1] ?? '0.5') };
+ *     },
+ *     retries: 2,
+ *   });
+ */
+export async function callModelStructured<T>(
+  modelName: string,
+  messages: ChatMessage[],
+  options: {
+    parse: (text: string) => T;
+    retries?: number;
+    maxTokens?: number;
+    onRetry?: (attempt: number, error: Error) => void;
+  },
+): Promise<{ data: T; raw: string; model: string; attempts: number }> {
+  const maxRetries = options.retries ?? 2;
+  let lastError: Error = new Error('No attempts made');
+  let raw = '';
+
+  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+    try {
+      const response = await callModel(modelName, messages, { maxTokens: options.maxTokens });
+      raw = response.content;
+      const data = options.parse(raw);
+      return { data, raw, model: response.model, attempts: attempt };
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt <= maxRetries) {
+        options.onRetry?.(attempt, lastError);
+        // Add a hint to the messages for retry
+        messages = [
+          ...messages,
+          { role: 'assistant' as const, content: raw },
+          {
+            role: 'user' as const,
+            content: `Your response could not be parsed: ${lastError.message}. Please respond again with the exact required format.`,
+          },
+        ];
+      }
+    }
+  }
+
+  throw new Error(`Failed after ${maxRetries + 1} attempts. Last error: ${lastError.message}`);
+}
+
+// ─── Pre-built Parsers ───────────────────────────────────────────────────────
+
+export const Parsers = {
+  /** Parse verdict/confidence/reasoning from audit critic response */
+  auditCritic(text: string): { verdict: 'vulnerability' | 'false_positive'; confidence: number; reasoning: string } {
+    const verdictMatch = text.match(/Verdict:\s*(vulnerability|false_positive)/i);
+    if (!verdictMatch) throw new Error('Missing "Verdict: vulnerability" or "Verdict: false_positive"');
+
+    const confMatch = text.match(/Confidence:\s*([\d.]+)/i);
+    const reasonMatch = text.match(/Reasoning:\s*([\s\S]+)/i);
+
+    const verdictRaw = verdictMatch[1].toLowerCase();
+    return {
+      verdict: verdictRaw.includes('false') ? 'false_positive' : 'vulnerability',
+      confidence: confMatch ? Math.min(1, Math.max(0, parseFloat(confMatch[1]))) : 0.5,
+      reasoning: reasonMatch?.[1]?.trim() ?? text.trim(),
+    };
+  },
+
+  /** Parse PASS/FAIL verdict from payment critic */
+  paymentCritic(text: string): { verdict: 'PASS' | 'FAIL'; confidence: number; signal: string } {
+    const verdictMatch = text.match(/(?:verdict|decision):\s*(PASS|FAIL)/i);
+    if (!verdictMatch) throw new Error('Missing "Verdict: PASS" or "Verdict: FAIL"');
+
+    const confMatch = text.match(/[Cc]onfidence:\s*([\d.]+)/);
+    const signalMatch = text.match(/[Ss]ignal:\s*(.+)/);
+
+    return {
+      verdict: verdictMatch[1].toUpperCase() as 'PASS' | 'FAIL',
+      confidence: confMatch ? Math.min(1, Math.max(0, parseFloat(confMatch[1]))) : 0.5,
+      signal: signalMatch?.[1]?.trim() ?? '',
+    };
+  },
+
+  /** Generic JSON extraction — finds first {...} in response */
+  json<T = Record<string, unknown>>(text: string): T {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('No JSON object found in response');
+    return JSON.parse(match[0]) as T;
+  },
+};

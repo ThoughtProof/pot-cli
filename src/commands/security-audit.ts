@@ -17,7 +17,7 @@ import {
   parseAuditCriticResponse,
   type AuditCriticResult,
 } from '../prompts/security-audit-critic.js';
-import { callModel } from '../utils/model-router.js';
+import { callModelStructured, Parsers } from '../utils/model-router.js';
 
 // ─── Pattern Definitions ──────────────────────────────────────────────────────
 
@@ -601,8 +601,12 @@ export async function securityAuditCommand(
         });
 
         const model = options.criticModel || 'sonnet';
-        const response = await callModel(model, messages, { maxTokens: 1024 });
-        f.criticVerdict = parseAuditCriticResponse(response.content);
+        const result = await callModelStructured(model, messages, {
+          parse: Parsers.auditCritic,
+          retries: 1,
+          maxTokens: 1024,
+        });
+        f.criticVerdict = result.data;
       } catch {
         // Critic failure is non-fatal — finding stands without verdict
       }
