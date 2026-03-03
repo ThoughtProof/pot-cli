@@ -12,6 +12,11 @@ import { execSync } from 'node:child_process';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import {
+  buildSecurityAuditCriticMessages,
+  parseAuditCriticResponse,
+  type AuditCriticResult,
+} from '../prompts/security-audit-critic.js';
 
 // ─── Pattern Definitions ──────────────────────────────────────────────────────
 
@@ -76,6 +81,7 @@ interface Finding {
   hasSandbox: boolean;
   cvss: number;
   permalink?: string;
+  criticVerdict?: AuditCriticResult;
 }
 
 interface ScanResult {
@@ -325,6 +331,11 @@ function printConsoleReport(result: ScanResult): void {
     if (f.permalink) {
       console.log(chalk.blue(`  🔗 ${f.permalink}`));
     }
+    if (f.criticVerdict) {
+      const cv = f.criticVerdict;
+      const icon = cv.verdict === 'false_positive' ? chalk.yellow('⚠️  FP') : chalk.red('✅ VULN');
+      console.log(`  Critic: ${icon} (${(cv.confidence * 100).toFixed(0)}%) — ${cv.reasoning.slice(0, 120)}`);
+    }
     console.log('');
   }
 
@@ -464,7 +475,7 @@ function createTpVcAttestation(result: ScanResult): TpVcAttestation {
 
 export async function securityAuditCommand(
   target: string,
-  options: { json?: boolean; tpVc?: boolean; verbose?: boolean },
+  options: { json?: boolean; tpVc?: boolean; verbose?: boolean; critic?: boolean; criticModel?: string },
 ): Promise<void> {
   const startTime = Date.now();
   const spinner = ora('Initializing security audit...').start();
@@ -572,6 +583,58 @@ export async function securityAuditCommand(
   };
 
   spinner.succeed(chalk.green(`Scan complete — ${findings.length} finding(s) in ${files.length} files (${(durationMs / 1000).toFixed(1)}s)`));
+
+  // ── Phase 2b: DSPy-optimized Critic (optional) ───────────────────────────────
+  if (options.critic && findings.length > 0) {
+    const criticSpinner = ora(`Running DSPy-optimized critic on ${findings.length} findings...`).start();
+
+    for (let i = 0; i < findings.length; i++) {
+      const f = findings[i];
+      criticSpinner.text = `Critic: evaluating ${i + 1}/${findings.length} — ${f.file}:${f.line}`;
+
+      try {
+        const messages = buildSecurityAuditCriticMessages({
+          codeSnippet: f.code,
+          finding: `${f.pattern.label} (${f.pattern.cwe}) — ${f.guardStatus}, CVSS ~${f.cvss}`,
+          vulnerabilityType: f.pattern.cwe.replace('CWE-', '').toLowerCase(),
+        });
+
+        // Use OpenAI-compatible API call (works with any provider)
+        const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '';
+        const model = options.criticModel || 'claude-sonnet-4-5-20250514';
+        const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.anthropic.com/v1';
+
+        // Simple fetch-based LLM call (no external deps)
+        const response = await fetch(`${baseUrl}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 1024,
+            system: messages[0].content,
+            messages: messages.slice(1).map(m => ({ role: m.role, content: m.content })),
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json() as { content?: Array<{ text?: string }> };
+          const text = data.content?.[0]?.text ?? '';
+          f.criticVerdict = parseAuditCriticResponse(text);
+        }
+      } catch {
+        // Critic failure is non-fatal — finding stands without verdict
+      }
+    }
+
+    const fpCount = findings.filter(f => f.criticVerdict?.verdict === 'false_positive').length;
+    criticSpinner.succeed(
+      chalk.green(`Critic complete — ${fpCount} likely false positive(s), ${findings.length - fpCount} confirmed`)
+    );
+  }
 
   // ── Phase 3: Output ──────────────────────────────────────────────────────────
   const safeRepoName = repoName.replace(/[^a-zA-Z0-9-_]/g, '-').slice(0, 40);
