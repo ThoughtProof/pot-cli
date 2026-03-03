@@ -17,6 +17,7 @@ import {
   parseAuditCriticResponse,
   type AuditCriticResult,
 } from '../prompts/security-audit-critic.js';
+import { callModel } from '../utils/model-router.js';
 
 // ─── Pattern Definitions ──────────────────────────────────────────────────────
 
@@ -599,32 +600,9 @@ export async function securityAuditCommand(
           vulnerabilityType: f.pattern.cwe.replace('CWE-', '').toLowerCase(),
         });
 
-        // Use OpenAI-compatible API call (works with any provider)
-        const apiKey = process.env.ANTHROPIC_API_KEY || process.env.OPENAI_API_KEY || '';
-        const model = options.criticModel || 'claude-sonnet-4-5-20250514';
-        const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.anthropic.com/v1';
-
-        // Simple fetch-based LLM call (no external deps)
-        const response = await fetch(`${baseUrl}/messages`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: 1024,
-            system: messages[0].content,
-            messages: messages.slice(1).map(m => ({ role: m.role, content: m.content })),
-          }),
-        });
-
-        if (response.ok) {
-          const data = await response.json() as { content?: Array<{ text?: string }> };
-          const text = data.content?.[0]?.text ?? '';
-          f.criticVerdict = parseAuditCriticResponse(text);
-        }
+        const model = options.criticModel || 'sonnet';
+        const response = await callModel(model, messages, { maxTokens: 1024 });
+        f.criticVerdict = parseAuditCriticResponse(response.content);
       } catch {
         // Critic failure is non-fatal — finding stands without verdict
       }
