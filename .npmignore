@@ -1,7 +1,14 @@
-src/
-tsconfig.json
-.potrc.json
+# Security audit results — local only, never publish
+manual-audits-*/
+security-audit-*.md
+security-audit-*.json
+
+# Dev files
+*.test.ts
+*.spec.ts
+truthfulqa-*.json
+truthfulqa-*.sh
+system-context.md
+benchmarks/
 blocks/
-*.log
-.DS_Store
-.git
+.potrc.json
