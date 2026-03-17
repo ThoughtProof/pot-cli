@@ -291,14 +291,19 @@ Report saved: security-audit-strands-agents-tools-2026-02-26.md
 | `pot-cli show <number>` | Display a specific block |
 | `pot-cli config` | Show current configuration |
 
-**Options:**
+**Options (`ask`):**
 - `--verbose` — Show progress details
 - `--lang en|de` — Output language
 - `--context last|all|5,8,9` — Chain with previous blocks
 - `--dry-run` — Test without API calls
+- `--verify-synthesis` — Run synthesis twice with different models and compare
+- `--calibrate` — Run calibrated normalize step after synthesis (opt-in, costs one extra API call)
+
+**Options (`security-audit`):**
 - `--error "msg"` — Error context for debug mode
-- `--json` — JSON output (security-audit)
-- `--tp-vc` — TP-VC attestation (security-audit)
+- `--json` — JSON output
+- `--tp-vc` — TP-VC attestation
+- `--critic` — DSPy-optimized adversarial critic
 
 ## Security & Privacy
 
