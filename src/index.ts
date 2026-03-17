@@ -10,6 +10,7 @@ import { securityAuditCommand } from './commands/security-audit.js';
 import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
 import { configCommand, addProviderCommand } from './commands/config.js';
+import { calibrationCommand } from './commands/calibration.js';
 
 const program = new Command();
 
@@ -113,6 +114,16 @@ configCmd
   .option('--base-url <url>', 'Custom base URL for OpenAI-compatible endpoints (e.g. http://localhost:11434/v1 for Ollama)')
   .action((name: string, model: string, apiKey: string, options) => {
     addProviderCommand(name, model, apiKey, options);
+  });
+
+program
+  .command('calibration')
+  .description('Show judge calibration stats (critic/synthesizer bias per model and domain)')
+  .option('--model <name>', 'Filter by model name (partial match)')
+  .option('--role <role>', 'Filter by role (critic|synthesizer|generator)')
+  .option('--domain <domain>', 'Filter by domain (general|medical|legal|financial|code|creative)')
+  .action(async (options) => {
+    await calibrationCommand(options);
   });
 
 program.parse();

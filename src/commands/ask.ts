@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { checkAuthorVerifierSeparation } from '@pot-sdk2/bridge';
 import { getConfig, loadSystemContext, createProvidersFromConfig } from '../config.js';
 import { BlockStorage } from '../storage/blocks.js';
+import { CalibrationStorage } from '../storage/calibration.js';
 import { runGenerators } from '../pipeline/generator.js';
 import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer, runDualSynthesizer, computeSynthesisBalance } from '../pipeline/synthesizer.js';
@@ -331,6 +332,42 @@ export async function askCommand(
     };
 
     const blockId = storage.save(block);
+
+    // Record judge calibration data (non-fatal)
+    try {
+      const cal = new CalibrationStorage();
+      const now = Date.now();
+      const confMatch = synthesis.content.match(/confidence[:\s]*(\d+(?:\.\d+)?)%/i);
+      const synthScore = confMatch ? parseFloat(confMatch[1]) / 100 : 0.5;
+      const verdictStr = normalizeResult?.verdict ?? 'UNCERTAIN';
+      const domain = (config as any).domain ?? 'general';
+
+      // Track critic
+      cal.record({
+        blockId,
+        model: critic.model,
+        role: 'critic',
+        domain,
+        scoreGiven: synthScore,
+        verdict: verdictStr,
+        recordedAt: now,
+      });
+
+      // Track synthesizer
+      cal.record({
+        blockId,
+        model: synthesizer.model,
+        role: 'synthesizer',
+        domain,
+        scoreGiven: synthScore,
+        verdict: verdictStr,
+        recordedAt: now,
+      });
+
+      cal.close();
+    } catch {
+      // Non-fatal — calibration tracking never blocks the pipeline
+    }
 
     spinner.succeed(chalk.green(`Block ${blockId} created in ${duration.toFixed(1)}s`));
 
