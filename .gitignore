@@ -8,3 +8,7 @@ blocks/
 benchmark-results/
 truthfulqa-50.json
 truthfulqa-benchmark.sh
+# Security audit results (local only)
+manual-audits-*/
+security-audit-*.md
+security-audit-*.json
