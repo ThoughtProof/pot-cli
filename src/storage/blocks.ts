@@ -48,6 +48,10 @@ export class BlockStorage {
   }
 
   load(blockId: string): Block | null {
+    // FIX TP-SELF-004: validate blockId format before path.join — prevents path traversal
+    if (!/^PoT-\d{3,6}$/.test(blockId)) {
+      throw new Error(`Invalid blockId format: "${blockId}". Expected PoT-NNN.`);
+    }
     const filePath = join(this.storagePath, `${blockId}.json`);
     
     if (!existsSync(filePath)) {

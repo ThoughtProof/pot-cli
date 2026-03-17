@@ -1,5 +1,6 @@
 import ora from 'ora';
 import chalk from 'chalk';
+import { checkAuthorVerifierSeparation } from '@pot-sdk2/bridge';
 import { getConfig, loadSystemContext, createProvidersFromConfig } from '../config.js';
 import { BlockStorage } from '../storage/blocks.js';
 import { runGenerators } from '../pipeline/generator.js';
@@ -7,6 +8,13 @@ import { runCritic } from '../pipeline/critic.js';
 import { runSynthesizer, runDualSynthesizer, computeSynthesisBalance } from '../pipeline/synthesizer.js';
 import { computeDPR } from '../metrics/dpr.js';
 import { Block, Provider, SynthesisBalance, SynthesisVerification } from '../types.js';
+import {
+  CALIBRATED_NORMALIZE_SYSTEM,
+  buildCalibratedNormalizePrompt,
+  parseCalibratedNormalizeOutput,
+  formatProposalsForNormalize,
+  type NormalizeOutput,
+} from '../prompts/calibrated-normalize.js';
 
 function calculateDissentScore(proposals: { content: string }[]): number {
   // Measures how different proposals are from each other
@@ -136,7 +144,7 @@ function parseContextOption(contextOption: string, storage: BlockStorage): { ref
 
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; verifySynthesis?: boolean }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; verifySynthesis?: boolean; calibrate?: boolean }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -188,6 +196,15 @@ export async function askCommand(
         process.exit(1);
       }
     }
+
+    // Author-Verifier Separation: warn if critic or synthesizer overlaps with generators
+    // A model cannot reliably critique/verify output it generated itself.
+    const generatorModels = generators.map(g => g.model);
+    checkAuthorVerifierSeparation(
+      generatorModels[0] ?? 'unknown',
+      [critic.model, synthesizer.model],
+      { mode: 'warn', logger: ((msg: string) => console.warn(chalk.yellow(`\n⚠️  ${msg}`))) },
+    );
 
     // Step 1: Normalize question (simple for v0.1)
     spinner.text = 'Normalizing question...';
@@ -260,6 +277,25 @@ export async function askCommand(
     // Step 4c: Compute DPR (Dissent Preservation Rate)
     const dpr = computeDPR(critique.content, synthesis.content, synthesisBalance.warning);
 
+    // Step 4d: Calibrated Normalize (DSPy-optimized, opt-in via --calibrate flag)
+    // Note: runs an extra synthesizer API call — opt-in to avoid doubling cost by default
+    let normalizeResult: NormalizeOutput | undefined;
+    if (options.calibrate) try {
+      const normalizePrompt = buildCalibratedNormalizePrompt({
+        question: normalizedQuestion,
+        proposals: formatProposalsForNormalize(proposals),
+        critique: critique.content,
+        synthesis: synthesis.content,
+      });
+      const combinedPrompt = `${CALIBRATED_NORMALIZE_SYSTEM}\n\n---\n\n${normalizePrompt}`;
+      const rawConf = synthesis.content.match(/confidence[:\s]*(\d+(?:\.\d+)?)%/i);
+      const fallback = rawConf ? parseFloat(rawConf[1]) / 100 : 0.5;
+      const normalizeResponse = await synthesizer.provider.call(synthesizer.model, combinedPrompt);
+      normalizeResult = parseCalibratedNormalizeOutput(normalizeResponse.content, fallback);
+    } catch {
+      // Non-fatal — pipeline continues without calibration
+    }
+
     // Step 5: Create and save block
     spinner.text = 'Saving block...';
     const duration = (Date.now() - startTime) / 1000;
@@ -319,6 +355,18 @@ export async function askCommand(
       if (dpr.false_consensus) {
         console.log(chalk.red(`⚠️  FALSE CONSENSUS detected — synthesizer discarded critic objections (DPR ${dpr.score.toFixed(2)} < 0.40)`));
       }
+    }
+
+    // Display Calibrated Normalize result
+    if (normalizeResult) {
+      const verdictEmoji: Record<string, string> = {
+        VERIFIED: '✅', UNCERTAIN: '🟡', DISSENT: '🔴', UNVERIFIED: '❌',
+      };
+      const confBar = normalizeResult.confidence >= 0.75 ? '🟢' : normalizeResult.confidence >= 0.50 ? '🟡' : '🔴';
+      console.log(chalk.dim(
+        `${verdictEmoji[normalizeResult.verdict] ?? '🔲'} Calibrated Verdict: ${normalizeResult.verdict} ` +
+        `${confBar} ${(normalizeResult.confidence * 100).toFixed(0)}% — ${normalizeResult.calibration_reason}`
+      ));
     }
 
     // Display Synthesis Verification result

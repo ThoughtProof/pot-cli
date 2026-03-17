@@ -26,6 +26,7 @@ program
   .option('--lang <language>', 'Language (de|en)', 'de')
   .option('--context <refs>', 'Reference previous blocks (e.g., "5,8,9" or "last" or "all")')
   .option('--verify-synthesis', 'Run synthesis twice with different models and compare results')
+  .option('--calibrate', 'Run calibrated normalize step (extra API call — opt-in)')
   .action(async (question: string, options) => {
     await askCommand(question, options);
   });

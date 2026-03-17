@@ -1,0 +1,27 @@
+{
+  "@context": "https://thoughtproof.ai/ns/security-audit/v1",
+  "type": "SecurityAuditAttestation",
+  "id": "urn:tp:security-audit:960e0c52975f3635",
+  "issuedAt": "2026-02-26T22:38:02.108Z",
+  "subject": {
+    "repoName": "src",
+    "commitSha": "129d6574",
+    "filesScanned": 21,
+    "findingsCount": 1,
+    "criticalCount": 1,
+    "highCount": 0,
+    "patternsVersion": "1.0.0"
+  },
+  "findings": [
+    {
+      "file": "commands/security-audit.ts",
+      "line": 38,
+      "cwe": "CWE-94",
+      "severity": "critical",
+      "cvss": 3,
+      "status": "unguarded",
+      "permalink": "https://github.com/ThoughtProof/pot-cli/blob/129d6574/commands/security-audit.ts#L38"
+    }
+  ],
+  "integrity": "960e0c52975f36355358cf26fb9d626f20882a59a46bd0090d38a03f41135a6f"
+}

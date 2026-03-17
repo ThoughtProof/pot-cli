@@ -209,6 +209,74 @@ pot-cli audit ./ai-system-docs/ --framework eu-ai-act
 
 Works on single files or entire directories (reads up to 10 .md/.txt files).
 
+### `pot-cli security-audit` — Static security analysis on any code repo
+
+No LLM required. Pure pattern-matching with context-aware classification.
+
+```bash
+# Audit a GitHub repo (clones with --depth 1, no API key needed)
+pot-cli security-audit https://github.com/strands-agents/tools
+
+# Audit a local repo
+pot-cli security-audit ./my-project
+
+# Structured JSON output (pipe-friendly)
+pot-cli security-audit ./my-project --json
+
+# With TP-VC attestation (tamper-evident JSON certificate)
+pot-cli security-audit https://github.com/owner/repo --tp-vc
+
+# Verbose: show per-file progress
+pot-cli security-audit ./my-project --verbose
+```
+
+**What it detects:**
+
+| Pattern | CWE | Severity |
+|---------|-----|----------|
+| `exec()`, `eval()` (Python) | CWE-94 | Critical |
+| `subprocess.Popen/run/call` | CWE-78 | Critical |
+| `os.system/popen` | CWE-78 | Critical |
+| `pickle.load/loads` | CWE-502 | Critical |
+| `child_process.exec/spawn` (JS/TS) | CWE-78 | Critical |
+| `new Function()` (JS/TS) | CWE-94 | Critical |
+| `importlib.import_module` | CWE-829 | High |
+| `yaml.load` without SafeLoader | CWE-502 | High |
+| `vm.runInContext` | CWE-94 | High |
+
+**Context-aware classification** — each finding is analyzed against ±20 lines of context to determine:
+
+| Status | Meaning | CVSS |
+|--------|---------|------|
+| `unguarded` | No user consent mechanism | ~9.1 |
+| `guarded-but-bypassable` | Guarded, but env var/flag can skip it | ~8.4 |
+| `guarded` | Requires explicit user approval | ~5.5 |
+| (sandbox present) | Runs inside container/jail/WASM/etc. | ~3.0 |
+
+**Example output:**
+
+```
+🔍 Security Audit: strands-agents/tools (commit c98a7e96)
+
+Found 3 findings in 47 files scanned:
+
+[CRITICAL] src/strands_tools/python_repl.py:213
+  exec(code, self._namespace)
+  CWE-94 | CVSS ~8.4 | Status: guarded-but-bypassable
+  Pattern: exec() — dynamic code execution
+  Bypass: line 75 — BYPASS_TOOL_CONSENT
+  Context: No sandbox keywords in ±20 lines
+  Steel-man: User explicitly configures the tool and sets the bypass env var.
+  🔗 https://github.com/strands-agents/tools/blob/c98a7e96/src/strands_tools/python_repl.py#L213
+
+Summary: 2 Critical, 1 High, 0 Medium | 47 files scanned | 0.8s
+Report saved: security-audit-strands-agents-tools-2026-02-26.md
+```
+
+**Limits:** Max 500 files, max 1 MB per file. Ignores `node_modules`, `.git`, `.venv`, `dist`, `build`, `__pycache__`.
+
+**No API key needed.** This command is 100% local static analysis — no LLM calls.
+
 ## Commands
 
 | Command | Description |
@@ -217,7 +285,8 @@ Works on single files or entire directories (reads up to 10 .md/.txt files).
 | `pot-cli deep <question>` | 3-run deep analysis with meta-synthesis |
 | `pot-cli debug <file>` | Multi-model code debugging with static analysis |
 | `pot-cli review <file>` | Adversarial code review |
-| `pot-cli audit` | Audit block integrity |
+| `pot-cli audit <target>` | Compliance audit (DSGVO, SOC 2, ISO 9001, …) |
+| `pot-cli security-audit <target>` | Static security analysis — no LLM needed |
 | `pot-cli list` | List all blocks |
 | `pot-cli show <number>` | Display a specific block |
 | `pot-cli config` | Show current configuration |
@@ -228,6 +297,8 @@ Works on single files or entire directories (reads up to 10 .md/.txt files).
 - `--context last|all|5,8,9` — Chain with previous blocks
 - `--dry-run` — Test without API calls
 - `--error "msg"` — Error context for debug mode
+- `--json` — JSON output (security-audit)
+- `--tp-vc` — TP-VC attestation (security-audit)
 
 ## Security & Privacy
 
