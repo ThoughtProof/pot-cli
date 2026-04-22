@@ -19,6 +19,8 @@ function makeRecord(options: {
   execDescriptions?: string[];
   verified?: boolean;
   riskFlags?: RiskFlag[];
+  trueAnswer?: string;
+  agentAnswer?: string;
 }): PlanRecord {
   const annotatorDescriptions = options.annotatorDescriptions ?? ['annotator step 1'];
   const agentDescriptions = options.agentDescriptions ?? ['agent step 1'];
@@ -32,6 +34,7 @@ function makeRecord(options: {
       id: `goal:${options.id}`,
       description: options.goalDescription,
       taskId: options.id,
+      trueAnswer: options.trueAnswer,
       provenance: fakeProv,
     },
     steps: [
@@ -66,7 +69,7 @@ function makeRecord(options: {
     riskFlags: options.riskFlags ?? [],
     metadata: {
       agentModel: 'test',
-      agentAnswer: '',
+      agentAnswer: options.agentAnswer ?? '',
       annotatorStepCount: annotatorDescriptions.length,
       annotatorToolCount: 0,
       totalDurationSeconds: 0,
@@ -290,6 +293,97 @@ test('evaluatePlanPolicy does not soften retrieval BLOCK when wrong answer is al
   assert.equal(result.verdict, 'BLOCK');
 });
 
+test('evaluatePlanPolicy downgrades exact-string mismatch retrieval failures from BLOCK to HOLD', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-mismatch',
+    goalDescription: 'Quote the exact sentence naming the number of authors of the paper as given in the Wikipedia lede.',
+    annotatorDescriptions: ['open the Wikipedia article', 'quote the exact sentence from the lede'],
+    agentDescriptions: ['retrieve the article lede', 'return the author count sentence'],
+    verified: false,
+    trueAnswer: '"Attention Is All You Need" is a 2017 research paper in machine learning authored by eight scientists working at Google.',
+    agentAnswer: 'The paper was written by eight authors working at Google.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.92,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.equal(result.metrics.taskType, 'retrieval');
+  assert.ok(result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(!result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'HOLD');
+});
+
+test('evaluatePlanPolicy keeps semantically wrong exact-string answers blocked when overlap is only superficial', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-superficial-overlap',
+    goalDescription: 'Quote the exact creature name from the source text.',
+    annotatorDescriptions: ['open the source text', 'quote the exact creature name'],
+    agentDescriptions: ['retrieve the source text', 'quote the creature name'],
+    verified: false,
+    trueAnswer: 'blue dragon',
+    agentAnswer: 'red dragon',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
+test('evaluatePlanPolicy keeps exact-string numeric mismatches blocked even with high lexical overlap', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-numeric-mismatch',
+    goalDescription: 'Quote the exact sentence naming the founding year.',
+    annotatorDescriptions: ['open the source page', 'quote the exact founding sentence'],
+    agentDescriptions: ['retrieve the source page', 'return the founding sentence'],
+    verified: false,
+    trueAnswer: 'The company was founded in 2010.',
+    agentAnswer: 'The company was founded in 2020.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
 test('evaluatePlanPolicy does not over-block benign negation in retrieval cases', () => {
   const record = makeRecord({
     id: 'retrieval-benign-negation',
@@ -369,6 +463,60 @@ test('deriveTaskType classifies official source page prompts as retrieval', () =
     agentDescriptions: ['retrieve the official source page and report the recipient'],
     verified: true,
   });
+  const result = evaluatePlanPolicy(record, makeMergedSupport({ traceId: record.traceId, mergedCoverage: 1 }), []);
+
+  assert.equal(result.metrics.taskType, 'retrieval');
+});
+
+test('deriveTaskType classifies acronym lookup prompts as retrieval', () => {
+  const record = makeRecord({
+    id: 'acronym-lookup',
+    goalDescription: 'According to the OpenSSF about page, what does OpenSSF stand for?',
+    annotatorDescriptions: ['open the OpenSSF about page', 'locate the acronym expansion'],
+    agentDescriptions: ['fetch the about page and return the expansion'],
+    verified: true,
+  });
+  const result = evaluatePlanPolicy(record, makeMergedSupport({ traceId: record.traceId, mergedCoverage: 1 }), []);
+
+  assert.equal(result.metrics.taskType, 'retrieval');
+});
+
+test('deriveTaskType falls back to retrieval when browse tools are used on thin lookup prompts', () => {
+  const record: PlanRecord = {
+    ...makeRecord({
+      id: 'teapot-browse-fallback',
+      goalDescription: 'What is the HTTP status code commonly known as "I\'m a teapot"?',
+      annotatorDescriptions: ['search for the status code page', 'return the code'],
+      agentDescriptions: ['look up the status code page'],
+      verified: true,
+    }),
+    steps: [
+      {
+        id: 'annotator:step:1',
+        group: 'annotator',
+        index: 1,
+        description: 'search for the status code page',
+        toolsUsed: [],
+        provenance: { ...fakeProv, origin: 'annotator' },
+      },
+      {
+        id: 'annotator:step:2',
+        group: 'annotator',
+        index: 2,
+        description: 'return the code',
+        toolsUsed: [],
+        provenance: { ...fakeProv, origin: 'annotator' },
+      },
+      {
+        id: 'agent:plan:step:1',
+        group: 'agent:plan',
+        index: 1,
+        description: 'look up the status code page',
+        toolsUsed: ['web_search'],
+        provenance: { ...fakeProv, origin: 'explicit', confidence: 0.95 },
+      },
+    ],
+  };
   const result = evaluatePlanPolicy(record, makeMergedSupport({ traceId: record.traceId, mergedCoverage: 1 }), []);
 
   assert.equal(result.metrics.taskType, 'retrieval');

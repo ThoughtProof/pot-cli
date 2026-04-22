@@ -157,11 +157,21 @@ const EXACT_STRING_SIGNALS = [
   'exact name',
   'exact title',
   'exact text',
+  'quote the exact',
+  'exact sentence',
+  'exact one-line',
+  'one-line description',
+];
+
+const EXACT_STRING_PATTERNS = [
+  /quote the exact\s+(sentence|line|one-line description)/i,
+  /as given in the .* lede/i,
 ];
 
 function detectExactStringQuestion(question: string): boolean {
   const lower = question.toLowerCase();
-  return EXACT_STRING_SIGNALS.some((sig) => lower.includes(sig));
+  return EXACT_STRING_SIGNALS.some((sig) => lower.includes(sig))
+    || EXACT_STRING_PATTERNS.some((pattern) => pattern.test(question));
 }
 
 function detectTitleTranslationQuestion(question: string): boolean {

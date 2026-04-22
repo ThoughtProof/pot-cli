@@ -27,6 +27,7 @@ export type ExecutionChainStatus = 'complete' | 'partial' | 'broken';
 export type DissentKind = 'fact' | 'observability' | 'policy' | 'mixed';
 export type HardStopClass =
   | 'factual_failure'
+  | 'exact_string_mismatch'
   | 'fabricated_support'
   | 'broken_execution'
   | 'provenance_absence_claim'
@@ -176,6 +177,8 @@ function deriveTaskType(record: PlanRecord): TaskTypeDetection {
     'spec',
     'standard',
     'according to',
+    'what does',
+    'stand for',
     'zip code',
     'surname',
     'stanza',
@@ -203,7 +206,9 @@ function deriveTaskType(record: PlanRecord): TaskTypeDetection {
     'tool output',
   ];
   const computationTools = new Set(['python', 'python_interpreter', 'shell', 'terminal', 'sql', 'calculator', 'interpreter', 'api']);
+  const retrievalTools = new Set(['web_search', 'search', 'web_fetch', 'fetch', 'browser', 'browse', 'read', 'http']);
   const hasComputationToolUsage = record.steps.some((step) => step.toolsUsed.some((tool) => computationTools.has(tool.toLowerCase())));
+  const hasRetrievalToolUsage = record.steps.some((step) => step.toolsUsed.some((tool) => retrievalTools.has(tool.toLowerCase())));
 
   const deterministicSignals = [
     'how many',
@@ -257,6 +262,9 @@ function deriveTaskType(record: PlanRecord): TaskTypeDetection {
 
   if (hasComputationToolUsage) {
     return { taskType: 'tool_chain', confidence: 'medium' };
+  }
+  if (hasRetrievalToolUsage) {
+    return { taskType: 'retrieval', confidence: 'medium' };
   }
   if (strongDeterministicHit) {
     return { taskType: 'deterministic', confidence: 'medium' };
@@ -369,15 +377,87 @@ function deriveDissentKind(findings: PolicyFinding[], executionChainStatus: Exec
   return 'policy';
 }
 
+const COMPARABLE_STOPWORDS = new Set([
+  'a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'is', 'it', 'of', 'on', 'or', 'the', 'to', 'was', 'were', 'with',
+]);
+
+function tokenizeComparableText(value: string): string[] {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function contentTokens(value: string): string[] {
+  return tokenizeComparableText(value).filter((token) => !COMPARABLE_STOPWORDS.has(token));
+}
+
+function numericTokens(value: string): string[] {
+  return tokenizeComparableText(value).filter((token) => /\d/.test(token));
+}
+
+function tokenJaccardSimilarity(left: string, right: string): number {
+  const leftTokens = new Set(contentTokens(left));
+  const rightTokens = new Set(contentTokens(right));
+  if (leftTokens.size === 0 || rightTokens.size === 0) return 0;
+
+  const intersection = [...leftTokens].filter((token) => rightTokens.has(token)).length;
+  const union = new Set([...leftTokens, ...rightTokens]).size;
+  return union === 0 ? 0 : intersection / union;
+}
+
+function hasLikelyExactStringMismatch(
+  record: PlanRecord,
+  findings: PolicyFinding[],
+  exactStringQuestion: boolean,
+): boolean {
+  if (!exactStringQuestion || !hasWrongAnswer(findings)) {
+    return false;
+  }
+
+  const claimedAnswer = String(record.metadata.agentAnswer ?? '').trim();
+  const trueAnswer = String(record.goal.trueAnswer ?? '').trim();
+  if (!claimedAnswer || !trueAnswer) {
+    return false;
+  }
+
+  const claimedNumeric = numericTokens(claimedAnswer);
+  const trueNumeric = numericTokens(trueAnswer);
+  if (claimedNumeric.length > 0 && trueNumeric.length > 0) {
+    const sharedNumeric = claimedNumeric.filter((token) => trueNumeric.includes(token));
+    if (sharedNumeric.length === 0) {
+      return false;
+    }
+  }
+
+  const normalizedClaimed = claimedAnswer.toLowerCase();
+  const normalizedTrue = trueAnswer.toLowerCase();
+  if (normalizedClaimed.includes(normalizedTrue)) {
+    const claimedLength = contentTokens(claimedAnswer).length;
+    const trueLength = contentTokens(trueAnswer).length;
+    return claimedLength <= trueLength + 8;
+  }
+
+  const claimedContent = new Set(contentTokens(claimedAnswer));
+  const trueContent = new Set(contentTokens(trueAnswer));
+  const overlapCount = [...claimedContent].filter((token) => trueContent.has(token)).length;
+
+  return overlapCount >= 3 && tokenJaccardSimilarity(claimedAnswer, trueAnswer) >= 0.25;
+}
+
 function deriveHardStopClasses(
   record: PlanRecord,
   taskType: TaskType,
   findings: PolicyFinding[],
   executionChainStatus: ExecutionChainStatus,
+  exactStringQuestion: boolean,
 ): HardStopClass[] {
   const hardStopClasses: HardStopClass[] = [];
 
-  if (hasWrongAnswer(findings)) {
+  if (hasLikelyExactStringMismatch(record, findings, exactStringQuestion)) {
+    hardStopClasses.push('exact_string_mismatch');
+  } else if (hasWrongAnswer(findings)) {
     hardStopClasses.push('factual_failure');
   }
   if (hasAnyHallucination(findings)) {
@@ -433,7 +513,8 @@ function derivePolicyContext(
         : 'medium';
 
   const dissentKind = deriveDissentKind(findings, executionChainStatus);
-  const hardStopClasses = deriveHardStopClasses(record, taskType, findings, executionChainStatus);
+  const sourceClaimExactStringQuestion = options?.experimentalSourceClaim?.exactStringQuestion ?? false;
+  const hardStopClasses = deriveHardStopClasses(record, taskType, findings, executionChainStatus, sourceClaimExactStringQuestion);
 
   return {
     taskType,
@@ -448,7 +529,7 @@ function derivePolicyContext(
     hardStopClasses,
     sourceClaimSupport: options?.experimentalSourceClaim?.support ?? null,
     sourceClaimConfidence: options?.experimentalSourceClaim?.confidence ?? null,
-    sourceClaimExactStringQuestion: options?.experimentalSourceClaim?.exactStringQuestion ?? false,
+    sourceClaimExactStringQuestion,
   };
 }
 
@@ -487,10 +568,17 @@ function evaluateDeterministicPolicy(ctx: PolicyContext, findings: PolicyFinding
 
 function evaluateRetrievalPolicy(ctx: PolicyContext, findings: PolicyFinding[]): DecisionSurface {
   if (
-    hasWrongAnswer(findings)
-    || hasHighHallucination(findings)
+    hasHighHallucination(findings)
     || ctx.hardStopClasses.includes('provenance_absence_claim')
   ) {
+    return 'BLOCK';
+  }
+
+  if (ctx.hardStopClasses.includes('exact_string_mismatch')) {
+    return 'HOLD';
+  }
+
+  if (hasWrongAnswer(findings)) {
     return 'BLOCK';
   }
 
@@ -611,6 +699,9 @@ function buildPolicySummary(
 
   if (ctx.hardStopClasses.includes('factual_failure')) {
     return 'Trace contains a wrong outcome, so the result is not defensible.';
+  }
+  if (ctx.hardStopClasses.includes('exact_string_mismatch')) {
+    return 'Trace appears semantically related, but it fails an exact-string or quote-style requirement and should be reviewed before proceeding.';
   }
   if (ctx.hardStopClasses.includes('fabricated_support')) {
     return 'Trace contains fabricated or unsupported support, so the result is not defensible.';
