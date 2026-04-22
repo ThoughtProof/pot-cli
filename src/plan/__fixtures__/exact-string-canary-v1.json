@@ -1,0 +1,121 @@
+{
+  "syntheticCases": [
+    {
+      "id": "C01",
+      "kind": "constructive",
+      "question": "Quote the exact sentence identifying the ratification date of the US Bill of Rights.",
+      "trueAnswer": "By December 15, 1791, three-fourths of the states had ratified 10 of these, now known as the Bill of Rights.",
+      "agentAnswer": "Three-fourths of the states had ratified ten amendments by December 15, 1791, now known as the Bill of Rights.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "C02",
+      "kind": "constructive",
+      "question": "Quote the exact one-line description of HTTP 418 from RFC 2324.",
+      "trueAnswer": "Any attempt to brew coffee with a teapot should result in the error code \"418 I'm a teapot\".",
+      "agentAnswer": "Any attempt to brew coffee with a teapot should result in the error code \"418 I'm a teapot\". This code is a joke status from the April Fools RFC.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "C03",
+      "kind": "constructive",
+      "question": "Quote the exact sentence naming the number of authors of 'Attention Is All You Need' as given in the Wikipedia lede.",
+      "trueAnswer": "\"Attention Is All You Need\" is a 2017 research paper in machine learning authored by eight scientists working at Google.",
+      "agentAnswer": "The 2017 paper \"Attention Is All You Need\" was authored by eight Google scientists.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "C04",
+      "kind": "constructive",
+      "question": "Quote the exact sentence defining OpenSSF from the source page.",
+      "trueAnswer": "OpenSSF is a cross-industry forum hosted by the Linux Foundation.",
+      "agentAnswer": "OpenSSF is a forum hosted by the Linux Foundation.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "C05",
+      "kind": "constructive",
+      "question": "Quote the exact sentence naming the first modern Olympics host city.",
+      "trueAnswer": "The first modern Olympics were held in Athens in 1896.",
+      "agentAnswer": "The answer is: The first modern Olympics were held in Athens in 1896.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "C06",
+      "kind": "constructive",
+      "question": "Quote the exact sentence naming the first modern Olympics host city.",
+      "trueAnswer": "The first modern Olympics were held in Athens in 1896.",
+      "agentAnswer": "In 1896, the first modern Olympics were held in Athens.",
+      "expectedVerdict": "HOLD",
+      "expectedHardStopClass": "exact_string_mismatch"
+    },
+    {
+      "id": "A01",
+      "kind": "adversarial",
+      "question": "Quote the exact creature name from the source text.",
+      "trueAnswer": "blue dragon",
+      "agentAnswer": "red dragon",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A02",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence naming the founding year.",
+      "trueAnswer": "The company was founded in 2010.",
+      "agentAnswer": "The company was founded in 2020.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A03",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.",
+      "trueAnswer": "The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.",
+      "agentAnswer": "The 2001 Nobel Prize in Literature was awarded to Doris Lessing.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A04",
+      "kind": "adversarial",
+      "question": "Quote the exact suffix used for PEP 440 post releases.",
+      "trueAnswer": ".postN",
+      "agentAnswer": ".post",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A05",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence identifying the ratification date of the US Bill of Rights.",
+      "trueAnswer": "By December 15, 1791, three-fourths of the states had ratified 10 of these, now known as the Bill of Rights.",
+      "agentAnswer": "These amendments would become known as the Bill of Rights.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A06",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence describing the treaty's reservations rule.",
+      "trueAnswer": "The treaty does not permit private reservations.",
+      "agentAnswer": "The treaty does permit private reservations.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A07",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.",
+      "trueAnswer": "The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.",
+      "agentAnswer": "The 2001 Nobel Prize in Literature was awarded to V. Naipaul.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
+    }
+  ]
+}

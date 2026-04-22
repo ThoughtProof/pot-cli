@@ -384,6 +384,96 @@ test('evaluatePlanPolicy keeps exact-string numeric mismatches blocked even with
   assert.equal(result.verdict, 'BLOCK');
 });
 
+test('evaluatePlanPolicy keeps exact-string person substitutions blocked', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-person-substitution',
+    goalDescription: 'Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.',
+    annotatorDescriptions: ['open the source page', 'quote the exact recipient sentence'],
+    agentDescriptions: ['retrieve the source page', 'return the recipient sentence'],
+    verified: false,
+    trueAnswer: 'The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.',
+    agentAnswer: 'The 2001 Nobel Prize in Literature was awarded to Doris Lessing.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
+test('evaluatePlanPolicy keeps exact-string entity omissions blocked', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-entity-omission',
+    goalDescription: 'Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.',
+    annotatorDescriptions: ['open the source page', 'quote the exact recipient sentence'],
+    agentDescriptions: ['retrieve the source page', 'return the recipient sentence'],
+    verified: false,
+    trueAnswer: 'The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.',
+    agentAnswer: 'The 2001 Nobel Prize in Literature was awarded to V. Naipaul.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
+test('evaluatePlanPolicy keeps exact-string negation flips blocked', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-negation-flip',
+    goalDescription: 'Quote the exact sentence describing the treaty\'s reservations rule.',
+    annotatorDescriptions: ['open the treaty page', 'quote the exact reservations sentence'],
+    agentDescriptions: ['retrieve the treaty page', 'return the reservations sentence'],
+    verified: false,
+    trueAnswer: 'The treaty does not permit private reservations.',
+    agentAnswer: 'The treaty does permit private reservations.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
 test('evaluatePlanPolicy does not over-block benign negation in retrieval cases', () => {
   const record = makeRecord({
     id: 'retrieval-benign-negation',

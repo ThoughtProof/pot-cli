@@ -380,6 +380,8 @@ function deriveDissentKind(findings: PolicyFinding[], executionChainStatus: Exec
 const COMPARABLE_STOPWORDS = new Set([
   'a', 'an', 'and', 'as', 'at', 'by', 'for', 'from', 'in', 'is', 'it', 'of', 'on', 'or', 'the', 'to', 'was', 'were', 'with',
 ]);
+const NEGATION_TOKENS = new Set(['no', 'not', 'never', 'none', 'without', 'cannot', 'cant', 'doesnt', 'dont', 'isnt', 'arent', 'wasnt', 'werent', 'wont', 'didnt']);
+const ENTITY_STOPWORDS = new Set(['The', 'A', 'An', 'By', 'In', 'On', 'At', 'For', 'Of']);
 
 function tokenizeComparableText(value: string): string[] {
   return value
@@ -407,6 +409,58 @@ function tokenJaccardSimilarity(left: string, right: string): number {
   return union === 0 ? 0 : intersection / union;
 }
 
+function hasNegationMismatch(left: string, right: string): boolean {
+  const leftNegation = contentTokens(left).some((token) => NEGATION_TOKENS.has(token));
+  const rightNegation = contentTokens(right).some((token) => NEGATION_TOKENS.has(token));
+  return leftNegation !== rightNegation;
+}
+
+function extractEntityishTokens(value: string): string[] {
+  const matches = value.match(/(?:\b[A-Z]{2,}\b|\b[A-Z][a-z]+\b|\b[A-Z]\.)/g) ?? [];
+  return matches.filter((token) => !ENTITY_STOPWORDS.has(token));
+}
+
+function hasEntitySubstitutionMismatch(left: string, right: string): boolean {
+  const leftEntities = new Set(extractEntityishTokens(left));
+  const rightEntities = new Set(extractEntityishTokens(right));
+  if (leftEntities.size === 0 || rightEntities.size === 0) {
+    return false;
+  }
+
+  const shared = [...leftEntities].filter((token) => rightEntities.has(token));
+  const leftOnly = [...leftEntities].filter((token) => !rightEntities.has(token));
+  const rightOnly = [...rightEntities].filter((token) => !leftEntities.has(token));
+
+  return shared.length >= 2 && leftOnly.length > 0 && rightOnly.length > 0;
+}
+
+function hasEntityOmissionMismatch(left: string, right: string): boolean {
+  const leftEntities = new Set(extractEntityishTokens(left));
+  const rightEntities = new Set(extractEntityishTokens(right));
+  if (leftEntities.size === 0 || rightEntities.size === 0) {
+    return false;
+  }
+
+  const shared = [...leftEntities].filter((token) => rightEntities.has(token));
+  const leftOnly = [...leftEntities].filter((token) => !rightEntities.has(token));
+  const rightOnly = [...rightEntities].filter((token) => !leftEntities.has(token));
+  if (shared.length < 1) {
+    return false;
+  }
+
+  const omittedTokens = leftOnly.length > 0 && rightOnly.length === 0
+    ? leftOnly
+    : rightOnly.length > 0 && leftOnly.length === 0
+      ? rightOnly
+      : [];
+
+  if (omittedTokens.length === 0) {
+    return false;
+  }
+
+  return omittedTokens.every((token) => token.replace(/\./g, '').length <= 2);
+}
+
 function hasLikelyExactStringMismatch(
   record: PlanRecord,
   findings: PolicyFinding[],
@@ -419,6 +473,14 @@ function hasLikelyExactStringMismatch(
   const claimedAnswer = String(record.metadata.agentAnswer ?? '').trim();
   const trueAnswer = String(record.goal.trueAnswer ?? '').trim();
   if (!claimedAnswer || !trueAnswer) {
+    return false;
+  }
+
+  if (hasNegationMismatch(claimedAnswer, trueAnswer)) {
+    return false;
+  }
+
+  if (hasEntitySubstitutionMismatch(claimedAnswer, trueAnswer) || hasEntityOmissionMismatch(claimedAnswer, trueAnswer)) {
     return false;
   }
 
