@@ -414,6 +414,36 @@ test('evaluatePlanPolicy keeps exact-string person substitutions blocked', () =>
   assert.equal(result.verdict, 'BLOCK');
 });
 
+test('evaluatePlanPolicy keeps exact-string entity omissions blocked', () => {
+  const record = makeRecord({
+    id: 'retrieval-exact-string-entity-omission',
+    goalDescription: 'Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.',
+    annotatorDescriptions: ['open the source page', 'quote the exact recipient sentence'],
+    agentDescriptions: ['retrieve the source page', 'return the recipient sentence'],
+    verified: false,
+    trueAnswer: 'The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.',
+    agentAnswer: 'The 2001 Nobel Prize in Literature was awarded to V. Naipaul.',
+    riskFlags: [makeRiskFlag('wrong_answer', 'high', 'agent:plan:step:2')],
+  });
+  const support = makeMergedSupport({
+    traceId: record.traceId,
+    mergedCoverage: 0.9,
+    trulyMissingCount: 0,
+  });
+
+  const result = evaluatePlanPolicy(record, support, [], {
+    experimentalSourceClaim: {
+      support: 'unsupported',
+      confidence: 'high',
+      exactStringQuestion: true,
+    },
+  });
+
+  assert.ok(!result.metrics.hardStopClasses.includes('exact_string_mismatch'));
+  assert.ok(result.metrics.hardStopClasses.includes('factual_failure'));
+  assert.equal(result.verdict, 'BLOCK');
+});
+
 test('evaluatePlanPolicy keeps exact-string negation flips blocked', () => {
   const record = makeRecord({
     id: 'retrieval-exact-string-negation-flip',

@@ -416,7 +416,7 @@ function hasNegationMismatch(left: string, right: string): boolean {
 }
 
 function extractEntityishTokens(value: string): string[] {
-  const matches = value.match(/\b(?:[A-Z]{2,}|[A-Z][a-z]+|[A-Z]\.)\b/g) ?? [];
+  const matches = value.match(/(?:\b[A-Z]{2,}\b|\b[A-Z][a-z]+\b|\b[A-Z]\.)/g) ?? [];
   return matches.filter((token) => !ENTITY_STOPWORDS.has(token));
 }
 
@@ -432,6 +432,33 @@ function hasEntitySubstitutionMismatch(left: string, right: string): boolean {
   const rightOnly = [...rightEntities].filter((token) => !leftEntities.has(token));
 
   return shared.length >= 2 && leftOnly.length > 0 && rightOnly.length > 0;
+}
+
+function hasEntityOmissionMismatch(left: string, right: string): boolean {
+  const leftEntities = new Set(extractEntityishTokens(left));
+  const rightEntities = new Set(extractEntityishTokens(right));
+  if (leftEntities.size === 0 || rightEntities.size === 0) {
+    return false;
+  }
+
+  const shared = [...leftEntities].filter((token) => rightEntities.has(token));
+  const leftOnly = [...leftEntities].filter((token) => !rightEntities.has(token));
+  const rightOnly = [...rightEntities].filter((token) => !leftEntities.has(token));
+  if (shared.length < 1) {
+    return false;
+  }
+
+  const omittedTokens = leftOnly.length > 0 && rightOnly.length === 0
+    ? leftOnly
+    : rightOnly.length > 0 && leftOnly.length === 0
+      ? rightOnly
+      : [];
+
+  if (omittedTokens.length === 0) {
+    return false;
+  }
+
+  return omittedTokens.every((token) => token.replace(/\./g, '').length <= 2);
 }
 
 function hasLikelyExactStringMismatch(
@@ -453,7 +480,7 @@ function hasLikelyExactStringMismatch(
     return false;
   }
 
-  if (hasEntitySubstitutionMismatch(claimedAnswer, trueAnswer)) {
+  if (hasEntitySubstitutionMismatch(claimedAnswer, trueAnswer) || hasEntityOmissionMismatch(claimedAnswer, trueAnswer)) {
     return false;
   }
 

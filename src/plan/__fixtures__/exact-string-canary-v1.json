@@ -107,6 +107,15 @@
       "agentAnswer": "The treaty does permit private reservations.",
       "expectedVerdict": "BLOCK",
       "expectedHardStopClass": "factual_failure"
+    },
+    {
+      "id": "A07",
+      "kind": "adversarial",
+      "question": "Quote the exact sentence naming the 2001 Nobel Prize in Literature recipient.",
+      "trueAnswer": "The 2001 Nobel Prize in Literature was awarded to V. S. Naipaul.",
+      "agentAnswer": "The 2001 Nobel Prize in Literature was awarded to V. Naipaul.",
+      "expectedVerdict": "BLOCK",
+      "expectedHardStopClass": "factual_failure"
     }
   ]
 }
