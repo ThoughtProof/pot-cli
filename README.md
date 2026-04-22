@@ -39,6 +39,22 @@ Your Question → 4 Generators → Adversarial Critic → Synthesizer → Episte
 - 📊 **Disagreement scoring:** Model Diversity Index quantifies how much models disagree
 - 🔄 **Deep mode:** 3 runs with rotated critic roles + meta-synthesis
 
+## Plan-Level Verification Workflow
+
+pot-cli now also includes a local plan-level evaluation workflow for first-party traces:
+
+- `plan-enrich-first-party`
+- `plan-enrich-source-pages`
+- `plan-build-source-claim-map`
+- `plan-benchmark`
+- `plan-policy`
+- `plan-sweep-first-party`
+
+This is useful for reference modeling experiments, policy sweeps, and source-claim analysis on fixed trace sets, including auto-derived source-claim evidence inside profile sweeps and optional source-page enrichment via `--enrich-source-pages`.
+
+See:
+- `docs/plan-level-cli-workflow.md`
+
 ## Quick Start
 
 ```bash

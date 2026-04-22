@@ -1,0 +1,5 @@
+{
+  "hard-H01": { "support": "exact", "confidence": "high", "exactStringQuestion": false },
+  "hard-H04": { "support": "exact", "confidence": "high", "exactStringQuestion": false },
+  "hard-H07": { "support": "exact", "confidence": "high", "exactStringQuestion": false }
+}
