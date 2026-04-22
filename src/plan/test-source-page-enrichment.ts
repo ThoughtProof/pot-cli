@@ -108,3 +108,46 @@ test('enrichFirstPartyTracesWithSourcePageMetadata leaves traces unchanged when 
 
   assert.deepEqual(enriched, traces);
 });
+
+test('enrichFirstPartyTracesWithSourcePageMetadata fails soft when source page fetch fails', async () => {
+  const traces: FirstPartyGaiaTrace[] = [
+    {
+      task_id: 'trace-3',
+      level: 'test',
+      question: 'According to the page, what does OpenSSF stand for?',
+      model: 'test-model',
+      answer: 'Open Source Security Foundation',
+      annotator_metadata: {
+        source_url: 'https://example.com/missing',
+      },
+      trace: {
+        steps: [
+          {
+            index: 1,
+            kind: 'browse',
+            tool: 'web_fetch',
+            summary: 'opened the official foundation page',
+            evidence: ['official foundation page loaded'],
+          },
+          {
+            index: 2,
+            kind: 'answer',
+            tool: null,
+            summary: 'returned Open Source Security Foundation',
+            evidence: [],
+          },
+        ],
+      },
+    },
+  ];
+
+  const enriched = await enrichFirstPartyTracesWithSourcePageMetadata(
+    traces,
+    async () => {
+      throw new Error('404 Not Found');
+    },
+  );
+
+  assert.deepEqual(enriched[0]?.trace.steps[0]?.evidence, ['official foundation page loaded']);
+  assert.deepEqual(traces[0]?.trace.steps[0]?.evidence, ['official foundation page loaded']);
+});
