@@ -8,11 +8,13 @@
     "pot": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:fixtures",
+    "build:fixtures": "mkdir -p dist/plan/__fixtures__ && cp -r src/plan/__fixtures__/. dist/plan/__fixtures__/",
     "dev": "tsup src/index.ts --format esm --watch",
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
-    "test": "node dist/index.js ask 'Test question' --dry-run"
+    "test": "node dist/index.js ask 'Test question' --dry-run",
+    "test:plan": "node --test dist/plan/test-*.js"
   },
   "keywords": [
     "ai",

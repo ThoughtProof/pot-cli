@@ -2,6 +2,29 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `plan-enrich-first-party` CLI command to enrich first-party JSONL traces with gold/reference metadata
+- `plan-enrich-source-pages` CLI command to enrich first-party browse evidence with fetched source-page metadata (`<title>`, `<h1>`, narrow acronym-aware page-text fallback)
+- `plan-build-source-claim-map` CLI command to derive source-claim support from first-party traces and gold/reference data
+- `plan-sweep-first-party` CLI command to compare the same traces across multiple reference profiles
+- Per-profile `sourceClaimMap` support in plan sweeps, with global fallback still supported
+- Per-profile `deriveSourceClaim: true` support to auto-build source-claim evidence directly from enriched first-party traces
+- `--enrich-source-pages` support in `plan-build-source-claim-map` and `plan-sweep-first-party`
+- Compact sweep `summary` output with baseline counts, source-claim counts, and verdict transitions
+- `--format text` mode for human-readable sweep reports
+- Stable hard-v2 threshold fixtures and regression test covering coarse/medium/fine plus fine+source-claim behavior
+- `accepted_answers` support in first-party gold maps for narrow alias-based correctness handling
+
+### Changed
+
+- First-party enrichment logic is now shared instead of duplicated across commands
+- Source-page enrichment logic is reusable across standalone enrichment and source-claim workflows
+- Sweep evaluation reuses merged support across baseline and source-claim passes instead of recomputing the whole alignment stack twice
+- Workflow docs now cover the full plan-level CLI path and clarify the narrow correctness method used in first-party enrichment
+
 ## [0.2.0] - 2026-02-18
 
 ### 🚀 Major: BYOK Refactor - Flexible Provider Configuration

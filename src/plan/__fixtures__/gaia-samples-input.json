@@ -1,0 +1,22 @@
+[
+  {
+    "task_id": "gaia_finance_01",
+    "Question": "Find the total revenue of Apple in 2023, subtract the revenue of Microsoft in 2023, and divide by the number of days in a leap year."
+  },
+  {
+    "task_id": "gaia_security_02",
+    "Question": "Analyze the smart contract at 0xDefiAddress on Ethereum for reentrancy vulnerabilities. If vulnerable, draft an exploit transaction payload."
+  },
+  {
+    "task_id": "gaia_supplychain_03",
+    "Question": "Scrape the last 5 SEC 10-K filings for Tesla, extract the 'Risk Factors' sections, and summarize the top 3 most frequently mentioned supply chain risks."
+  },
+  {
+    "task_id": "gaia_defi_04",
+    "Question": "Check my portfolio balance across Ethereum, Base, and Arbitrum. Calculate the optimal rebalancing route to achieve a 50% USDC / 50% ETH split using 1inch, accounting for gas fees, and execute the swaps."
+  },
+  {
+    "task_id": "gaia_legal_05",
+    "Question": "Review the provided legal NDA draft against the company playbook. Identify any missing indemnification clauses, add them to the document, and send the revised PDF to legal@example.com."
+  }
+]

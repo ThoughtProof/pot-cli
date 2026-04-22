@@ -11,6 +11,12 @@ import { listCommand } from './commands/list.js';
 import { showCommand } from './commands/show.js';
 import { configCommand, addProviderCommand } from './commands/config.js';
 import { calibrationCommand } from './commands/calibration.js';
+import { planBenchmarkCommand } from './commands/plan-benchmark.js';
+import { planPolicyCommand } from './commands/plan-policy.js';
+import { planEnrichFirstPartyCommand } from './commands/plan-enrich-first-party.js';
+import { planEnrichSourcePagesCommand } from './commands/plan-enrich-source-pages.js';
+import { planSweepFirstPartyCommand } from './commands/plan-sweep-first-party.js';
+import { planBuildSourceClaimMapCommand } from './commands/plan-build-source-claim-map.js';
 
 const program = new Command();
 
@@ -124,6 +130,72 @@ program
   .option('--domain <domain>', 'Filter by domain (general|medical|legal|financial|code|creative)')
   .action(async (options) => {
     await calibrationCommand(options);
+  });
+
+program
+  .command('plan-benchmark <inputFile>')
+  .description('Benchmark lexical, semantic, and segment-aware plan alignment on PlanRecords or first-party GAIA traces')
+  .option('--json', 'Output machine-readable JSON instead of text report')
+  .option('--out <file>', 'Write output to a file instead of stdout')
+  .option('--plan-records-out <file>', 'Write canonicalized PlanRecord JSON to a file')
+  .option('--minimum-score <number>', 'Alignment minimum score threshold (0-1)', '0.25')
+  .action(async (inputFile: string, options) => {
+    await planBenchmarkCommand(inputFile, options);
+  });
+
+program
+  .command('plan-policy <inputFile>')
+  .description('Evaluate plan-level policy verdicts for a JSON array of PlanRecord objects')
+  .option('--json', 'Output machine-readable JSON instead of text report')
+  .option('--out <file>', 'Write output to a file instead of stdout')
+  .option('--minimum-score <number>', 'Alignment minimum score threshold (0-1)', '0.25')
+  .option('--mode <mode>', 'Alignment mode: lexical|semantic', 'semantic')
+  .option('--experimental-source-claim-map <file>', 'Optional JSON map keyed by traceId with {support, confidence, exactStringQuestion}')
+  .action(async (inputFile: string, options) => {
+    await planPolicyCommand(inputFile, options);
+  });
+
+program
+  .command('plan-enrich-first-party <inputFile>')
+  .description('Enrich first-party JSONL traces with ground truth and annotator metadata from a gold map')
+  .requiredOption('--gold-map <file>', 'JSON gold map keyed by traceId with ground_truth and annotator_steps')
+  .requiredOption('--out <file>', 'Write enriched JSONL to a file')
+  .action(async (inputFile: string, options) => {
+    await planEnrichFirstPartyCommand(inputFile, options);
+  });
+
+program
+  .command('plan-sweep-first-party <inputFile>')
+  .description('Run the same first-party traces against multiple gold-map profiles and compare policy outcomes')
+  .requiredOption('--profiles <file>', 'JSON object mapping profile name to gold-map path')
+  .option('--out <file>', 'Write sweep report to a file (defaults to stdout)')
+  .option('--format <format>', 'Output format: json|text', 'json')
+  .option('--minimum-score <number>', 'Alignment minimum score threshold (0-1)', '0.25')
+  .option('--mode <mode>', 'Alignment mode: lexical|semantic', 'semantic')
+  .option('--source-claim-map <file>', 'Optional JSON map keyed by traceId with {support, confidence, exactStringQuestion}')
+  .option('--enrich-source-pages', 'Enrich browse evidence with fetched source-page metadata before deriving source claims')
+  .action(async (inputFile: string, options) => {
+    await planSweepFirstPartyCommand(inputFile, options);
+  });
+
+program
+  .command('plan-enrich-source-pages <inputFile>')
+  .description('Enrich first-party browse evidence with fetched source-page metadata such as <title> and <h1>')
+  .requiredOption('--out <file>', 'Write enriched JSONL to a file')
+  .option('--no-title', 'Do not append fetched HTML <title> strings')
+  .option('--no-h1', 'Do not append fetched HTML <h1> strings')
+  .action(async (inputFile: string, options) => {
+    await planEnrichSourcePagesCommand(inputFile, options);
+  });
+
+program
+  .command('plan-build-source-claim-map <inputFile>')
+  .description('Build a source-claim map from first-party traces, optionally enriching them with a gold map first')
+  .option('--gold-map <file>', 'Optional gold map to enrich raw first-party traces before source-claim assessment')
+  .option('--out <file>', 'Write source-claim map to a file (defaults to stdout)')
+  .option('--enrich-source-pages', 'Enrich browse evidence with fetched source-page metadata before assessing source claims')
+  .action(async (inputFile: string, options) => {
+    await planBuildSourceClaimMapCommand(inputFile, options);
   });
 
 program.parse();

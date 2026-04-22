@@ -1,0 +1,32 @@
+{
+  "hard-H01": {
+    "ground_truth": "64",
+    "annotator_steps": [
+      "Open RFC 5321.",
+      "Locate the subsection about the local-part size limit.",
+      "Read the maximum total length in octets.",
+      "Return 64."
+    ],
+    "annotator_tools": ["Search engine", "Web browser"]
+  },
+  "hard-H04": {
+    "ground_truth": "19",
+    "annotator_steps": [
+      "Open PEP 20.",
+      "Read the abstract that explains the number of aphorisms written down.",
+      "Distinguish the written-down count from the intended total.",
+      "Return 19."
+    ],
+    "annotator_tools": ["Search engine", "Web browser"]
+  },
+  "hard-H07": {
+    "ground_truth": "August 2, 1776",
+    "annotator_steps": [
+      "Open the National Archives Declaration timeline page.",
+      "Locate the entry about when most delegates signed the engrossed copy, not the July 4 adoption entry.",
+      "Extract the date from that signing entry.",
+      "Return August 2, 1776."
+    ],
+    "annotator_tools": ["Search engine", "Web browser"]
+  }
+}
