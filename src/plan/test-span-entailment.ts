@@ -344,6 +344,33 @@ test('question with "exactly as it appears" is flagged', () => {
   assert.equal(result.exactStringQuestion, true);
 });
 
+test('question with "quote the exact sentence" is flagged', () => {
+  const result = assessSpanEntailment({
+    question: 'Quote the exact sentence identifying the ratification date of the US Bill of Rights.',
+    claimedAnswer: 'By December 15, 1791, three-fourths of the states had ratified 10 of these, now known as the Bill of Rights.',
+    sourceText: 'By December 15, 1791, three-fourths of the states had ratified 10 of these, now known as the Bill of Rights.',
+  });
+  assert.equal(result.exactStringQuestion, true);
+});
+
+test('question with "exact one-line description" is flagged', () => {
+  const result = assessSpanEntailment({
+    question: 'Quote the exact one-line description of HTTP status 418 as defined in RFC 2324 section 2.3.2.',
+    claimedAnswer: 'Any attempt to brew coffee with a teapot should result in the error code "418 I\'m a teapot".',
+    sourceText: 'Any attempt to brew coffee with a teapot should result in the error code "418 I\'m a teapot".',
+  });
+  assert.equal(result.exactStringQuestion, true);
+});
+
+test('question with "as given in the ... lede" is flagged', () => {
+  const result = assessSpanEntailment({
+    question: 'Quote the exact sentence naming the number of authors of "Attention Is All You Need" as given in the Wikipedia lede.',
+    claimedAnswer: '"Attention Is All You Need" is a 2017 research paper in machine learning authored by eight scientists working at Google.',
+    sourceText: '"Attention Is All You Need" is a 2017 research paper in machine learning authored by eight scientists working at Google.',
+  });
+  assert.equal(result.exactStringQuestion, true);
+});
+
 test('question without exact-string phrase is not flagged', () => {
   const result = assessSpanEntailment({
     question: 'What is the general location in the story?',
