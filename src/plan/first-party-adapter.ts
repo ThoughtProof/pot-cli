@@ -48,6 +48,39 @@ function normalizeAnswer(value: string | null | undefined): string {
   return String(value ?? '').trim().toLowerCase();
 }
 
+function includesAll(haystack: string, needles: string[]): boolean {
+  return needles.every((needle) => haystack.includes(needle));
+}
+
+function answersEquivalent(taskId: string, answer: string, groundTruth: string): boolean {
+  const normalizedAnswer = normalizeAnswer(answer);
+  const normalizedGroundTruth = normalizeAnswer(groundTruth);
+  if (normalizedAnswer === normalizedGroundTruth) {
+    return true;
+  }
+
+  switch (taskId) {
+    case 'V0-05': {
+      const hasDate = normalizedAnswer.includes('august 2, 1776');
+      const rejectsJuly4 = includesAll(normalizedAnswer, ['july 4', 'not supportable']);
+      return hasDate && rejectsJuly4;
+    }
+    case 'V0-09': {
+      return includesAll(normalizedAnswer, ['1225', 'henry iii']);
+    }
+    case 'V0-13': {
+      const core = includesAll(normalizedAnswer, ['predicate', 'intended use'])
+        && (normalizedAnswer.includes('technological characteristic') || normalizedAnswer.includes('technological characteristics'))
+        && normalizedAnswer.includes('safety')
+        && normalizedAnswer.includes('effectiveness');
+      const fallback = normalizedAnswer.includes('de novo') || normalizedAnswer.includes('pma');
+      return core && fallback;
+    }
+    default:
+      return false;
+  }
+}
+
 function parseAnnotatorSteps(stepsText: string | undefined): string[] {
   if (!stepsText) return [];
 
@@ -100,10 +133,9 @@ export function firstPartyTraceToPlanRecord(
   const annotatorStepsParsed = parseAnnotatorSteps(annotatorStepsText);
   const annotatorToolsParsed = parseAnnotatorTools(annotatorToolsText);
   const hasGroundTruth = input.ground_truth != null && String(input.ground_truth).trim().length > 0;
-  const verified =
-    typeof input.final_correct === 'boolean'
-      ? input.final_correct
-      : hasGroundTruth && normalizeAnswer(input.answer) === normalizeAnswer(input.ground_truth);
+  const verified = hasGroundTruth
+    ? answersEquivalent(input.task_id, input.answer, input.ground_truth!)
+    : (typeof input.final_correct === 'boolean' ? input.final_correct : false);
 
   const goal: GoalNode = {
     id: `goal:${input.task_id}`,

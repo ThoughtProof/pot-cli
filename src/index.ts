@@ -17,6 +17,7 @@ import { planEnrichFirstPartyCommand } from './commands/plan-enrich-first-party.
 import { planEnrichSourcePagesCommand } from './commands/plan-enrich-source-pages.js';
 import { planSweepFirstPartyCommand } from './commands/plan-sweep-first-party.js';
 import { planBuildSourceClaimMapCommand } from './commands/plan-build-source-claim-map.js';
+import { planScoreBenchmarkCommand } from './commands/plan-score-benchmark.js';
 
 const program = new Command();
 
@@ -153,6 +154,17 @@ program
   .option('--experimental-source-claim-map <file>', 'Optional JSON map keyed by traceId with {support, confidence, exactStringQuestion}')
   .action(async (inputFile: string, options) => {
     await planPolicyCommand(inputFile, options);
+  });
+
+program
+  .command('plan-score-benchmark <inputFile>')
+  .description('Score a mixed plan-level benchmark bundle against expected verdicts, marking unresolved item types explicitly')
+  .option('--json', 'Output machine-readable JSON instead of text report')
+  .option('--out <file>', 'Write output to a file instead of stdout')
+  .option('--minimum-score <number>', 'Alignment minimum score threshold (0-1)', '0.25')
+  .option('--mode <mode>', 'Alignment mode: lexical|semantic', 'semantic')
+  .action(async (inputFile: string, options) => {
+    await planScoreBenchmarkCommand(inputFile, options);
   });
 
 program
