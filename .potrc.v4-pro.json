@@ -1,0 +1,47 @@
+{
+  "blockStoragePath": "./blocks",
+  "language": "de",
+  "search": {
+    "apiKey": "REUSE_EXISTING_SEARCH_KEY",
+    "baseUrl": "https://api.perplexity.ai",
+    "model": "sonar"
+  },
+  "generators": [
+    {
+      "name": "Anthropic",
+      "model": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "apiKey": "REUSE_EXISTING_ANTHROPIC_KEY"
+    },
+    {
+      "name": "xAI",
+      "model": "grok-4-1-fast-non-reasoning",
+      "baseUrl": "https://api.x.ai/v1/chat/completions",
+      "apiKey": "REUSE_EXISTING_XAI_KEY"
+    },
+    {
+      "name": "DeepSeek",
+      "model": "deepseek-v4-pro",
+      "baseUrl": "https://api.deepseek.com/chat/completions",
+      "apiKey": "REUSE_EXISTING_DEEPSEEK_KEY"
+    },
+    {
+      "name": "Gemini",
+      "model": "gemini-3.1-flash-lite-preview",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+      "apiKey": "REUSE_EXISTING_GOOGLE_KEY"
+    }
+  ],
+  "critic": {
+    "name": "Anthropic",
+    "model": "claude-opus-4-6",
+    "provider": "anthropic",
+    "apiKey": "REUSE_EXISTING_ANTHROPIC_KEY"
+  },
+  "synthesizer": {
+    "name": "Anthropic-Synth",
+    "model": "claude-opus-4-6",
+    "provider": "anthropic",
+    "apiKey": "REUSE_EXISTING_ANTHROPIC_KEY"
+  }
+}

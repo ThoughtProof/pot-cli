@@ -1,0 +1,87 @@
+{
+  "sourceFormat": "first-party-jsonl",
+  "schemaVersion": "plan-policy-report/v2",
+  "count": 2,
+  "verdictCounts": {
+    "ALLOW": 0,
+    "CONDITIONAL_ALLOW": 0,
+    "HOLD": 0,
+    "BLOCK": 2
+  },
+  "results": [
+    {
+      "traceId": "V0-05",
+      "verdict": "BLOCK",
+      "findings": [
+        {
+          "id": "policy:wrong_answer:V0-05",
+          "type": "wrong_answer",
+          "severity": "high",
+          "description": "The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.",
+          "stepIds": [],
+          "count": 1
+        }
+      ],
+      "summary": "Trace contains a wrong outcome, so the result is not defensible.",
+      "metrics": {
+        "verified": false,
+        "taskType": "retrieval",
+        "taskTypeConfidence": "medium",
+        "mergedCoverage": 1,
+        "trulyMissingCount": 0,
+        "executionOnlyCount": 0,
+        "segmentOnlyCount": 0,
+        "traceVerifiability": "high",
+        "answerConfidence": "low",
+        "answerExternallyCheckable": false,
+        "answerCorrectBySanityCheck": false,
+        "provenanceChainComplete": true,
+        "executionChainStatus": "complete",
+        "dissentKind": "fact",
+        "hardStopClasses": [
+          "factual_failure"
+        ],
+        "sourceClaimSupport": null,
+        "sourceClaimConfidence": null,
+        "sourceClaimExactStringQuestion": false
+      }
+    },
+    {
+      "traceId": "V0-09",
+      "verdict": "BLOCK",
+      "findings": [
+        {
+          "id": "policy:wrong_answer:V0-09",
+          "type": "wrong_answer",
+          "severity": "high",
+          "description": "The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.",
+          "stepIds": [],
+          "count": 1
+        }
+      ],
+      "summary": "Trace contains a wrong outcome, so the result is not defensible.",
+      "metrics": {
+        "verified": false,
+        "taskType": "retrieval",
+        "taskTypeConfidence": "medium",
+        "mergedCoverage": 1,
+        "trulyMissingCount": 0,
+        "executionOnlyCount": 0,
+        "segmentOnlyCount": 2,
+        "traceVerifiability": "high",
+        "answerConfidence": "low",
+        "answerExternallyCheckable": false,
+        "answerCorrectBySanityCheck": false,
+        "provenanceChainComplete": true,
+        "executionChainStatus": "complete",
+        "dissentKind": "fact",
+        "hardStopClasses": [
+          "factual_failure"
+        ],
+        "sourceClaimSupport": null,
+        "sourceClaimConfidence": null,
+        "sourceClaimExactStringQuestion": false
+      }
+    }
+  ]
+}

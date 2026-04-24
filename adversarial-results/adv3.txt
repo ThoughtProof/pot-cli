@@ -3,66 +3,72 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-134 created in 185.6s
+✔ Block PoT-474 created in 110.5s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Einstein Did NOT Win the Nobel Prize for Relativity
+## Verdict: ALLOW
 
-## Core Fact (All Models Agree)
+---
 
-Albert Einstein received the **1921 Nobel Prize in Physics** (awarded in 1922) specifically *"for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect."* Relativity was **deliberately excluded** from the citation. This is verifiable directly from [nobelprize.org](https://www.nobelprize.org/prizes/physics/1921/einstein/facts/).
+# Einstein's Nobel Prize: Synthesized Verification
 
-## What Einstein Actually Won For
+**No, the statement is incorrect.** Albert Einstein was awarded the 1921 Nobel Prize in Physics **"for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect"** — not for his theory of relativity.
 
-His 1905 paper explained how light ejects electrons from metal surfaces by proposing that light comes in discrete packets (quanta/photons), helping establish quantum theory. Robert Millikan's experiments (~1914–1916) confirmed Einstein's mathematical equation, though Millikan himself initially doubted the photon interpretation.
+---
 
-## Why Not Relativity?
+## Consensus Finding
 
-This requires a crucial distinction the critique identified most proposals blurred:
-
-- **Special relativity (1905)** was broadly accepted by physicists by 1921
-- **General relativity (1915)** remained contentious — and this was the real obstacle
-
-Key factors in the committee's decision:
-
-1. **Scientific caution**: The committee wanted experimentally well-verified work. General relativity lacked comprehensive proof (Eddington's 1919 eclipse observations were still debated).
-2. **Allvar Gullstrand's opposition**: This Nobel Committee member, a physics-of-optics expert, actively opposed awarding for relativity, believing he had found errors in general relativity. *No proposal mentioned this — a significant shared blind spot.*
-3. **Political pressures**: Anti-Semitic opposition (the "Anti-relativity Company," Philipp Lenard's campaigns) played a documented but debated role. Historians disagree on how directly this influenced the Swedish committee's decision.
+All four proposals correctly identify the core fact. This is a matter of public record from the Nobel Foundation. There is zero substantive disagreement on the answer itself.
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Resolution |
-|-------|-------------|------------|
-| **Was special relativity controversial in 1921?** | Three proposals lumped all relativity together as "speculative/controversial"; one correctly distinguished special (accepted) from general (contested) | Special relativity was widely accepted; general relativity was the contentious one |
-| **Role of anti-Semitism** | Only one proposal raised it; three ignored it | Historically documented factor, but its direct causal weight on the Nobel decision is debated by historians — should be mentioned with hedging |
-| **Einstein's Nobel lecture topic** | One proposal claimed it focused on the photoelectric effect | **This is factually wrong.** Einstein's Nobel lecture (July 11, *1923*, not 1922) was titled "Fundamental ideas and problems of the theory of relativity." He spoke about *relativity*, not the photoelectric effect. |
+| Issue | Resolution |
+|---|---|
+| **Why relativity was excluded** | P1 says "insufficient evidence"; P2/P3 say "controversial"; P4 says "conservative standards." The critique correctly identifies that all oversimplify: the real story involves specific committee members (Gullstrand's active hostility, Oseen's compromise championing of the photoelectric effect), not just generic caution. I adopt the critique's more nuanced framing. |
+| **Einstein's Nobel lecture** | **Critical divergence.** P2 claims Einstein discussed the photoelectric effect in his acceptance speech. This is **factually false** — Einstein's Nobel lecture (delivered July 11, 1923, in Gothenburg) was titled *"Fundamental Ideas and Problems of the Theory of Relativity."* He spoke about relativity, not the photoelectric effect. This is well-documented historical irony. P2's error here is serious. |
+| **The broader citation language** | P1 alone acknowledges the edge case that "services to Theoretical Physics" may have been a deliberate partial nod toward relativity. This is a legitimate historiographic point. I adopt it as a noted nuance rather than dismissing it. |
 
-## Unverified Claims Addressed
+## Key Historical Facts (Verified)
 
-The critique flagged several fabricated or misleading claims from one proposal:
-- ❌ "70% of online quizzes wrongly link it to relativity" — **no source exists for this statistic**
-- ❌ "Cited 100,000+ times on Google Scholar" — **unverifiable and likely inflated**
-- ❌ LEDs attributed to the photoelectric effect — **LEDs use electroluminescence, a different phenomenon**
+1. **Official citation:** "for his services to Theoretical Physics, and especially for his discovery of the law of the photoelectric effect" (nobelprize.org)
+2. **The prize was designated for 1921** but formally awarded in November 1922 under the Nobel "reserved prize" mechanism
+3. **Einstein's 1905 paper** on the photoelectric effect proposed light quanta (photons), foundational to quantum mechanics
+4. **Committee politics** were a significant factor — not merely insufficient evidence for relativity. The 1919 Eddington eclipse observations had broadly confirmed general relativity in the physics community
+5. **Einstein's Nobel lecture discussed relativity**, not the photoelectric effect — an irony that underscores the complex relationship between the prize and Einstein's broader work
 
-These illustrate a key epistemic principle: **detail and confidence ≠ accuracy.** The most elaborately sourced-looking proposal contained the most errors.
+## Why This Misconception Persists
 
-## Additional Context (Shared Blind Spots)
+Einstein is culturally synonymous with relativity (E=mc²). The public narrative collapses "Einstein's greatest work" into "what he won the Nobel for," which are historically distinct. This is a textbook case of probabilistic association overriding specific factual records.
 
-- The 1921 prize was actually *reserved* (no prize given that year), then awarded retroactively in 1922 alongside Niels Bohr's 1922 prize — reflecting the committee's indecision.
-- Einstein had already agreed to give his Nobel prize money to his ex-wife Mileva Marić as part of their 1919 divorce settlement — years before receiving it.
+---
 
-## Bottom Line
+## Synthesis Decisions
 
-This is a well-established historical fact with zero ambiguity in the primary source. The interesting signal is how confidently wrong the surrounding context can be, even when the core answer is correct.
+| Source | Adopted | Rejected | Reason |
+|---|---|---|---|
+| **P1 (Claude)** | Core structure, precision, edge case acknowledgment | 99.5% confidence framing; "nothing substantive can go wrong" | Slightly overconfident self-assessment; the broader citation nuance deserves more than dismissal |
+| **P2 (Grok)** | Historical context on nominations, Millikan's verification | Nobel speech claim (fabricated); "50+ nominations for relativity" (unverified); Pew survey statistics (likely hallucinated); Feynman Lectures citation (misleading) | The critique devastatingly demonstrates that citation density ≠ reliability. P2 is the most dangerous proposal despite appearing most rigorous |
+| **P3 (DeepSeek)** | Epistemic framing, conciseness, "what can go wrong" structure | Nothing rejected, but too thin to anchor the synthesis | Correct but lacks depth and sources |
+| **P4 (Gemini)** | "Probabilistic association" failure mode insight | "Cosmological theory" (imprecise); excessive ThoughtProof marketing; editorial claim that relativity is Einstein's "most significant" contribution | Platform evangelism diluted the epistemic analysis; the core insight about association-based errors is valid but buried |
+| **Critique** | Gullstrand/Oseen political context; P2's Nobel speech error; meta-observation about citation-density danger | — | The critique's identification of P2's fabricated speech claim is the single most valuable signal in this entire analysis |
 
-**Confidence: 97%** (on the core factual answer — this is a matter of documented historical record with a primary source, warranting an exception to the usual 85% cap; confidence on surrounding historical interpretation of *why* the committee decided as it did: ~70%)
+## Meta-Note for ThoughtProof
 
-## Where Models Disagreed
-See table above. The disagreements stemmed from **different levels of historical nuance** — particularly whether proposals distinguished special from general relativity, and how much weight to assign political vs. scientific factors in the committee's reasoning.
+P2 exemplifies exactly the failure mode multi-agent verification must catch: **high citation density masking fabricated claims.** Three of four agents avoided the Nobel speech error. The consensus mechanism works here — this is a genuine proof-of-concept moment for the protocol.
+
+---
+
+**Confidence: 82%**
+
+Capped below maximum despite near-universal agreement because: (1) historical nuance around committee motivations involves interpretive judgment, and (2) the broader citation language question remains a legitimate historiographic debate, not a settled binary.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-134
+🧪 Check Type: defensibility
+💾 Saved as PoT-474
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.834 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.839 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.908
+🟢 Dissent Preservation Rate: 1.000 (15/15 objections preserved)

@@ -30,7 +30,7 @@ const PROVIDER_PRESETS: Array<{
   { envVar: 'ANTHROPIC_API_KEY', name: 'Anthropic', model: 'claude-sonnet-4-6', isAnthropic: true },
   { envVar: 'XAI_API_KEY',       name: 'xAI',       model: 'grok-4-1-fast',     baseUrl: DEFAULT_BASE_URLS['xai'] },
   { envVar: 'OPENAI_API_KEY',    name: 'OpenAI',    model: 'gpt-4o',             baseUrl: DEFAULT_BASE_URLS['openai'] },
-  { envVar: 'DEEPSEEK_API_KEY',  name: 'DeepSeek',  model: 'deepseek-chat',      baseUrl: DEFAULT_BASE_URLS['deepseek'] },
+  { envVar: 'DEEPSEEK_API_KEY',  name: 'DeepSeek',  model: 'deepseek-v4-flash',  baseUrl: DEFAULT_BASE_URLS['deepseek'] },
   { envVar: 'MOONSHOT_API_KEY',  name: 'Moonshot',  model: 'kimi-k2-turbo-preview', baseUrl: DEFAULT_BASE_URLS['moonshot'] },
   { envVar: 'MISTRAL_API_KEY',   name: 'Mistral',   model: 'mistral-large-latest',  baseUrl: DEFAULT_BASE_URLS['mistral'] },
   { envVar: 'GROQ_API_KEY',      name: 'Groq',      model: 'llama-3.3-70b-versatile', baseUrl: DEFAULT_BASE_URLS['groq'] },

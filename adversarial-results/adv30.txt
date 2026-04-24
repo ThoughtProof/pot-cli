@@ -3,61 +3,70 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-161 created in 122.6s
+✔ Block PoT-501 created in 111.4s
 
 📊 SYNTHESIS:
 
-# How Fast Does Gravity Travel? — Synthesized Answer
+## Verdict: ALLOW
 
-## Concrete Position
+# The Speed of Gravity: Synthesized Answer
 
-**Gravity propagates at the speed of light: c = 299,792,458 m/s in vacuum.** This is not a theoretical approximation — it is a direct prediction of General Relativity, confirmed by multi-messenger astronomical observation to extraordinary precision.
+**Gravity propagates at the speed of light in vacuum: 299,792,458 m/s (*c*).**
 
-## The Key Evidence: GW170817
+This is not a theoretical preference but an empirically confirmed result, anchored by the landmark multi-messenger observation of GW170817 in August 2017.
 
-On August 17, 2017, LIGO/Virgo detected gravitational waves from a **neutron star merger** (not a black hole merger — correcting Proposal 4's error) 130 million light-years away. Crucially, the Fermi gamma-ray telescope detected an electromagnetic counterpart ~1.7 seconds later. This multi-messenger event is the gold standard measurement.
+---
 
-**The actual published constraint** (Abbott et al., ApJL 848, L13, 2017): **−3 × 10⁻¹⁵ ≤ (v_GW − c)/c ≤ +7 × 10⁻¹⁶**
+## The Core Evidence
 
-This means gravitational waves and light travel at the same speed to roughly **one part in a quadrillion**. Note: Proposal 3's claim of "0.3%" precision is off by ~12 orders of magnitude, and Proposal 1's attribution of this constraint to GW150914 is wrong — GW150914 had no electromagnetic counterpart and therefore could not independently constrain the speed.
+**GW170817** — LIGO/Virgo detected gravitational waves from a binary neutron star merger ~130 million light-years away. Gamma-ray bursts from the same event arrived ~1.7 seconds later. The published constraint on any deviation is **asymmetric**: −3 × 10⁻¹⁵ ≤ (v_GW − c)/c ≤ +7 × 10⁻¹⁶ (Abbott et al., ApJL 848, L13, 2017). This means gravity and light travel at the same speed to extraordinary precision.
 
-## Important Subtlety: The 1.7-Second Gap
+**Graviton mass bound:** Current LIGO/Virgo results (GWTC-3, Abbott et al. 2021) constrain the graviton mass to < **1.27 × 10⁻²³ eV/c²**, consistent with zero. A massless force carrier must propagate at *c*. No frequency-dependent dispersion has been observed across 70+ gravitational wave detections.
 
-All proposals somewhat oversimplified this. The 1.7-second delay between gravitational and electromagnetic signals is **not purely a speed measurement** — it's dominated by astrophysical source physics (the time needed for the gamma-ray jet to form and break through merger debris). The speed constraint depends on modeling assumptions about this source delay. The published bounds conservatively account for this, but it's a systematic uncertainty no proposal properly flagged.
+**General Relativity prediction:** Linearized GR yields gravitational waves propagating at exactly *c*. Full numerical relativity simulations match observed waveforms to sub-percent accuracy.
 
-## What "Speed of Gravity" Actually Means
+---
 
-This question is subtly ambiguous. What's been measured is the speed of **gravitational radiation** (waves). The static gravitational field doesn't "propagate" in the conventional sense — it already exists. Only **changes** in the gravitational field propagate at c. Practically: if the Sun vanished, both its light and gravitational influence would disappear from Earth simultaneously, ~8.3 minutes later.
+## Important Nuances
 
-A historically important confusion (raised by Van Flandern, 2002) is that planetary orbits seem to "point" at where the Sun *is*, not where it *was* — suggesting instantaneous gravity. GR resolves this: for bound systems, velocity-dependent terms nearly perfectly cancel aberration effects, making gravity *appear* instantaneous while actually propagating at c.
+1. **"Speed" applies to propagating changes, not static fields.** The gravity you feel from Earth isn't a wave — it's curved spacetime geometry. The "speed of gravity" refers to how quickly *changes* in that geometry propagate. This distinction matters and all proposals correctly noted it.
 
-## What Could Go Wrong
+2. **The constraint is a bound, not an independent measurement.** Saying "confirmed to 15 significant figures" (as P1 claimed) is misleading. The measurement constrains the *fractional deviation* to < ~10⁻¹⁵. That's a bound on the ratio v_gravity/v_light, not an independent speed measurement with 15-digit precision.
 
-1. **Quantum gravity unknowns:** At Planck scales (10⁻³⁵ m), our theories break down. Energy-dependent dispersion or other exotic effects are conceivable but currently untestable (LHC reaches ~10⁴ GeV vs. the ~10¹⁹ GeV Planck scale).
+3. **Deviations below ~10⁻¹⁵ remain untested, not impossible.** The honest epistemic position is that deviations are constrained to be extraordinarily small — not that they're logically ruled out. Quantum gravity effects at the Planck scale could in principle introduce corrections, but these are far beyond current experimental reach.
 
-2. **Modified gravity theories:** Relativistic extensions of MOND (like TeVeS) and massive-graviton theories were severely constrained by GW170817. The graviton mass bound is now approximately m_g ≤ 7.7 × 10⁻²³ eV/c² (from LIGO/Virgo analyses), implying negligible speed deviation.
-
-3. **Future surprises:** A statistically significant (≥5σ) arrival-time anomaly in a future multi-messenger event would challenge GR. No current evidence points this direction.
-
-4. **Lab-scale limitations:** Terrestrial experiments (torsion balances, atom interferometers) cannot approach the 10⁻¹⁵ precision of astronomical observations, so tightening this bound will require more astrophysical events.
+---
 
 ## Where Models Disagreed
 
-All four proposals agreed on the core answer (c), but disagreed on **precision figures and factual details**:
-- **GW170817 precision:** Ranged from ~10⁻¹⁵ (Proposals 1, 4) to 10⁻¹⁸ or 10⁻¹⁹ (Proposal 2) to 0.3% (Proposal 3). The published figure is ~10⁻¹⁵. Proposal 2's tighter figures conflate raw arrival-time ratios with actual speed constraints (ignoring source physics). Proposal 3's figure is catastrophically wrong.
-- **Nature of GW170817:** Three proposals correctly identified neutron star merger; Proposal 4 incorrectly called it a black hole merger.
-- **Citation accuracy:** Proposal 1 cited papers that don't support the claims attributed to them (Long et al. tested short-range gravity, not propagation speed; GW150914 had no EM counterpart for speed measurement).
+| Issue | Resolution |
+|-------|-----------|
+| **Graviton mass bound** (ranged from 10⁻²² to 1.76×10⁻²³) | Best current value is **1.27 × 10⁻²³ eV/c²** from GWTC-3. P1's figure was outdated; P2 lost an order of magnitude. |
+| **Speed constraint precision** (P2 claimed 10⁻¹⁷; others ~10⁻¹⁵) | The published GW170817 bound is ~10⁻¹⁵. P2's 10⁻¹⁷ claim lacks a valid source and appears hallucinated. |
+| **GW150914 vs GW170817** | P2 conflated these events — GW150914 was a black hole merger with no confirmed EM counterpart. The multi-messenger constraint comes exclusively from GW170817. |
+| **GPS as supporting example** (P4) | Rejected. GPS corrections address relativistic *time dilation*, not gravitational propagation speed. |
+| **Mercury's perihelion** (P4) | Rejected as support for this specific claim. Mercury's precession is explained by the static Schwarzschild metric, not gravitational wave propagation. |
 
-These disagreements stem from model hallucination and imprecise sourcing rather than genuine scientific uncertainty.
+The disagreements were not about the answer (unanimous: *c*) but about supporting evidence and precision claims. P2 contained multiple factual errors that would fail basic verification — demonstrating exactly why multi-agent cross-checking has value even on settled questions.
 
-## Bottom Line
+---
 
-For any practical, engineering, or scientific purpose: **gravity travels at c = 299,792,458 m/s.** The residual uncertainty (~10⁻¹⁵) is far below any conceivable practical relevance.
+## Synthesis Decisions
 
-**Confidence: 82%** (core claim extremely well-established; confidence capped due to quantum gravity unknowns and subtleties around static vs. radiative gravity that remain theoretically unresolved)
+- **Adopted from P1:** Core structure, static vs. propagating distinction, epistemic humility about quantum gravity. Corrected the "15 significant figures" framing and outdated graviton mass bound.
+- **Rejected from P2:** Multiple factual errors (event conflation, fabricated constraint, self-contradictory numbers). Core conclusion retained only.
+- **Adopted from P3:** Concise framing of common misconceptions. Softened the "epistemically indefensible" claim to reflect that sub-10⁻¹⁵ deviations are untested rather than impossible.
+- **Adopted from P4:** Risk analysis structure. Rejected the GPS and Mercury examples as unsound support for this specific claim.
+- **Incorporated from Critique:** Asymmetric bound specification, correct GWTC-3 graviton mass figure, flag on "15 significant figures" error.
+
+Confidence: 85%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-161
+🧪 Check Type: defensibility
+💾 Saved as PoT-501
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.857 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.823 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 85%
+🟢 Synthesis Balance Score: 0.920
+🟢 Dissent Preservation Rate: 0.833 (10/12 objections preserved)

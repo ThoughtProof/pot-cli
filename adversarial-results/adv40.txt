@@ -3,63 +3,85 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-171 created in 132.0s
+✔ Block PoT-511 created in 123.7s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Oil Pulling vs. Brushing and Flossing
 
-## Clear Recommendation
 
-**No. Oil pulling is not an effective alternative to brushing and flossing.** This conclusion is supported by mainstream dental consensus (ADA, WHO/FDI) and the available — albeit limited — evidence base. Oil pulling may offer marginal supplementary benefit but cannot replace mechanical plaque removal.
+## Verdict: ALLOW
 
-## What We Can Say With Confidence
+# Oil Pulling vs. Brushing and Flossing: Synthesized Assessment
 
-- **Brushing with fluoride toothpaste** physically disrupts biofilm and delivers topical fluoride for remineralization. This is non-negotiable.
-- **Interproximal cleaning** (floss or interdental brushes) reaches surfaces a brush cannot. Also non-negotiable.
-- **Oil pulling** (swishing sesame or coconut oil 10-20 minutes) may modestly reduce certain oral bacteria (particularly *S. mutans*) through mechanical swishing and mild antimicrobial properties of lauric acid. It does not deliver fluoride, cannot mechanically disrupt organized biofilm, and cannot clean between tight contact points.
+**No. Oil pulling is not an effective alternative to brushing and flossing.** It may serve as a minor adjunct practice, but substitution carries real oral health risks.
 
-The real danger is **substitution thinking** — patients who adopt oil pulling as a replacement feel a false sense of clean, skip brushing, and present years later with preventable caries and periodontal disease.
+---
 
-## What We Must Be Honest About
+## Core Consensus (All Four Models Agree)
 
-**The critique identified serious problems across all proposals, and the synthesis must address them:**
+All proposals correctly conclude that oil pulling lacks the mechanical plaque removal and fluoride delivery that define effective oral hygiene. This consensus aligns with ADA position statements and the weight of available clinical evidence. The agreement is genuine, not an artifact of shared bias on the central question.
 
-1. **The specific efficacy numbers are unreliable.** Proposals claimed brushing removes "40-70%" of plaque, oil pulling removes "10-30%," and flossing removes "70-90%" interproximally. These ranges varied by 50-100% across proposals, strongly suggesting models generated plausible-sounding figures rather than citing real data. **Do not trust the specific percentages.** The directional claim — brushing/flossing >> oil pulling — is sound, but the precision is manufactured.
+## What the Evidence Defensibly Supports
 
-2. **Multiple citations were likely hallucinated.** The "2016 Cochrane review" on oil pulling does not appear to exist in Cochrane's database (likely conflated with Shanbhag 2016 in *J Tradit Complement Med*). Several other cited papers with precise sample sizes and effect measures could not be verified. **Citation-heavy ≠ citation-accurate.** This is a critical lesson.
+**Oil pulling can:**
+- Modestly reduce *Streptococcus mutans* counts short-term
+- Produce plaque/gingivitis improvements roughly comparable to antimicrobial mouthwash in small, short-duration studies
+- Work through plausible (if limited) mechanisms: oil emulsification disrupting some bacterial membranes
 
-3. **Flossing's evidence base is weaker than presented.** All proposals treated flossing efficacy as robustly quantified. In reality, a 2011 Cochrane review found very low quality evidence, and a 2016 Associated Press investigation highlighted this gap. The recommendation to floss still stands (plausible mechanism, low cost/risk, professional consensus), but none of the proposals acknowledged this nuance.
+**Oil pulling cannot:**
+- Remove calculus — only mechanical debridement achieves this
+- Deliver fluoride — the single most evidence-backed caries-prevention agent
+- Clean interproximal surfaces — where ~30-40% of plaque accumulates
+- Replace biofilm disruption that brushing provides
 
-4. **The steelman case was ignored.** In populations with zero access to fluoride toothpaste or dental products, is oil pulling better than nothing? Some evidence suggests the swishing action itself provides modest benefit — but so might water rinsing, which undermines even the adjunct claim.
+**The defensible ceiling:** Oil pulling is mouthwash-equivalent at best for soft tissue inflammation. That makes it a supplementary rinse, not a hygiene method.
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|-------|-------------|----------------|
-| Oil pulling efficacy range | 10-20% vs. 15-20% vs. 20-30% | Nobody has solid data; all are estimates |
-| Brushing plaque removal | 40-50% vs. 60-70% | Depends on whether flossing is included; sloppy variable control |
-| Aspiration risk framing | "Rare case reports" vs. "lipemia-induced" (incorrect term) vs. "choking risk" | One proposal used clinically wrong terminology; actual risk is lipoid pneumonia, extremely rare |
-| Fabricated risks | "Pulp chamber occlusion causing anaerobic necrosis" | One proposal invented a risk mechanism with no literature support |
+| Issue | Disagreement | Resolution |
+|---|---|---|
+| **Oil pulling vs. chlorhexidine** | P1/P3: comparable in some studies; P2/P4: clearly inferior | Evidence is genuinely mixed. Small studies show comparability; overall weight slightly favors chlorhexidine. "Clearly inferior" overstates; "comparable" overstates in the other direction. |
+| **Saponification mechanism** | P3 accepts as plausible; P4 calls it a chemical fallacy | **P4 is correct.** True saponification requires a strong base (NaOH/KOH). The oral environment doesn't facilitate this. P3's acceptance is rejected. |
+| **Lipoid pneumonia risk** | P1: "documented cases exist"; P4: "non-zero risk" | **P4's framing adopted.** Confirmed case reports specifically from oil pulling are not verified. It remains a theoretical risk, not an established one. |
 
-The disagreement on numbers reflects a shared problem: the evidence base for oil pulling is genuinely thin, and models filled gaps with plausible-sounding fabrications.
+## Critique-Identified Problems Addressed
 
-## Practical Hierarchy
+**Fabricated/unverified citations (especially Proposal 2):** The Critic flagged P2's "2016 Cochrane Review (9 RCTs, n=500+)" as likely fabricated and multiple other citations as unverifiable. P2's high citation density masked low reliability. **I reject P2's specific numerical claims** (20-30% S. mutans reduction, 2.1 vs 3.4 Silness-Löe scores, 10-15% additive benefit, 4x gingivitis progression) as unverified and potentially hallucinated.
 
-1. **Essential:** Brush 2×/day with fluoride toothpaste + interproximal cleaning 1×/day
-2. **Optional adjunct:** Oil pulling if you enjoy it — before brushing, not instead of it
-3. **Never:** Replace mechanical hygiene with oil pulling or any rinse-only approach
+**P1's Asokan citation:** The "2014, n=60" combination is flagged as a possible conflation of the 2009 (n=20) and 2011 studies. I retain the directional finding but not the specific citation details.
 
-## What ThoughtProof Caught Here
+**Shared blind spot — flossing evidence weakness:** The Critic correctly identifies that all proposals treat flossing as unassailable gold standard, while the 2016 AP investigation revealed surprisingly thin evidence. This is a genuine asymmetry in scrutiny. However, this doesn't rehabilitate oil pulling — it means the comparison baseline is weaker than stated, not that oil pulling is stronger.
 
-The most "authoritative-looking" proposal (Proposal 1, with its citations and data table) was flagged as the most epistemically dangerous — its citations couldn't be verified, making it worse than proposals that honestly provided no citations. This is precisely the failure mode multi-model verification should surface.
+**Missing context — access/cultural framing:** In populations without access to toothbrushes or fluoride toothpaste, oil pulling may offer harm-reduction value. All proposals assumed Western clinical context without stating this.
 
-**Confidence: 62%**
+## Risks of Substitution
 
-The directional conclusion (oil pulling ≠ replacement) warrants ~85%+ confidence. But confidence is capped at 62% because: (a) all four models shared biases about flossing evidence strength; (b) specific quantitative claims were unreliable across all proposals; (c) multiple citations were unverifiable; and (d) the critique identified shared blind spots (steelman case, water-swishing comparison) that none addressed.
+1. **Caries progression** — no fluoride protection, no mechanical removal
+2. **Calculus accumulation** — irreversible without professional intervention
+3. **False security** — a 20-minute ritual feels thorough while providing minimal protection
+4. **Aspiration risk** — theoretical, not confirmed by case literature, but plausible in vulnerable populations
+
+## Synthesis Decisions
+
+| Argument | Decision | Reason |
+|---|---|---|
+| P1's overall framing and honesty | **ADOPTED** — primary structure | Highest epistemic calibration per Critic (7/10) |
+| P2's quantitative claims | **REJECTED** | Multiple likely fabricated citations; false precision |
+| P3's saponification acceptance | **REJECTED** | Chemically incorrect per P4's analysis |
+| P4's mechanistic critique | **ADOPTED** | Chemically sound and unique contribution |
+| P4's "hygiene displacement" concept | **ADOPTED with caveat** | Useful framing even if not established terminology |
+| Critic's flossing blind spot | **ADOPTED as caveat** | Genuine asymmetry, though it doesn't change the verdict |
+
+**Bottom line:** If asked "instead of brushing?" — unambiguous no. If asked "in addition to?" — probably harmless, marginally beneficial, not necessary, and a 20-minute time investment with poor return.
+
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-171
+🧪 Check Type: defensibility
+💾 Saved as PoT-511
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.850 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.824 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.873
+🟢 Dissent Preservation Rate: 1.000 (20/20 objections preserved)

@@ -1,35 +1,20 @@
 {
   "hard-H01": {
-    "ground_truth": "64",
+    "trace_id": "hard-H01",
     "annotator_steps": [
-      "Open RFC 5321.",
-      "Navigate to the size-limits section.",
-      "Locate the subsection about the local-part of a mailbox address.",
-      "Read the sentence stating the maximum total length in octets.",
-      "Return 64."
+      "Identify the governing RFC source for local-part octet limit",
+      "Locate the specific local-part octet limit rule in RFC 5321",
+      "Connect the rule to the answer and confidence judgment"
     ],
-    "annotator_tools": ["Search engine", "Web browser"]
-  },
-  "hard-H04": {
-    "ground_truth": "19",
-    "annotator_steps": [
-      "Open PEP 20.",
-      "Read the abstract rather than only the aphorism list.",
-      "Notice the distinction between the intended total number of aphorisms and the number written down.",
-      "Extract the written-down count from the abstract sentence.",
-      "Return 19."
-    ],
-    "annotator_tools": ["Search engine", "Web browser"]
+    "true_answer": "64 octets"
   },
   "hard-H07": {
-    "ground_truth": "August 2, 1776",
+    "trace_id": "hard-H07",
     "annotator_steps": [
-      "Open the National Archives Declaration timeline page.",
-      "Identify the July 4 adoption entry and avoid treating it as the signing date.",
-      "Locate the later entry that explicitly describes when most delegates signed the engrossed copy.",
-      "Extract the date from that entry.",
-      "Return August 2, 1776."
+      "Identify the authoritative National Archives source",
+      "Locate the signing date in the National Archives",
+      "Connect the sourced date to the final recommendation"
     ],
-    "annotator_tools": ["Search engine", "Web browser"]
+    "true_answer": "August 2, 1776"
   }
 }

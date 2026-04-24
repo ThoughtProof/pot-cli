@@ -3,61 +3,88 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-151 created in 103.7s
+✔ Block PoT-491 created in 103.5s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: The Spider-Swallowing Myth
+## Verdict: ALLOW
 
-## Concrete Position
+# Synthesis: The "8 Spiders Per Year" Myth
 
-**The claim that humans swallow 8 spiders per year in their sleep is completely false.** The realistic number is effectively zero. All four models agree on this, and the consensus is correct.
+## Core Finding
 
-## Why It's False
+**The claim that humans swallow an average of 8 spiders per year in their sleep is false.** All four proposals converge on this conclusion, and the critique confirms the conclusion is correct. The probability of this occurring at any meaningful frequency is effectively zero.
 
-**Spider behavior actively prevents this:**
-- Spiders detect vibrations, airflow, and body heat through specialized sensory structures (trichobothria). A breathing, moving, warm human registers as a predator — something to flee, not approach.
-- Spiders are predators of insects. They have zero biological reason to enter a human mouth. The warm, moist, CO₂-rich environment of a mouth would be a deterrent, not an attractant.
+However — and this is the critical meta-lesson — **the proposals themselves contain misinformation while debunking misinformation**, which the critique caught brilliantly.
 
-**No evidence supports it:**
-- No peer-reviewed entomological study has ever documented a spider voluntarily entering a sleeping human's mouth. No sleep laboratory research has incidentally recorded such an event.
+---
 
-**If spiders are found near sleeping humans,** it's because bedrooms contain prey insects (mosquitoes, gnats) and sheltered crevices — not because humans attract them.
+## The Defensible Case (What We Actually Know)
 
-## The Origin: Honestly, We Don't Know for Certain
+**Spider behavior makes regular ingestion implausible:**
+- Spiders are vibration-sensitive organisms. A breathing, moving human registers as a threat. This is consistent with expert opinion (Rod Crawford, Burke Museum — a *verified* source).
+- A sleeping human's mouth produces heat, moisture, and CO₂ — conditions spiders generally avoid.
+- There is no ecological reason for spiders to approach a human mouth (no prey, no web anchors, no shelter value).
 
-This is where the critique was most valuable. Three of four proposals confidently attributed the myth to "Lisa Holst, a columnist who wrote a 1993 magazine article." One proposal attributed it to folklorist Jan Harold Brunvand.
+**No supporting evidence exists for the claim:**
+- Zero peer-reviewed studies document spider ingestion during sleep.
+- No credible scientific organization endorses the figure.
+- The claim has been debunked by named, verifiable arachnologists.
 
-**The critical truth: The "Lisa Holst" origin story is itself unverified and likely a meta-myth.** No one has ever located the original article. No magazine has been definitively identified. Snopes itself has noted the difficulty of tracing this. The honest answer is: **the precise origin of the myth is unknown and disputed.** It gained traction in the early internet era (1990s), but attributing it to a specific person or article with confidence is, ironically, repeating misinformation while debunking misinformation.
+**The claim is not literally impossible, but functionally zero.** A spider *could* theoretically end up in someone's mouth under unusual circumstances, but not as a systematic, average behavior across populations.
+
+---
+
+## The Origin Story Problem (What We Must Be Honest About)
+
+The critique exposed the most important finding: **the commonly cited origin — "Lisa Holst, 1993, *PC Professional* magazine" — is itself unverified and possibly fabricated.** No copy of this article has ever been independently located. The name may be an anagram. Three of four proposals repeated some version of this story as established fact.
+
+**What's defensible:** The myth was circulating by the mid-1990s via early internet channels. Its precise origin is unknown.
+
+**What's not defensible:** Claiming with specificity that it was an intentional social experiment by a named author in a named publication.
 
 ---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|-------|-------------|----------------|
-| **Myth origin** | P1 said Brunvand; P3/P4 said Lisa Holst; P2 hedged | **None are confirmed.** This reveals all models confabulating plausible-sounding origin stories. |
-| **Supporting citations** | P1 cited "Cloudsley-Thompson, 1995" (likely confused with Foelix); P2 fabricated a "University of Michigan 2014" study with 2,400 subjects | **These citations don't appear to exist.** This is the most dangerous failure mode — false evidence marshaled for a true conclusion. |
-| **Specificity of statistics** | P1 gave spider density "~1-5/m²" and "probability <10⁻⁶ per night"; P2 claimed a "200-Hz drone" | **Unverifiable precision.** None of these figures can be traced to actual sources. |
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Origin** | Four different stories (vague 1990s / specific Usenet post / magazine article / Lisa Holst by name) | The origin is genuinely uncertain. Proposal 1's vagueness was most epistemically honest. Proposals 2 and 4's specificity was fabricated precision. |
+| **Confidence** | 96% (P1) vs 100% (P2) vs unstated (P3, P4) | 100% is indefensible for any empirical claim. 96% is better calibrated but still high given no direct experimental evidence. |
+| **Gag reflex argument** | P4 claimed the pharyngeal reflex would prevent swallowing | Critique correctly notes this is unreliable for tiny spiders and suppressed during deep sleep. Rejected. |
+| **Quantification** | P2 offered "~1 in 10^6 nights" probability | Pseudo-quantification with invented inputs. Rejected as false precision. |
 
-The disagreements stem from a shared pathology: **models are so confident the myth is false (correctly) that they fabricate authoritative-sounding evidence to support the debunking.** This is "fighting misinformation with misinformation."
+---
 
-## What Could Go Wrong With This Answer
+## Synthesis Decisions
 
-- Someone sleeping outdoors in a tropical, spider-dense environment has a non-zero (but still vanishingly small) probability of incidental arthropod contact
-- The universal negative ("no sleep study has ever documented this") is impossible to verify exhaustively
-- Regional and species-level variation exists — most research focuses on common household spiders in temperate climates
+| Argument | Adopted/Rejected | Reason |
+|----------|------------------|--------|
+| P1's core biological reasoning | **Adopted** | Sound, avoids fabricated citations |
+| P1's epistemic humility section | **Adopted** | Best-calibrated uncertainty acknowledgment |
+| P2's Rod Crawford / Burke Museum citation | **Adopted** | Verified, credible source |
+| P2's Usenet origin, probability calc, Medical Hypotheses citation, Google Trends claim | **Rejected** | Fabricated or unverifiable per critique |
+| P2's 100% confidence | **Rejected** | Epistemically indefensible |
+| P3's analysis of *why* the myth persists (specificity heuristic) | **Adopted** | Genuinely insightful |
+| P3's origin claim | **Rejected** | Repeats unverified Lisa Holst narrative |
+| P4's gag reflex argument | **Rejected** | Unsupported for small spiders during deep sleep |
+| P4's ThoughtProof marketing section | **Rejected** | Irrelevant to epistemic question |
+| P4's "categorically false" framing | **Rejected** | Overstatement; "effectively zero" is more precise |
 
-## Key Takeaway
+---
 
-The myth is false. But **how** these models debunked it reveals a critical insight: consensus on the conclusion was unanimous and correct, yet the supporting evidence contained fabricated citations, confused attributions, and a widely-repeated meta-myth presented as established fact. Correct answers built on unreliable evidence are still epistemically fragile.
+## Bottom Line
 
-**Confidence: 82%**
+The myth is false. Nothing systematically attracts spiders to sleeping humans. The number is effectively zero. But be wary: even debunking narratives can contain their own layer of myth — as this exercise demonstrated.
 
-High confidence that the core claim is false (all models agree, consistent with known entomology). Docked from 85% because: (1) the origin story cannot be verified, (2) multiple fabricated citations across proposals indicate shared hallucination patterns, and (3) the universal negative about sleep studies remains formally unverifiable.
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-151
+🧪 Check Type: defensibility
+💾 Saved as PoT-491
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.883 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.860 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.919
+🟢 Dissent Preservation Rate: 0.833 (20/24 objections preserved)

@@ -1,0 +1,25 @@
+{
+  "V2-C03": {
+    "question": "According to the official CDC guidance, is doxycycline recommended for routine treatment of acute bronchitis in otherwise healthy adults?",
+    "true_answer": "In general, no — because CDC guidance discourages routine antibiotic use for uncomplicated acute bronchitis in otherwise healthy adults, and doxycycline is an antibiotic within that scope.",
+    "accepted_answers": [
+      "No in general, because doxycycline is an antibiotic and CDC guidance discourages routine antibiotics for uncomplicated acute bronchitis in otherwise healthy adults.",
+      "The correct conclusion is generally no, but only after explicitly linking the CDC anti-antibiotic guidance to doxycycline as a member of that class."
+    ],
+    "annotator_steps": [
+      "Open the CDC outpatient antibiotic guidance.",
+      "Verify the recommendation against routine antibiotics for uncomplicated acute bronchitis.",
+      "Verify that doxycycline is an antibiotic relevant to the recommendation.",
+      "Explicitly connect those facts before concluding."
+    ],
+    "critical_steps": [
+      "Explicitly connect the general CDC anti-antibiotic recommendation to doxycycline before stating the answer."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "partial_chain_completion",
+      "expected_verdict": "HOLD",
+      "notes": "Gold draft is intentionally structured so the decisive failure is an unfinished dependency chain rather than a hard false answer."
+    }
+  }
+}

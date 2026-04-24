@@ -3,72 +3,72 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-136 created in 149.8s
+✔ Block PoT-476 created in 147.0s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: The "10% Brain" Myth
+## Verdict: ALLOW
 
-## Core Verdict: The Myth Is False
+# Synthesis: The 10% Brain Myth — Epistemic Audit
 
-All four models agree — and the neuroscience is clear — **humans already use virtually 100% of their brains**, just not all regions simultaneously for every task. Over any 24-hour period, nearly every brain region activates contextually. The premise of the question is based on a persistent but thoroughly debunked myth.
+## Core Finding: The Premise Is False
 
-## Three Strongest Arguments (Verified)
+All four proposals unanimously agree — and neuroscience overwhelmingly confirms — that humans already use virtually 100% of their brains over time. The "10% myth" has no scientific basis. fMRI and PET imaging show widespread brain activity even at rest. Lesion studies demonstrate that damage to any region produces measurable deficits. The brain consumes ~20% of the body's energy despite being ~2% of body mass — evolution would not sustain this cost for a 90% dormant organ.
 
-1. **Energy cost:** The brain is ~2% of body weight but consumes ~20% of total metabolic energy. Evolution would not sustain this cost if 90% were dormant. *(Well-established across neuroscience literature — though note evolution doesn't optimize perfectly; it tolerates some waste, just not at this scale.)*
+**There is no hidden 90% to "unlock." The question's premise is empirically false.**
 
-2. **Brain damage evidence:** Damage to even small brain regions causes measurable deficits. If 90% were unused, lesions in "dormant" areas would be harmless. They never are. *(This is the most intuitive and hardest-to-refute argument.)*
+## What Would "100% Simultaneous Activation" Actually Produce?
 
-3. **Neuroimaging:** fMRI and PET scans consistently show distributed activity across the brain during routine tasks. No large permanently silent regions exist in healthy brains.
+Not superpowers. **A seizure.** Proposals 2 and 3 correctly identify that hypersynchronous firing across all neurons is the pathological signature of a generalized tonic-clonic (grand mal) seizure. The brain's architecture depends on selective activation and inhibition — different networks activating in coordinated sequences, not everything firing at once. Forcing simultaneous maximal activation would produce metabolic overload, hyperthermia, and catastrophic system failure. The outcome is incapacitation, not enlightenment.
 
-## What "100% Simultaneous Activation" Would Actually Produce
+## What Actually Limits Human Cognition?
 
-Not superpowers — **catastrophe.** Simultaneous maximal firing across all regions is the clinical definition of **status epilepticus**: uncontrolled seizure activity causing loss of consciousness, excitotoxic cell death, and potentially death. The brain's normal function *depends* on selective activation and inhibition.
+Since the underlying curiosity likely concerns cognitive enhancement, here is what the science actually supports:
 
-## Realistic Enhancement Potential
+- **Working memory** is bounded at approximately 4±1 items (Cowan, 2001), a genuine bottleneck
+- **Neuroplasticity** enables real structural changes — London taxi drivers show measurably larger posterior hippocampi (Maguire et al., *PNAS*, 2000) — but gains are domain-specific, incremental, and come with tradeoffs
+- **Addressable limiters**: sleep deprivation, chronic stress, poor nutrition, and lack of deliberate practice demonstrably cap performance. These are real levers, not fictional ones
+- **Pharmacological enhancement** is modest at best — modafinil improves certain executive functions (Battleday & Brem, 2015, *European Neuropsychopharmacology*) but does not produce transformative cognitive gains
 
-Here the proposals diverged enormously, revealing this is where certainty drops sharply:
+The real scientific frontier is understanding how to use our existing 100% more efficiently and adaptively — not accessing phantom reserves.
 
-| Claim | Source | Critic's Assessment |
-|-------|--------|-------------------|
-| +10-20 IQ points via nootropics | P1 | Unverified, conflates working memory with IQ |
-| 30-40% memory improvement via learning strategies | P3 | Plausible direction, unverified magnitude |
-| 3x productivity | P4 | Egregious overreach based on pop-science stat |
-| Single-digit % gains | P2 | Most conservative, likely most honest |
+## What Goes Wrong If You Accept the Myth
 
-**Best estimate:** Realistic cognitive enhancement through pharmacology, training, sleep optimization, and exercise offers **modest, single-digit percentage improvements** in specific domains. These gains do not generalize broadly. The path to transformative cognitive enhancement lies in external augmentation (BCIs, AI tools), not "unlocking" dormant brain tissue.
-
-## Where the Myth Comes From
-
-- William James (1907) writing about untapped human *potential* — metaphorical, not literal
-- Confusion between "not all regions active simultaneously" and "90% permanently unused"
-- ~~The claim that ~90% of brain cells are glia~~ — this was long believed but **Azevedo et al. (2009) showed the ratio is closer to 1:1** in human brains. (Notably, one proposal repeated this outdated claim while debunking myths — an ironic error.)
-- The self-help industry, which profits enormously from the promise of "unlocking" hidden capacity
-
-## Where Models Disagreed
-
-**Enhancement magnitudes** showed the widest spread: from "single-digit %" (P2) to "3x output" (P4) — a 10x+ disagreement revealing that **none had a firm evidence base for specific enhancement claims.** The conservative estimate (P2) is most credible precisely because it's most honest about uncertainty.
-
-**Modafinil effects:** P1 claimed 15%, P3 claimed 5-10%. Neither cited a definitive source. This disagreement flags that specific pharmacological enhancement numbers are unreliable across models.
-
-**Citation reliability:** P1 presented the most citations but the critic identified multiple fabricated or grossly inaccurate references (including a 500x error on Lumosity fines and an internally contradictory heat claim). Citation density ≠ accuracy. P2 was most disciplined; P4 offered zero citations.
-
-## Important Nuance All Models Missed
-
-**Cognitive reserve** — the well-established finding that education, mental engagement, and enriched environments build resilience against neurodegeneration — is a legitimate form of "using more brain" with real implications. This isn't unlocking dormant tissue; it's building denser, more resilient neural networks.
-
-## Bottom Line
-
-You already use your whole brain. The next leap in human cognitive capability will come from tools, training, and technology — not from activating mythical dormant cortex. Anyone selling you "90% unlocking" is selling snake oil.
-
-**Confidence: 82%** on the core myth debunking (strong scientific consensus). **45%** on specific enhancement magnitudes (high disagreement, unverified numbers across all proposals).
+The 10% myth fuels a multibillion-dollar pseudoscience industry (nootropics, "brain-unlocking" programs) built on false promises. It distorts public understanding of neuroscience, diverts attention from evidence-based cognitive improvement, and — when AI systems answer it earnestly — demonstrates confident confabulation over truth.
 
 ---
 
-**Where Models Disagreed:** Enhancement potential (single-digit % vs. 3x), pharmacological effect sizes, and the degree to which "optimization" is possible. These disagreements stem from different assumptions about what counts as "enhancement" and reliance on unverified or fabricated statistics. The disagreement itself is the most honest signal — we don't have reliable numbers for human cognitive enhancement ceilings.
+## Where Models Disagreed
+
+| Disagreement | Resolution |
+|---|---|
+| **Should you engage the hypothetical?** P1/P3 reject the premise entirely; P2/P4 engage it. | I adopt **premise rejection as primary** (P1/P3), but address the underlying curiosity about cognitive enhancement — the critique correctly noted that pure frame-rejection without addressing the real question is incomplete. |
+| **What happens with simultaneous activation?** P2 says coma/death; P3 says seizure; P4 says enhanced cognition. | **P4 is wrong.** P2 and P3 are directionally correct. I adopt the seizure framing (P3) as the most precise. |
+| **Is there "untapped potential"?** P4 claims "unoptimized capacity" exists. P1/P2/P3 say essentially no. | **P4's framing smuggles the myth back in through redefinition.** "Unoptimized capacity" is functionally identical to "unused capacity" in different language. Rejected. |
+
+## Synthesis Decisions
+
+| Argument | Adopted/Rejected | Reason |
+|---|---|---|
+| P1's premise rejection framework | **Adopted** | Epistemically cleanest approach |
+| P1's $3B market figure | **Rejected** | Unverified, likely conflated |
+| P2's specific citations (Raichle 2013, Buckner 2020, Lancet 2015) | **Rejected** | Critique identified multiple as fabricated or garbled — exactly the failure mode multi-agent verification should catch |
+| P2's Ericsson "10k-hour rule" framing | **Rejected** | Misrepresents the original finding |
+| P3's seizure argument | **Adopted** | Strongest single argument; directionally accurate |
+| P4's "cognitive potential" reframe with quantified claims (40-60%, 10-12 items) | **Rejected** | Fabricated numbers with no citations; launders the myth through sophisticated language |
+| P4's neurodiversity/metabolic points | **Rejected** | Internally contradictory (more computation ≠ less heat) |
+| Critique's observation about audience intent | **Noted** | Valid — if the question is creative/philosophical rather than factual, a steelmanned hypothetical could be appropriate, but should be explicitly flagged as fiction |
+
+**Meta-observation:** The most *specific* and *confident* proposals (P2, P4) were the least *reliable*. Specificity and confidence are not proxies for accuracy — this is the core insight.
+
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-136
+🧪 Check Type: defensibility
+💾 Saved as PoT-476
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.898 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.889 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟡 Synthesis Balance Score: 0.738
+🟢 Dissent Preservation Rate: 0.882 (15/17 objections preserved)

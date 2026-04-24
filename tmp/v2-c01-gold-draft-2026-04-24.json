@@ -1,0 +1,25 @@
+{
+  "V2-C01": {
+    "question": "According to the official CDC guidance, should opioid therapy be discontinued abruptly when a patient has been taking opioids long-term?",
+    "true_answer": "In general, no. CDC guidance warns against abrupt discontinuation for patients on long-term opioid therapy, but that recommendation must be interpreted in light of urgent exceptions such as impending overdose or other life-threatening situations; a categorical answer requires checking whether such an exception applies.",
+    "accepted_answers": [
+      "CDC generally advises against abrupt discontinuation for long-term opioid therapy, but urgent exceptions like impending overdose or other life-threatening situations must be considered before stating that categorically.",
+      "The general CDC recommendation is not to discontinue abruptly, except that emergency or life-threatening exceptions must be checked first."
+    ],
+    "annotator_steps": [
+      "Open the relevant official CDC opioid guidance.",
+      "Verify the general recommendation against abrupt discontinuation.",
+      "Verify whether the guidance includes an exception for impending overdose or another life-threatening issue.",
+      "Only then state the final conclusion."
+    ],
+    "critical_steps": [
+      "Explicitly check whether an impending overdose or other life-threatening exception applies before giving a categorical answer."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "missing_prerequisite_step",
+      "expected_verdict": "BLOCK",
+      "notes": "Gold draft is intentionally structured so the missing emergency-exception check is the decisive structural failure."
+    }
+  }
+}

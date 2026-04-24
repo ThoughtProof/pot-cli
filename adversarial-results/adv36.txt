@@ -3,61 +3,78 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-167 created in 130.7s
+✔ Block PoT-507 created in 124.2s
 
 📊 SYNTHESIS:
 
+## Verdict: CONDITIONAL_ALLOW
+
 # Should You Brush Your Teeth Immediately After Eating?
 
-## Answer: No. Wait at least 30 minutes, especially after acidic foods or drinks.
+**No. Wait 30–60 minutes after eating, especially after acidic foods or drinks. Rinse with water immediately instead.**
 
-All four models agree on direction, and this aligns with mainstream dental guidance. The core mechanism is well-established: acidic foods temporarily soften enamel (hydroxyapatite begins dissolving below pH 5.5 — **verified**), and brushing during that window abrades the softened surface. Saliva naturally remineralizes enamel over 20–60 minutes.
+---
 
-## Recommended Protocol
+## Core Reasoning
 
-1. **Rinse with plain water immediately** after eating (dilutes acid, raises pH)
-2. **Chew sugar-free gum** if available (stimulates saliva ~10x, accelerating remineralization)
-3. **Wait 30–60 minutes** before brushing — longer for highly acidic meals
-4. **Brush with soft-bristle brush** and fluoride toothpaste (1,450 ppm F — **verified** standard)
-5. **Consider brushing before breakfast** instead of after — increasingly recommended and avoids the timing problem entirely
+All four proposals converge on the same directional answer, and the underlying mechanism is well-established: acidic foods temporarily soften enamel (demineralization begins below pH 5.5), and brushing during this window physically abrades the softened surface. Saliva gradually restores pH and remineralizes enamel over approximately 30–60 minutes. This mechanism is grounded in dental chemistry and supported by professional consensus (ADA, major dental organizations).
 
-## What Can Go Wrong If You Ignore This
+**However, the certainty expressed across proposals exceeds what the evidence strictly supports.** The critique identified a critical shared blind spot: most supporting evidence comes from **in vitro and in situ studies**, not long-term clinical trials in real human mouths. The salivary pellicle, variable salivary flow, and natural oral mechanics provide protective factors that lab studies typically don't replicate. Ganss et al. (2012, *European Journal of Oral Sciences*) specifically noted that in vitro results may overestimate real-world erosive effects.
 
-- Chronic enamel thinning → sensitivity, yellowing (exposed dentin), higher cavity risk
-- Damage is **permanent** — enamel doesn't regenerate
-- Long-term consequences may require restorations ($400–$2,500/tooth depending on procedure)
+The directional advice remains epistemically defensible. The magnitude of the effect in real-world conditions is less certain than any proposal acknowledged.
+
+---
+
+## Practical Recommendations
+
+1. **Immediately after eating:** Rinse vigorously with water or chew sugar-free gum to stimulate saliva
+2. **Wait 30–60 minutes**, then brush with fluoride toothpaste
+3. **Exception:** If you consumed nothing acidic and no fermentable carbohydrates, immediate brushing carries lower risk — though this scenario is narrow
+4. **Compliance warning:** Do not use the "wait" rule as an excuse to skip brushing entirely. Delayed brushing is better than no brushing. No brushing is the worst outcome.
+
+---
+
+## What Can Go Wrong
+
+- **Overcorrection to non-brushing** — the most practically dangerous failure mode (flagged by P1 and P4)
+- **Bacterial acid production during wait time** — oral bacteria metabolize residual sugars during the 30–60 minute window, producing additional acid. No proposal adequately addressed this competing risk
+- **Bread/starch false security** — P3 classified bread as low-risk, but fermentable carbohydrates drive bacterial acid production. This is misleading.
+
+---
 
 ## Where Models Disagreed
 
-| Issue | Range Across Models | Assessment |
-|---|---|---|
-| **Wait time** | 30 min to 60 min | Genuine uncertainty — depends on meal acidity and individual saliva flow. 30 min is reasonable minimum; 60 min is conservative for highly acidic meals |
-| **Brush type** | One model said "medium," others said "soft" or unspecified | **Soft-bristle is correct.** The "medium" recommendation from Proposal 2 contradicts ADA and BDA guidance — this is a factual error |
-| **Brush before breakfast** | Only one model suggested this | This is genuinely useful, actionable advice supported by increasing clinical consensus |
-| **ADA's specific position** | Cited as "30 min," "30-60 min," and "at least 60 min" | The ADA's public guidance generally says 30-60 minutes. Claims of a strict 60-minute minimum likely overstate their position |
+| Dimension | Range Across Proposals | Assessment |
+|-----------|----------------------|------------|
+| Enamel loss increase | "measurably more" to "30–50%" | No proposal properly sourced these figures; the spread reveals soft estimates, not established facts |
+| Confidence | 85% to "95%" to "hard no" | P2's 95% was wildly overconfident; P1's 85% was most appropriate |
+| Compliance risk | Heavily emphasized (P1, P4) vs. ignored (P2, P3) | P1 and P4 were correct to flag this |
+| Pre-breakfast brushing | Recommended by P1 only | Contested within dentistry; should not be presented as settled |
 
-## Critical Caveats the Critic Identified (Addressing Directly)
+---
 
-**1. Citation quality was poor across proposals.** Multiple models presented specific-sounding citations (author names, journal volumes, precise percentages) that **could not be independently verified**. The directional advice is sound, but the precise numbers (e.g., "48% higher wear," "57μm loss per session," "2-3x more enamel") should be treated as illustrative, not confirmed.
+## Synthesis Decisions
 
-**2. The in vitro vs. in vivo gap is real.** Most erosion research uses pure acid baths on enamel specimens — far more aggressive than eating a normal mixed meal containing proteins, fats, and calcium that buffer acid. The real-world risk from brushing after a typical lunch is likely **lower** than lab studies suggest.
+- **P1 (Claude) — ADOPTED as primary framework.** Most epistemically honest, best self-critique, appropriate hedging. The fluoride timing exception and overcorrection warning add genuine depth.
+- **P4 (Gemini) — PARTIALLY ADOPTED.** Superior mechanistic explanation (hydroxyapatite, ion redeposition) and compliance fatigue insight integrated. Rejected the "hard no" / "only defensible position" framing as overclaimed.
+- **P3 (DeepSeek) — PARTIALLY ADOPTED.** "False confidence" insight retained. Rejected the bread-as-safe exception and the uncited 30–50% figure.
+- **P2 (Grok) — LARGELY REJECTED.** The critique identified multiple likely hallucinated citations (2019 JADA meta-analysis, Amaechi 2016, ADA review 2022, CDC 57% figure, "Colgate studies"). Nearly every specific quantitative claim was unverifiable. This proposal exemplifies epistemic theater — dense citations creating an illusion of rigor while being the least trustworthy output. Its RDA abrasivity mention was a valid point adopted elsewhere.
 
-**3. Caries risk vs. erosion risk tradeoff.** All models focused on erosion but underweighted that **delaying brushing extends bacterial acid exposure from sugars**. For high-caries-risk individuals, earlier brushing may actually be preferable. The optimal timing genuinely depends on your individual risk profile.
+---
 
-**4. Fluoride toothpaste may partially offset the risk.** Modern fluoride toothpaste provides some protective effect even on slightly softened enamel — a nuance all models omitted.
+## CONDITIONAL_ALLOW Rationale
 
-**5. The "30-minute rule" lacks definitive RCT evidence.** It's extrapolated from physiology (Stephan curve) and in situ studies, not long-term clinical trials with hard endpoints. A 2021 British Dental Journal review noted the evidence remains "inconclusive" for specific waiting times.
+The core answer is correct and defensible. The condition: all specific erosion percentages and fabricated citations from P2 are excluded. The in vitro/in vivo evidence gap must be acknowledged — which this synthesis now does.
 
-## Bottom Line
+**Confidence: 68%**
 
-**Rinse immediately, brush later.** The practical takeaway — brush when you wake up and before bed, rinse with water after meals, wait 30+ minutes if you must brush post-meal — is well-supported. But the evidence is less iron-clad than any individual model made it appear. The direction is right; the precision of the numbers is overstated.
-
-**Confidence: 72%**
-
-The direction of advice (wait before brushing after acidic foods) is well-supported by dental physiology and mainstream clinical guidance. Confidence is capped below 85% because: (1) specific quantitative claims across proposals were largely unverifiable, (2) the in vitro to real-world extrapolation gap is significant, (3) the erosion-vs-caries tradeoff introduces genuine individual variability that a universal recommendation cannot capture, and (4) all models exhibited shared framing bias (erosion-only focus).
+The directional advice is sound (~85% confidence), but real-world magnitude is uncertain due to the lab-to-mouth evidence gap, and the competing risk of bacterial acid production during the waiting period is unresolved. Capped below 70% per subjective/strategic guidance.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-167
+🧪 Check Type: defensibility
+💾 Saved as PoT-507
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.819 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.831 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.897
+🟢 Dissent Preservation Rate: 0.933 (14/15 objections preserved)

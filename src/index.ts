@@ -18,6 +18,7 @@ import { planEnrichSourcePagesCommand } from './commands/plan-enrich-source-page
 import { planSweepFirstPartyCommand } from './commands/plan-sweep-first-party.js';
 import { planBuildSourceClaimMapCommand } from './commands/plan-build-source-claim-map.js';
 import { planScoreBenchmarkCommand } from './commands/plan-score-benchmark.js';
+import { runGradedEval } from './commands/plan-graded-eval.js';
 
 const program = new Command();
 
@@ -163,6 +164,7 @@ program
   .option('--out <file>', 'Write output to a file instead of stdout')
   .option('--minimum-score <number>', 'Alignment minimum score threshold (0-1)', '0.25')
   .option('--mode <mode>', 'Alignment mode: lexical|semantic', 'semantic')
+  .option('--experimental-source-claim', 'Include experimental source-claim support during benchmark scoring (off by default)')
   .action(async (inputFile: string, options) => {
     await planScoreBenchmarkCommand(inputFile, options);
   });
@@ -208,6 +210,20 @@ program
   .option('--enrich-source-pages', 'Enrich browse evidence with fetched source-page metadata before assessing source claims')
   .action(async (inputFile: string, options) => {
     await planBuildSourceClaimMapCommand(inputFile, options);
+  });
+
+program
+  .command('plan-graded-eval')
+  .description('Run graded support evaluator (PLV v2) against pilot items with 5-tier scoring + evidence citation')
+  .option('--input <file>', 'Input JSON with PLV items')
+  .option('--model <model>', 'Model alias (grok, sonnet, deepseek)', 'grok')
+  .option('--output <file>', 'Output JSON path')
+  .action(async (options) => {
+    const args: string[] = [];
+    if (options.input) args.push('--input', options.input);
+    if (options.model) args.push('--model', options.model);
+    if (options.output) args.push('--output', options.output);
+    await runGradedEval(args);
   });
 
 program.parse();

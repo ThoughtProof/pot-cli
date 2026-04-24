@@ -1,0 +1,65 @@
+{
+  "os-RFC9110": {
+    "trace_id": "os-RFC9110",
+    "annotator_steps": [
+      "Identify the governing RFC 9110 section",
+      "Locate the relevant status rule",
+      "Connect the sourced rule to the verdict"
+    ],
+    "true_answer": "421 Misdirected Request"
+  },
+  "rfc9110-422": {
+    "trace_id": "rfc9110-422",
+    "annotator_steps": [
+      "Identify the RFC 9110 status-code source",
+      "Locate the 422 rule text",
+      "Connect the sourced rule to the final execution judgment"
+    ],
+    "true_answer": "422 Unprocessable Content"
+  },
+  "46719c30-f4c3-4cad-be07-d5cb21eee6bb": {
+    "trace_id": "46719c30-f4c3-4cad-be07-d5cb21eee6bb",
+    "annotator_steps": [
+      "Identify the correct author and publication path",
+      "Verify the provenance chain",
+      "Judge whether the final recommendation remains defensible"
+    ],
+    "true_answer": "Vaswani et al., NeurIPS 2017"
+  },
+  "4b6bb5f7-f634-410e-815d-e673ab7f8632": {
+    "trace_id": "4b6bb5f7-f634-410e-815d-e673ab7f8632",
+    "annotator_steps": [
+      "Identify the official source surface",
+      "Extract the decisive span correctly",
+      "Connect the extraction to the recommendation"
+    ],
+    "true_answer": "Correct extraction from official source"
+  },
+  "72e110e7-464c-453c-a309-90a95aed6538": {
+    "trace_id": "72e110e7-464c-453c-a309-90a95aed6538",
+    "annotator_steps": [
+      "Identify a valid evidence anchor on the results surface",
+      "Extract the correct country/flag relationship",
+      "Judge whether the evidence chain supports the output"
+    ],
+    "true_answer": "Correct country/flag relationship"
+  },
+  "cffe0": {
+    "trace_id": "cffe0",
+    "annotator_steps": [
+      "Review the candidate task trace",
+      "Identify the missing or broken plan step",
+      "Assess whether the overall recommendation remains defensible"
+    ],
+    "true_answer": "Complete analysis with all steps"
+  },
+  "dc28c": {
+    "trace_id": "dc28c",
+    "annotator_steps": [
+      "Review the provenance chain",
+      "Identify the break point",
+      "Assess whether the chain supports the output"
+    ],
+    "true_answer": "Valid provenance chain"
+  }
+}

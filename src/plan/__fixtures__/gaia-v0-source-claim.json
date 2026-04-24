@@ -1,0 +1,44 @@
+{
+  "os-RFC9110": {
+    "support": "exact",
+    "confidence": "high",
+    "source": "RFC 9110 Section 15.5.20",
+    "claimText": "421 Misdirected Request"
+  },
+  "rfc9110-422": {
+    "support": "exact",
+    "confidence": "high",
+    "source": "RFC 9110 Section 15.5.21",
+    "claimText": "422 Unprocessable Content"
+  },
+  "46719c30-f4c3-4cad-be07-d5cb21eee6bb": {
+    "support": "unsupported",
+    "confidence": "low",
+    "source": "unknown",
+    "claimText": "Provenance mismatch detected"
+  },
+  "4b6bb5f7-f634-410e-815d-e673ab7f8632": {
+    "support": "unsupported",
+    "confidence": "low",
+    "source": "unknown",
+    "claimText": "Extraction mismatch from official source"
+  },
+  "72e110e7-464c-453c-a309-90a95aed6538": {
+    "support": "unsupported",
+    "confidence": "low",
+    "source": "unknown",
+    "claimText": "No valid evidence anchor found"
+  },
+  "cffe0": {
+    "support": "unsupported",
+    "confidence": "low",
+    "source": "unknown",
+    "claimText": "Structural gap in trace"
+  },
+  "dc28c": {
+    "support": "unsupported",
+    "confidence": "low",
+    "source": "unknown",
+    "claimText": "Provenance chain breaks at decisive point"
+  }
+}

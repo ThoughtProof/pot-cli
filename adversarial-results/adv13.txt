@@ -3,63 +3,81 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-144 created in 135.4s
+✔ Block PoT-484 created in 129.3s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Lightning Strike Probability
+## Verdict: CONDITIONAL_ALLOW
 
-## Core Finding
+# Lightning Strikes Twice: Synthesized Analysis
 
-**Lightning routinely strikes the same place twice. The proverb is empirically false as a physical claim.** All four models agree on this, and the underlying physics is well-established: tall, conductive, isolated objects create consistent electromagnetic conditions that attract repeated strikes.
+**Core Position: The saying "lightning never strikes the same place twice" is false — and directionally backwards. Locations struck once are statistically *more* likely to be struck again, not less.**
 
-## Verified Numbers
+All four proposals converge on this conclusion. The disagreements lie in quantification, sourcing rigor, and analytical depth.
 
-- **Empire State Building: ~20-25 strikes/year** — well-documented by the building itself and multiple meteorological sources. (Proposal 4's claim of "~100" is **wrong by 4-5x** and is rejected.)
-- **US cloud-to-ground strikes: ~20-25 million/year** — consistent across NOAA and Vaisala (NLDN operator) data. Proposal 2's "40 million" likely conflates strokes with strikes without disclosure.
-- **US land area: ~10 trillion m²** — verified arithmetic.
+---
 
-## Probability Framework
+## The Defensible Facts
 
-The right model is **Poisson-distributed, conditioned on location characteristics**:
+**Lightning follows physics, not memory.** It seeks paths of least resistance — tall objects, conductive materials, isolated features. A location struck once almost certainly retains the physical properties that attracted the strike. The probability of a second strike is **approximately equal to the first** — which, for previously-struck locations, is *already above the regional average*.
 
-**For tall structures (300m+):** Strike rates of 15-25/year are well-documented. P(re-strike within 1 year) ≈ **effectively 100%**. This is trivially true and uncontroversial.
+**Empire State Building:** The best-supported estimate is **~20–25 strikes per year**, originating from decades of observation. Some higher figures (up to 100) may reflect counting methodology differences — specifically whether upward-initiated leaders are included alongside traditional return strokes. I adopt the conservative 20–25 range while noting the counting ambiguity.
 
-**For ordinary locations (flat ground, 1 m²):** Base rate ≈ 1 in 1,000,000/year in moderate-density US regions. P(second strike within a human lifetime) ≈ **<0.01%**. This is the genuinely interesting case, and notably, *no proposal provided well-sourced numbers for it*.
+**Human strikes:** NOAA estimates approximately **1 in 15,300 lifetime risk** (derived from ~1 in 1,222,000 annual risk over an 80-year lifespan). A second strike's probability depends on continued exposure, not on having been struck before. Roy Sullivan's 7 documented strikes are extraordinary but statistically coherent given extreme outdoor exposure as a park ranger.
 
-**For previously-struck natural features (isolated trees, ridgelines):** Elevated probability due to the same persistent features that caused the first strike — but specific numbers (Proposal 3's "10-20% within 5 years") are **unverified estimates**, not sourced data.
+**The cognitive root:** This myth is the **Gambler's Fallacy** applied to meteorology — the false belief that a past random event reduces future probability.
 
-The critical insight, best articulated by Proposals 3 and 4: observing a first strike is **Bayesian evidence** that the location has strike-attracting features. The first strike doesn't *cause* the second — it *reveals* persistent vulnerability.
+---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why |
-|-------|-------------|-----|
-| ESB strike frequency | 25 vs. ~100/year | P4 likely hallucinated or confused with total strokes; others used standard figure |
-| Suburban home risk | P2 claimed ~33%/year (Florida); others didn't attempt | P2 almost certainly **overestimated by ~100x** — applying tower-scale enhancement to a 30m home is physically unjustified |
-| Specificity of citations | P1 cited "Williams 2005," "NLDL," IEEE journals; others avoided | P1's citations are **likely hallucinated** (the network is NLDN, not NLDL; it began in the 1980s, not 1959). P3 was wisest to avoid fake precision |
-| Definition of "same place" | 1 m²? 10 m²? 100 m²? | No proposal rigorously addressed this, despite it changing results by orders of magnitude |
+| Issue | Disagreement | Resolution |
+|---|---|---|
+| **ESB strikes/year** | P1/P3: ~25; P2: ~100; P4: 25–100 | Adopt 20–25 as the well-sourced baseline; higher figures may reflect different counting methods |
+| **Quantitative depth** | P2 attempted formulas and citations; P3 offered almost none | P2's rigor was undermined by likely fabricated citations and factual errors (e.g., claiming ESB is "23m" when it's 443m). P1's moderate rigor with honest uncertainty bounds is more epistemically sound |
+| **Scope of analysis** | P4 devoted ~40% to ThoughtProof platform commentary | Rejected as non-responsive padding; the question is about lightning statistics |
+| **Definition of "same place"** | No proposal rigorously defined this | This is the most important shared blind spot — 1m² vs. a structure vs. 1km² yields orders-of-magnitude differences in probability |
 
-## What Goes Wrong With All Proposals
+---
 
-The critique identified a pattern I must flag: **every proposal presented specific statistics with authoritative confidence, but most numbers dissolve under verification**. Fabricated citation names (NLDL), swapped building heights (Proposal 2 confused Empire State/Willis/Eiffel Tower dimensions), and unsourced multipliers (3,000x height factor) all appeared. This is the classic AI failure mode of **fluent confabulation** — and precisely what epistemic verification protocols exist to catch.
+## Flagged Unverified Claims (from Critique)
 
-## Practical Bottom Line
+- **P2's "AMS Journals (2015)" citation:** No author, title, or DOI. Likely hallucinated. **REJECTED.**
+- **P2's Kennedy Space Center "81 strikes on same 5m spot" data:** Unverifiable. **REJECTED.**
+- **P2's "20% increase in U.S. strikes since 1980, per EPA":** Likely conflation of projected increases with historical data. **REJECTED.**
+- **P2's "12% repeat chance for average U.S. home":** No derivation, implausibly high. **REJECTED.**
+- **P4's "High-Confidence Error" framing:** Performative, not analytical. **REJECTED as framing.**
 
-- **Tall structures/towers:** Near-certain annual re-strikes. Install lightning protection. Not debatable.
-- **Ordinary ground-level locations:** Extremely unlikely to be struck twice. The proverb is *approximately* true here by accident.
-- **The proverb's real danger:** It implies struck locations are *safer*, when they may be *more dangerous* (persistent attracting features remain).
+---
 
-## Recommendation
+## What Can Go Wrong With This Analysis
 
-Trust the qualitative consensus (lightning repeats at favorable locations) but **treat all specific probabilities in these proposals as rough estimates, not verified data**. The most honest framing came from Proposal 3, which acknowledged uncertainty rather than fabricating precision.
+1. **Definitional ambiguity:** "Same place" is never rigorously defined — all probability estimates are scale-dependent
+2. **Upward vs. downward lightning:** Tall structures often initiate upward leaders, a fundamentally different process than cloud-to-ground strikes — no proposal addresses this
+3. **No primary sources cited by any proposal:** All references are to organizations or landmarks, not peer-reviewed papers with authors and DOIs
+4. **Human vs. structure models conflated:** People move and change exposure; structures don't. These require different probability frameworks
 
-**Confidence: 62%**
+---
 
-Confidence is capped below 70% because: (1) this is partly a quantitative question where all models presented unverifiable numbers, (2) the critique identified shared bias (all focused on easy tall-structure cases, avoiding the harder ordinary-location math), and (3) specific citations were largely hallucinated across proposals, meaning the evidentiary foundation is weaker than it appears.
+## Synthesis Decisions
+
+- **Adopted P1's structure and framing** (strongest version of correct conclusion, honest uncertainty)
+- **Adopted P3's Bayesian insight** (first strike is evidence of elevated baseline risk)
+- **Rejected P2's quantitative claims** (multiple fabricated citations, factual errors, internal contradictions)
+- **Rejected P4's ThoughtProof commentary** (non-responsive to the question)
+- **Incorporated critique's identification of shared blind spots** (definition of "same place," upward lightning, lack of primary sources)
+
+**Conditional on:** acknowledging that no proposal cited verifiable primary research, and the definition of "same place" remains unresolved — which means all specific probability figures carry significant uncertainty.
+
+**Confidence: 72%**
+
+The directional answer (myth is false) is near-certain. The specific statistics carry moderate uncertainty due to sourcing gaps across all proposals.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-144
+🧪 Check Type: defensibility
+💾 Saved as PoT-484
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.888 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.836 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.849
+🟢 Dissent Preservation Rate: 0.938 (15/16 objections preserved)

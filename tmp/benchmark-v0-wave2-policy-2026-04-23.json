@@ -1,0 +1,89 @@
+{
+  "sourceFormat": "first-party-jsonl",
+  "schemaVersion": "plan-policy-report/v2",
+  "count": 2,
+  "verdictCounts": {
+    "ALLOW": 0,
+    "CONDITIONAL_ALLOW": 0,
+    "HOLD": 1,
+    "BLOCK": 1
+  },
+  "results": [
+    {
+      "traceId": "V0-13",
+      "verdict": "HOLD",
+      "findings": [
+        {
+          "id": "policy:truly_missing:V0-13",
+          "type": "truly_missing_step",
+          "severity": "medium",
+          "description": "1 annotator step(s) remain uncovered even after plan, execution, and segment-aware support are combined.",
+          "stepIds": [
+            "annotator:step:1"
+          ],
+          "count": 1
+        }
+      ],
+      "summary": "Answer may be defensible, but unresolved observability or provenance gaps remain too material to proceed.",
+      "metrics": {
+        "verified": true,
+        "taskType": "retrieval",
+        "taskTypeConfidence": "medium",
+        "mergedCoverage": 0.8,
+        "trulyMissingCount": 1,
+        "executionOnlyCount": 0,
+        "segmentOnlyCount": 3,
+        "traceVerifiability": "low",
+        "answerConfidence": "high",
+        "answerExternallyCheckable": true,
+        "answerCorrectBySanityCheck": true,
+        "provenanceChainComplete": false,
+        "executionChainStatus": "complete",
+        "dissentKind": "observability",
+        "hardStopClasses": [
+          "observability_gap"
+        ],
+        "sourceClaimSupport": null,
+        "sourceClaimConfidence": null,
+        "sourceClaimExactStringQuestion": false
+      }
+    },
+    {
+      "traceId": "V0-14",
+      "verdict": "BLOCK",
+      "findings": [
+        {
+          "id": "policy:wrong_answer:V0-14",
+          "type": "wrong_answer",
+          "severity": "high",
+          "description": "The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.",
+          "stepIds": [],
+          "count": 1
+        }
+      ],
+      "summary": "Trace contains a wrong outcome, so the result is not defensible.",
+      "metrics": {
+        "verified": false,
+        "taskType": "mixed",
+        "taskTypeConfidence": "low",
+        "mergedCoverage": 1,
+        "trulyMissingCount": 0,
+        "executionOnlyCount": 0,
+        "segmentOnlyCount": 1,
+        "traceVerifiability": "high",
+        "answerConfidence": "low",
+        "answerExternallyCheckable": false,
+        "answerCorrectBySanityCheck": false,
+        "provenanceChainComplete": true,
+        "executionChainStatus": "complete",
+        "dissentKind": "fact",
+        "hardStopClasses": [
+          "factual_failure"
+        ],
+        "sourceClaimSupport": null,
+        "sourceClaimConfidence": null,
+        "sourceClaimExactStringQuestion": false
+      }
+    }
+  ]
+}

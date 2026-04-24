@@ -3,65 +3,65 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-159 created in 124.7s
+✔ Block PoT-499 created in 136.3s
 
 📊 SYNTHESIS:
 
-# Can You Fold a Piece of Paper More Than 7 Times?
+## Verdict: CONDITIONAL_ALLOW
 
-## Clear Answer
+# Can You Fold Paper More Than 7 Times?
 
-**For a standard sheet of paper (A4/Letter) folded by hand: No. The practical limit is 6–7 folds.** This is not a "myth" — it's an engineering constraint rooted in exponential mathematics. However, it is not a fundamental law of physics: with sufficiently long or thin material and mechanical assistance, the limit can be exceeded.
+## The Answer: It Depends on What You Mean — And That's the Actual Finding
 
-## The Physics
+The 7-fold limit is **true for standard-sized paper folded by hand** and **false as a universal physical law**. Both are simultaneously correct, and the failure of all four proposals to clearly lead with this dual truth is the main epistemic gap.
 
-Each fold doubles the number of layers and halves the available area:
+### The Physics (Verified)
 
-| Folds | Layers | Thickness (from 0.1mm paper) |
-|-------|--------|------------------------------|
-| 6 | 64 | ~6.4 mm |
-| 7 | 128 | ~12.8 mm |
-| 8 | 256 | ~25.6 mm |
+All four proposals agree on the underlying facts:
+- **Standard A4/letter paper:** ~7 folds maximum by hand. This is empirically robust.
+- **Gallivan's formula** (✅ confirmed): L = πt/6 × (2ⁿ + 4)(2ⁿ − 1) governs the single-direction limit — it's geometry, not an absolute physical law.
+- **Britney Gallivan (2002):** Folded toilet paper **12 times** using a ~1,219-meter roll. Well-documented, widely replicated in principle.
+- **13 folds** achieved by students at St. Mark's School (2012) with a large sheet.
 
-Two things kill you simultaneously:
-1. **Exponential thickness growth** — bending a 12.8mm-thick stack through 180° requires enormous force
-2. **Exponential area shrinkage** — by fold 7, the remaining foldable surface is roughly 2–5 cm² (depending on fold direction), too small to grip and manipulate
-
-Bending resistance scales steeply with thickness (proportional to t³ in idealized beam theory, though real paper folding involves fiber fracture, delamination, and interlayer friction — making the actual scaling harder to pin down precisely). The exact force required at fold 7–8 is **not well-established in peer-reviewed literature**; estimates of ~100–225 lbs (450–1000N) appear across sources but none are rigorously cited.
-
-**Important caveat the models flagged:** Most people actually fail at **fold 5 or 6**, not 7. The "7" figure is the popularized ceiling; your actual experience with a standard sheet will likely top out at 6.
-
-## The Exception That Proves the Rule
-
-**Britney Gallivan (2002)** derived the mathematical formula for minimum paper length needed for *n* single-direction folds:
-
-**L = (πt/6)(2ⁿ + 4)(2ⁿ − 1)**
-
-Using a ~1.2 km roll of thin toilet paper, she achieved **12 folds** — by hand, in a shopping mall corridor, with family assistance. No forklift, no mechanical sled. The key insight: you need exponentially more *length*, not just more strength.
-
-The **MythBusters** (likely 2007, not 2005 as one model claimed) achieved **11 folds** using a football-field-sized sheet and a forklift in an airplane hangar.
+The limit is **parametric** — determined by the ratio of paper length to thickness — not a law of nature. With sufficient length and thin material, 12+ folds are physically achievable and have been demonstrated.
 
 ## Where Models Disagreed
 
-**Core framing conflict:** Three models (P1, P2, P4) correctly framed the 7-fold limit as real for standard conditions. One model (P3) called it a "myth" and labeled the standard claim "FALSE" — despite agreeing on the same underlying facts. This is a rhetorical framing error, not a factual one. Calling a practically true claim "false" because extreme exceptions exist is epistemically misleading.
+The disagreement is **semantic, not physical**. Proposals 1 and 4 interpret "can you fold paper" as "is it physically possible with any paper?" (answer: yes). Proposals 2 and 3 interpret it as "can you fold a standard sheet by hand?" (answer: no). All four agree on the underlying mechanics. No proposal fully names this interpretation gap as the crux — Proposal 1 comes closest but buries it in a "What Can Go Wrong" section.
 
-**Force estimates:** Models cited 100–200 lbs, ~1000N, and 400–500N for human capability and fold resistance. None provided peer-reviewed sources. These figures are plausible approximations but should not be treated as verified.
+## Addressing the Critique's Key Findings
 
-**Scaling law:** One model claimed resistance scales as thickness², another as thickness³. Neither sourced the claim. Real paper folding is messier than idealized beam theory.
+**Mathematical errors in Proposal 1:** The critic verified that the 20-fold calculation is off by ~3 orders of magnitude (~57,562 km, not ~12 km). The 7-fold and 12-fold calculations are also off by 25-27%. These errors are serious for an answer that leads with a formula. I **reject Proposal 1's specific numerical claims** while retaining its correct epistemic framing.
 
-**Unverified claims flagged by critique:** Gallivan using a "forklift" (likely confused with MythBusters), folding "gold foil 14 times" (unconfirmed), "400 rolls" of toilet paper (unverified specific), MythBusters "S3E6, 2005" (wrong — likely Season 5, 2007), a "sled" apparatus (no evidence), and specific fiber shear stress values (unsourced).
+**Fabricated citations in Proposal 2:** The MythBusters "S1E2, 2005" citation is likely incorrect (Season 1 aired 2003). The "4,000m" figure is a unit error (should be ~4,000 feet ≈ 1,219m). The force analysis contains an incoherent "25.6 layers" passage. I **reject Proposal 2's specific physics calculations** while accepting its practical conclusion about standard paper.
+
+**Proposal 3's oversimplification:** Calling 7 folds a "physical limit, not a myth" is a false dichotomy. It's both a real practical limit AND a myth when stated universally. I **reject this framing** as epistemically imprecise.
+
+**Proposal 4's strengths:** Best structure, fewest factual errors, strongest risk analysis (material failure, energy requirements, precision). Smartly avoids computing specific values, which prevents the math errors that plague Proposals 1 and 2. However, calling Gallivan's toilet paper "specialized tissue paper" is a minor mischaracterization. I **adopt Proposal 4's framework** as the strongest scaffold.
+
+## Synthesis Decisions
+
+| Argument | Adopted/Rejected | Why |
+|---|---|---|
+| P1: "Myth, definitively" framing | **Partially adopted** | Correct that it's not a universal law; "definitively" is overconfident given semantic ambiguity |
+| P1: Specific numerical calculations | **Rejected** | Multiple verified math errors (20-fold off by ~4,700x) |
+| P2: Standard paper can't exceed ~7 folds | **Adopted** | Empirically correct for the common interpretation |
+| P2: Force/physics calculations | **Rejected** | Garbled execution, fabricated citation |
+| P3: "Physical limit, not a myth" | **Rejected** | False dichotomy; less precise than parametric framing |
+| P4: Parametric model framework | **Adopted** | Most epistemically sound — identifies the variable-dependent nature of the limit |
+| P4: Risk analysis (material failure, energy, precision) | **Adopted** | Strongest practical analysis across all proposals |
 
 ## Bottom Line
 
-- **Standard paper, by hand: 6–7 folds maximum.** This is real and reproducible.
-- **With extreme dimensions or mechanical aid: 11–12 folds demonstrated.**
-- **The limit is geometric/engineering, not a fundamental physical law** — but that doesn't make it a "myth." It makes it a well-understood constraint.
-- **Force estimates in all proposals are unsourced approximations.** Treat them as rough guides, not facts.
+For a standard sheet by hand: **~7 folds is the real limit**. As a universal physical law: **it's false — 12+ folds have been demonstrated with sufficient paper length**. The answer is parameter-dependent, governed by Gallivan's formula.
 
-**Confidence: 78%** — High agreement on core answer (6–7 folds for standard paper), but force estimates are unverified, exact empirical ceiling may be 5–6 for most people, and peripheral historical details had multiple errors across models.
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-159
+🧪 Check Type: defensibility
+💾 Saved as PoT-499
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.811 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.829 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.835
+🟢 Dissent Preservation Rate: 0.684 (13/19 objections preserved)

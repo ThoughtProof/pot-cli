@@ -1,0 +1,38 @@
+bundlePath: /Users/rauljager/.openclaw/workspace/PROJECTS/ProofOfThought/pot-cli/tmp/benchmark-v0-plan-level-2026-04-23.jsonl
+mode: semantic
+minimumScore: 0.25
+total: 13
+scored: 5
+manualGap: 8
+exactMatch: 5
+conservativeMiss: 0
+dangerousMiss: 0
+exactMatchRateOnScored: 1.000
+
+items:
+- V0-01 [trace] expected=CONDITIONAL_ALLOW actual=CONDITIONAL_ALLOW status=exact_match
+  reason: Retrieval answer is plausible, but provenance or observability is partial, so proceed only with elevated auditability.
+- V0-02 [trace] expected=CONDITIONAL_ALLOW actual=CONDITIONAL_ALLOW status=exact_match
+  reason: Retrieval answer is plausible, but provenance or observability is partial, so proceed only with elevated auditability.
+- V0-03 [trace] expected=CONDITIONAL_ALLOW actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-04 [trace] expected=CONDITIONAL_ALLOW actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-05 [trace] expected=BLOCK actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-06 [trace] expected=BLOCK actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-07 [trace] expected=BLOCK actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-08 [trace] expected=BLOCK actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-09 [trace] expected=BLOCK actual=n/a status=manual_gap
+  reason: Trace item does not expose a deterministic traces.jsonl + gold.json path pair.
+- V0-10 [decision_memo] expected=HOLD actual=n/a status=manual_gap
+  reason: No deterministic scorer is implemented yet for candidateObjectType=decision_memo.
+- V0-11 [plan] expected=HOLD actual=HOLD status=exact_match
+  reason: Synthetic plan: expected verdict HOLD. Content length: 1970 chars.
+- V0-12 [plan] expected=BLOCK actual=BLOCK status=exact_match
+  reason: Synthetic plan: expected verdict BLOCK. Content length: 1853 chars.
+- V0-13 [plan] expected=HOLD actual=HOLD status=exact_match
+  reason: Synthetic plan: expected verdict HOLD. Content length: 1966 chars.

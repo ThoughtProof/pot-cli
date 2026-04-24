@@ -20,7 +20,7 @@
     },
     {
       "name": "DeepSeek",
-      "model": "deepseek-chat",
+      "model": "deepseek-v4-flash",
       "baseUrl": "https://api.deepseek.com/chat/completions",
       "apiKey": "YOUR_DEEPSEEK_API_KEY"
     }

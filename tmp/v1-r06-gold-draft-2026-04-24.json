@@ -1,0 +1,17 @@
+{
+  "V1-R06": {
+    "trace_id": "V1-R06",
+    "annotator_steps": [
+      "Find the authoritative paper record for Attention Is All You Need.",
+      "Identify the actual publication venue/source attribution from the primary record.",
+      "Distinguish authorship or organizational affiliation from publication venue.",
+      "Reject provenance claims that conflate Google affiliation with publication venue."
+    ],
+    "true_answer": "Attention Is All You Need was published as a NeurIPS 2017 conference paper; authorship and organizational affiliation should not be conflated with publication venue.",
+    "accepted_answers": [
+      "It appeared as a NeurIPS 2017 conference paper.",
+      "The paper was published at NeurIPS 2017, not simply 'by Google'.",
+      "Google researchers authored it, but the publication venue was NeurIPS 2017."
+    ]
+  }
+}

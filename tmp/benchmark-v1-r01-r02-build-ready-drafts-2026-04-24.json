@@ -1,0 +1,128 @@
+{
+  "family": "v1_retrieval_boundary",
+  "createdAt": "2026-04-24",
+  "cases": [
+    {
+      "id": "V1-R01",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "taskPrompt": "According to RFC 9110, what does HTTP status code 425 Too Early mean?",
+      "sourceTarget": {
+        "primary": "RFC 9110 / HTTP Semantics",
+        "sourceType": "official_rfc",
+        "notes": "Use the RFC section defining status code 425 Too Early as the authoritative source."
+      },
+      "gold": {
+        "trueAnswer": "The server is unwilling to risk processing a request that might be replayed.",
+        "acceptedAnswers": [
+          "The server is unwilling to risk processing a request that might be replayed.",
+          "The server is unwilling to process a request that might be replayed.",
+          "Indicates the server is unwilling to risk processing a request that could be replayed."
+        ],
+        "annotatorSteps": [
+          "Find RFC 9110.",
+          "Open the section defining HTTP status 425 Too Early.",
+          "Extract the meaning from the RFC text.",
+          "Answer with the RFC-backed definition and provenance."
+        ],
+        "annotatorTools": [
+          "search",
+          "browser"
+        ],
+        "decisiveSupportStep": "Open the exact RFC 9110 section defining 425 Too Early.",
+        "retrievalDependency": "critical"
+      },
+      "intendedGoodTrace": {
+        "shape": [
+          "Search for HTTP status 425 Too Early meaning.",
+          "Reach RFC 9110.",
+          "Open the exact relevant section.",
+          "Answer with a faithful definition and provenance."
+        ],
+        "expectedPolicyRead": "ALLOW or CONDITIONAL_ALLOW depending on trace completeness; benchmark target focuses on imperfect-trace path below."
+      },
+      "intendedImperfectTrace": {
+        "shape": [
+          "Search for HTTP status 425.",
+          "Reach RFC 9110 or clearly first-party reference.",
+          "Do not fully surface the exact defining section or miss one decisive support hop.",
+          "Answer still gives the correct meaning."
+        ],
+        "expectedSignals": {
+          "verified": true,
+          "trulyMissingCount": 1,
+          "dissentKind": "observability",
+          "hardStop": false,
+          "firstPartyAnchor": true
+        },
+        "expectedVerdict": "CONDITIONAL_ALLOW"
+      },
+      "isolatedBoundary": "first_party_supported_retrieval_softening",
+      "buildNotes": [
+        "Keep the answer content correct.",
+        "Ensure one decisive support step is missing in the imperfect trace.",
+        "Do not introduce contradictory evidence.",
+        "The case should test narrow softening, not factual failure."
+      ]
+    },
+    {
+      "id": "V1-R02",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "taskPrompt": "According to the official Python enhancement process, what does PEP stand for?",
+      "sourceTarget": {
+        "primary": "Official Python PEP documentation",
+        "sourceType": "official_spec_definition",
+        "notes": "Use an official Python/PEP page where the acronym expansion can be grounded."
+      },
+      "gold": {
+        "trueAnswer": "Python Enhancement Proposal",
+        "acceptedAnswers": [
+          "Python Enhancement Proposal"
+        ],
+        "annotatorSteps": [
+          "Find the official Python/PEP documentation.",
+          "Locate where PEP is defined.",
+          "Extract the acronym expansion.",
+          "Answer with the official definition and provenance."
+        ],
+        "annotatorTools": [
+          "search",
+          "browser"
+        ],
+        "decisiveSupportStep": "Locate the official definition line expanding PEP.",
+        "retrievalDependency": "critical"
+      },
+      "intendedGoodTrace": {
+        "shape": [
+          "Search for what PEP stands for.",
+          "Reach official Python/PEP documentation.",
+          "Open the relevant defining page.",
+          "Answer with the exact expansion and provenance."
+        ],
+        "expectedPolicyRead": "ALLOW or CONDITIONAL_ALLOW depending on observability completeness; benchmark target focuses on sparse-trace rescue below."
+      },
+      "intendedImperfectTrace": {
+        "shape": [
+          "Search for PEP meaning.",
+          "Reach an official Python/PEP source.",
+          "Trace remains sparse and does not fully surface the exact defining line.",
+          "Final answer is still correct."
+        ],
+        "expectedSignals": {
+          "verified": true,
+          "trulyMissingCount": 1,
+          "dissentKind": "observability",
+          "hardStop": false,
+          "firstPartyAnchor": true,
+          "lowLexicalSupport": true
+        },
+        "expectedVerdict": "CONDITIONAL_ALLOW"
+      },
+      "isolatedBoundary": "first_party_definition_rescue",
+      "buildNotes": [
+        "Keep lexical support sparse enough that source-page enrichment actually matters.",
+        "Use a correct answer with an observability gap, not a wrong answer.",
+        "The key test is whether official-source grounding rescues a sparse trace into CONDITIONAL_ALLOW."
+      ]
+    }
+  ]
+}

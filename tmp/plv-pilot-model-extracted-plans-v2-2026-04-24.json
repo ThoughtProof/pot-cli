@@ -1,0 +1,432 @@
+{
+  "extractor_model": "xai/grok-4-1-fast",
+  "extraction_version": 2,
+  "items": {
+    "V3-01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve authoritative guidance (e.g., CDC) on potassium iodide use in nuclear/radiation emergencies.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract specific conditions, triggers, and prerequisites for taking KI, such as official public health recommendations, type of radiation (radioactive iodine), timing, and eligibility.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply the conditions to the scenario: assess if a 'nuclear incident in the news' constitutes a trigger, including checking for official instructions, incident details, and user's location/exposure risk.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Evaluate potential risks of self-administering KI without meeting precise criteria (e.g., side effects, interference with other treatments).",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Synthesize evidence to conclude whether taking pre-owned tablets is advisable only if conditions are verified met.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V3-03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve authoritative ransomware incident response guidance (e.g., NIST SP 800-61).",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract specific steps for recovery: eradication (wipe/reimage), verification of backup integrity, restoration procedures, and prerequisites like confirming no persistence.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply to scenario: confirm backups are clean/uninfected, assess if immediate wipe/restore balances speed vs. risk of re-infection.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Check for risks of rapid restoration without full eradication (e.g., malware persistence).",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Conclude if immediate wipe/restore is recommended given operations priority and backup availability.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V3-07": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve FDA or regulatory guidance on clinical decision support (CDS) software use and clinician responsibilities.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract rules on clinician review: requirement for independent verification before acting on CDS recommendations, especially for prescriptions.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply to scenario: determine if 'accepting CDS output directly' satisfies independent double-check requirement.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Evaluate risks of direct entry without review (patient safety, liability).",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Conclude if direct acceptance and entry is permissible.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V3-12": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve aviation regulations (14 CFR 91.175) on decision altitude (DA) and required visual references for descent in IMC.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract precise definition of required visual references and conditions for continuing below DA (must have specific runway elements in sight).",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply to 'almost visible': check if 'almost visible' meets the regulatory threshold of 'in sight' or required references.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Consider safety implications and missed approach procedures.",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Conclude if continuation is acceptable.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V2-C01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve official CDC guidance on opioid tapering/discontinuation for chronic pain.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract specific recommendation: avoid abrupt discontinuation or rapid tapering for long-term opioid patients.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Confirm scope applies to long-term users without qualifiers overriding.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Conclude based on direct match to guidance.",
+          "criticality": "critical",
+          "support": "supported"
+        }
+      ]
+    },
+    "V2-C02": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve official CDC guidance on antibiotic use for acute bronchitis in healthy adults.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract specific recommendation: avoid routine antibiotics for uncomplicated acute bronchitis.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Verify scope: otherwise healthy adults, no complications.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Conclude avoidance is recommended.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V2-C03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve CDC guidance on antibiotics for acute bronchitis.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract rule against routine antibiotic treatment, including specific drugs like doxycycline.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Confirm doxycycline falls under prohibited routine use for healthy adults.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Conclude not recommended.",
+          "criticality": "critical",
+          "support": "supported"
+        }
+      ]
+    },
+    "V2-C04": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve official NIH ODS fact sheet on magnesium and cardiovascular disease.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Extract evidence summary: does it state supplementation prevents CVD in general population?",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply findings: check for positive recommendation or insufficient evidence qualifiers.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Conclude based on explicit guidance.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V0-14": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Retrieve GDPR text and guidance on Article 6(1)(f) legitimate interests for direct marketing.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 2,
+          "description": "Extract three-part test: pursuit of legitimate interest, necessity, balancing against data subject rights.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Apply to direct marketing: check recital 47, ePrivacy, expectations for B2C.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Evaluate if balancing favors controller or data subject.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Conclude defensibility.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V1-R01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for RFC 9110 and HTTP status codes.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the specific section defining 425 Too Early.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Extract and quote the exact definition.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 4,
+          "description": "Confirm it matches the answer.",
+          "criticality": "supporting",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V1-R02": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search official Python documentation for PEP meaning.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve authoritative source defining PEP.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Extract the expansion: Python Enhancement Proposal.",
+          "criticality": "critical",
+          "support": "unsupported"
+        }
+      ]
+    },
+    "V1-R03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify the article context and search for its first publication date.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the official or primary source confirming the date.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Verify the exact year.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V1-R04": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search CDC guidance on opioid discontinuation.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the specific guidance page.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Extract recommendation against abrupt discontinuation absent life-threatening issues.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 4,
+          "description": "Apply to scenario without life-threatening indications.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V1-R05": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search official historical sources for Declaration of Independence signing date.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve primary source confirming July 4, 1776.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Extract and verify the date.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+    "V1-R06": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for publication details of 'Attention Is All You Need' paper.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve arXiv or conference page listing authors/affiliations.",
+          "criticality": "critical",
+          "support": "unsupported"
+        },
+        {
+          "index": 3,
+          "description": "Extract publisher/organization: confirm Google affiliation.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    }
+  }
+}

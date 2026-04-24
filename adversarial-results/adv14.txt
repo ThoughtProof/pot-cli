@@ -3,71 +3,84 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-145 created in 120.6s
+✔ Block PoT-485 created in 128.3s
 
 📊 SYNTHESIS:
 
-# How Much Taller is Everest Than the Second-Tallest Mountain?
+## Verdict: ALLOW
 
-## Definitive Answer
+---
 
-**Mount Everest exceeds K2 by approximately 238 meters (780 feet).**
+## The Core Answer
 
-- **Everest**: 8,848.86 m (29,032 ft) — per the 2020 joint China-Nepal GNSS/gravimetry survey
-- **K2**: 8,611 m (28,251 ft) — the conventionally accepted figure
-- **Difference**: 237.86 m, commonly rounded to ~238 m
+Mount Everest exceeds K2, the second-highest mountain above sea level, by approximately **238 meters (780 feet)**.
 
-This is a straightforward factual question with high convergence across authoritative sources.
+- **Mount Everest:** 8,848.86 m (2020 joint China-Nepal survey using GNSS + gravimetry)
+- **K2:** 8,611 m (established through Italian Karakoram Expedition surveys, refined by satellite data)
+- **Difference:** 237.86 m, conventionally rounded to **238 m**
+
+This is among the most well-established geographical facts available. The ranking is uncontested across all major geodetic authorities, and the margin is large enough that no plausible measurement error closes the gap.
+
+---
+
+## Essential Caveats
+
+The answer depends on the definition of "tallest":
+
+1. **Highest elevation above mean sea level** → Everest wins by 238 m over K2 *(this is the standard interpretation)*
+2. **Greatest base-to-summit height** → Mauna Kea (~10,203 m from ocean floor) exceeds Everest
+3. **Farthest point from Earth's center** → Chimborazo (Ecuador) exceeds Everest by ~2.1 km due to equatorial bulge
+
+For virtually all standard usage, "tallest mountain" means highest above sea level. The answer is epistemically solid **as long as this assumption is stated**.
 
 ---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|-------|-------------|----------------|
-| **Headline difference** | Proposal 1 claimed **861 meters** while its own math showed 237.86m. All others agreed on ~237m. | This is a catastrophic self-contradiction — the most dangerous kind of error because the formatting looked authoritative. The "861" appears to be a unit confusion artifact (neither correct in feet nor meters). |
-| **Everest's precise height** | P1 & P2 used 8,848.86m; P3 rounded to 8,849m; P4 used the outdated 8,848m | The 2020 official figure is 8,848.86m. P4's use of the pre-2020 number undermines its own emphasis on "definitive, verifiable" answers. |
-| **Framing** | P2 answered the question cleanly. P3 and P4 injected extensive ThoughtProof business commentary. P1 buried a correct calculation under a wrong headline. | The question asked about mountain heights, not platform strategy. Two proposals prioritized marketing over accuracy. |
+**Rounding (237 vs. 238):** Proposals 1 and 4 cited 237 m at points; Proposals 2 and 3 used 238. Standard rounding of 237.86 yields **238**. The critique correctly identifies 237 as a rounding error.
 
-The core disagreement was **not substantive** — three of four proposals computed the correct difference. The outlier (P1) was internally contradictory rather than working from different data.
+**Should the question be challenged?** Proposal 3 argued the question should be rejected as poorly framed until "tallest" is defined. Proposals 1, 2, and 4 answered directly with caveats. I adopt a middle path: answer the most likely intended interpretation (sea-level elevation) while flagging the definitional ambiguity. Outright rejection is epistemically principled but practically hostile for a platform needing user trust.
+
+**Confidence calibration:** Proposal 2 claimed 99.9%, Proposal 4 claimed 98%. Both are overconfident given definitional ambiguities and geoid model dependencies. I cap well below these.
 
 ---
 
-## Addressing Critic's Key Flags
+## Synthesis Decisions
 
-**UNVERIFIED claims I'm excluding from the synthesis:**
-- P1's "1987 Sino-Soviet K2 spat" and specific journal citations (*Survey Review* 2021, *Journal of Geodesy* 2020) — cannot be independently confirmed
-- P1's "2008-2010 Karakoram surveys" confirming K2 — likely fabricated or conflated
-- P2's claim "K2 is more stable" tectonically — plausible but unsourced
-
-**Shared blind spot across all proposals:** K2's 8,611m has never received a modern GNSS resurvey comparable to Everest's 2020 measurement. The ±2-3m uncertainty applies to K2 at least as much as to Everest, meaning the true difference could range from roughly **233-243 meters**.
-
----
-
-## What Can Go Wrong With This Answer
-
-1. **Measurement methodology**: Snow cap vs. rock height matters. Everest's 2020 figure includes snow. K2's canonical figure has similar ambiguity.
-2. **Definitional ambiguity**: "Tallest" above sea level → Everest wins. From base to summit → Mauna Kea. From Earth's center → Chimborazo. I'm using the standard convention (above mean sea level).
-3. **K2 needs a modern resurvey**: The gap could shift by several meters when K2 receives GNSS-grade measurement.
-4. **Tectonic change**: Both mountains are in active collision zones. Everest rises roughly 4mm/year (estimates vary), but erosion and seismic events (e.g., 2015 Nepal earthquake) can cause sudden drops. The gap is stable on any human timescale.
+| Element | Decision | Source | Rationale |
+|---------|----------|--------|-----------|
+| Core figure (238 m) | **Adopted** | All proposals (consensus) | Arithmetic is unambiguous |
+| Definitional caveats | **Adopted** | P1, P3, P4 | Genuine epistemic value; P3's framing was strongest |
+| Reject-the-question stance | **Partially rejected** | P3 | Too restrictive for practical use; answer the likely intent, flag the assumption |
+| K2 "resurveyed 2022" | **Rejected** | P1 | Critique flagged as unverified; no corroborating source |
+| 861 m headline claim | **Rejected** | P2 | Catastrophic arithmetic error; self-correction doesn't undo the propagation risk |
+| Tectonic uplift "10 m/decade" | **Rejected** | P2 | Off by two orders of magnitude (critique confirmed) |
+| Aconcagua prominence gap of 3,382 m | **Rejected** | P3 | Critique demonstrated the math doesn't work under any reasonable interpretation |
+| "Exactly 237 meters" | **Rejected** | P4 | Contradicts its own calculation; standard rounding gives 238 |
+| 2020 survey as resolving snow-vs-rock debate | **Rejected** | P4 | Misleading characterization; it resolved a bilateral measurement disagreement |
+| Snow/ice cap variance flag | **Adopted** | P2 | Genuinely relevant: Everest's ice cap fluctuates ~2-4 m seasonally |
+| Geoid model dependency | **Adopted** | Critique (shared blind spot) | ~1-2 m uncertainty from different geoid models; no proposal addressed this |
 
 ---
 
-## Meta-Observation
+## Unresolved Gaps
 
-This exercise demonstrates a key insight for epistemic verification: **citation density and formatting are not proxies for accuracy.** Proposal 1 had tables, decimal precision, journal names, and specific survey dates — yet its headline answer was wrong by 624 meters, contradicted by its own arithmetic. A robust verification protocol must catch internal contradictions and validate citations, not just count agreement or assess surface credibility.
+- No proposal independently verified K2's status as second-highest (it is, but the premise was assumed, not checked)
+- The 2020 survey, while authoritative, is a bilateral effort — independent third-party verification hasn't occurred
+- Geoid model choice (EGM96 vs. EGM2008) introduces ~1-2 m uncertainty none addressed
 
 ---
 
-**Confidence: 95%** → capped at **85%**
+**Confidence: 82%**
 
-This is a well-established factual question with strong source convergence. The only meaningful uncertainty is the ±2-3m measurement margin on K2 and minor rounding conventions. Three of four models converged on the correct answer.
-
-## Where Models Disagreed
-See table above. The disagreement was driven by computational/unit error (P1) and outdated data (P4), not by fundamentally different frameworks or evidence bases. This pattern — surface-level disagreement masking a clear consensus — is itself a useful diagnostic signal.
+High agreement on core fact across all models and the critique. Capped below 85% due to unresolved geoid dependency and the definitional ambiguity that, while flagged, cannot be resolved without querying the user's intent.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-145
+🧪 Check Type: defensibility
+💾 Saved as PoT-485
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.911 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.853 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.804
+🟢 Dissent Preservation Rate: 0.889 (16/18 objections preserved)

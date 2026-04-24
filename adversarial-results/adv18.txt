@@ -3,66 +3,72 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-149 created in 131.0s
+✔ Block PoT-489 created in 138.4s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Lemmings and the Mass Suicide Myth
 
-## The Core Truth (All Models Agree)
 
-**Lemmings do not commit mass suicide. The behavior has no evolutionary purpose because it doesn't exist.** This is the correct answer, and all four proposals converge on it with good reason: no peer-reviewed zoological study has ever documented intentional mass self-destruction in any rodent species.
+## Verdict: ALLOW
+
+---
+
+# Lemmings Do Not Commit Mass Suicide: Correcting the False Premise
+
+## Core Answer
+
+The question contains a **false premise**. Lemmings do not commit mass suicide, and the behavior therefore serves no evolutionary purpose. This is one of the most durable myths in popular biology, and the epistemically responsible answer is to correct it rather than rationalize a fiction.
 
 ## What Actually Happens
 
-Lemming populations undergo dramatic boom-bust cycles roughly every 3–4 years (well-documented in ecological literature). When populations peak, lemmings **disperse** in search of food and territory. During these mass migrations:
+Lemmings undergo **boom-bust population cycles** (approximately every 3–4 years). When populations peak, individuals disperse en masse seeking food and territory. Some attempt water crossings and **drown accidentally** when distances exceed their swimming capacity. This is not intentional self-destruction — it is a predictable mortality cost of an otherwise adaptive dispersal strategy.
 
-- Some drown attempting to cross rivers and lakes — a cost of dispersal, not intentional suicide
-- Some fall from terrain features accidentally
-- Most mortality comes from predation, starvation, and exposure
-- **The species survives just fine** — dispersal is the adaptive behavior
+The myth was cemented by Disney's 1958 documentary *White Wilderness*, which **staged the footage** — transporting lemmings to Alberta (outside their natural range) and herding them off a cliff. The exact staging methods are debated across sources (pushing, herding, use of a turntable), but the fabrication itself is well-documented, notably by the CBC investigation *Cruel Camera* (~1982–83). The film won an Academy Award, lending cultural authority to the fiction.
 
-## Origin of the Myth
+## Why Evolution Rules Out Mass Suicide
 
-**Critical correction flagged by critique:** The myth **predates Disney**. Scandinavian folklore dating to at least the 1530s (Zeigler's writings) described lemmings falling from the sky or marching into the sea. Disney's 1958 documentary *White Wilderness* **amplified** the myth but did not create it. No proposal mentioned this, representing a shared blind spot.
+A trait that consistently kills individuals before reproduction would be **rapidly eliminated by natural selection**. The dispersal behavior is best explained by **individual-level selection**: when staying means starvation from resource competition, dispersal — even at risk of drowning — has positive expected fitness value. No kin selection or group selection framework is required.
 
-Regarding the documentary: filmmakers acquired lemmings, transported them to **Alberta** (not the Yukon — Proposal 1 was factually wrong on this), and forced them off a cliff for dramatic footage. The lemmings were not native to the filming location. The specific methods (herding, possible turntable, manual pushing) vary across accounts, and details like exact numbers killed (~50) remain unverified. The CBC investigated this in approximately 1982 ("Cruel Camera").
-
-## The Evolutionary Argument
-
-All proposals correctly note that natural selection cannot favor a trait guaranteeing the individual's death — **in species with lemming-like relatedness structures.** However, the critique rightly flags that the blanket claim "self-sacrifice can never evolve" is overstated. Eusocial insects (worker bees, soldier ants) demonstrate that self-sacrifice *can* evolve under Hamilton's rule (rB > C) when relatedness is extremely high. Lemmings, as relatively unrelated dispersers, don't meet these conditions.
-
-What lemmings actually do is evolutionarily sound:
-- **Dispersal** reduces local competition and inbreeding risk
-- **Risk-taking during migration** is preferable to guaranteed starvation
-- **Colonizing new habitat patches** maintains genetic diversity and population resilience
+True altruistic self-sacrifice in nature (e.g., worker bee stinging) requires specific genetic architectures like haplodiploidy and high relatedness coefficients. Lemmings lack these structures. Accidental drowning during migration is a byproduct of environmental hazard, not an evolved strategy.
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Resolution |
-|-------|-------------|------------|
-| **Filming location** | Proposal 1: Yukon; Proposal 3: Alberta | **Alberta is correct** |
-| **Method of killing** | "Herding" vs. "turntable" vs. "throwing" | Multiple methods likely used; no single account fully verified |
-| **Citation rigor** | Proposal 1 loaded with citations; others minimal | **Critique found multiple Proposal 1 citations unverifiable or likely hallucinated** — a critical warning that citation density ≠ reliability |
-| **Depth of evolutionary argument** | Proposals 1-2 engaged Hamilton/kin selection; 3-4 used simpler framing | More nuanced treatment is more accurate but all reached the correct conclusion |
+**Kin selection relevance:** Proposal 2 invoked Hamilton's kin selection (r = 0.25–0.5) as a primary mechanism for dispersal mortality. Proposals 1 and 4 argued individual selection suffices. **I side with Proposals 1/4** — the ecological consensus treats lemming dispersal as density-dependent individual selection. Proposal 2's kin selection framing was forced and internally contradictory (simultaneously calling drownings "maladaptive errors" and kin-selected adaptations).
 
-## What the Critique Caught That All Models Missed
+**Staging specifics:** Proposals varied on whether lemmings were "pushed," "herded," or placed on a "rotating platform." None cited the primary investigative source. The fabrication is confirmed; the exact method remains secondary-source territory.
 
-1. **Pre-Disney folklore origins** of the myth (centuries old)
-2. **Oversimplified evolutionary blanket claims** about self-sacrifice
-3. **The actually interesting science** — predator-prey dynamics, vegetation feedback loops, climate change impacts on cycle regularity — was ignored by every proposal in favor of straightforward myth-busting
-4. **Fabricated-looking citations** in the most "rigorous-appearing" proposal — the most dangerous form of misinformation
+**Swimming ability:** Proposal 4 called lemmings "poor swimmers" — this is **factually incorrect**. Lemmings are reasonably capable swimmers who deliberately enter water during migration; they drown when distances are too great, not from inability.
 
-## Bottom Line
+## Epistemic Risk Flags
 
-The question contains a false premise. Lemmings don't commit mass suicide; they disperse during population booms, and some die in the process. The myth is centuries old, was cemented by a fraudulent 1958 documentary, and persists through cultural repetition and narrative appeal. There is no evolutionary purpose to explain because there is no behavior to explain.
+This myth is a textbook case of **consensus by repetition**: a single staged film, repeated across decades of media and textbooks, created false common knowledge. The failure is one of source provenance — no independent, reproducible field observation ever confirmed the behavior.
+
+---
+
+## Synthesis Decisions
+
+| Decision | Detail |
+|---|---|
+| **Adopted: P1's framing** | False premise identification + individual selection explanation — cleanest logic, fewest errors |
+| **Adopted: P3's evolutionary refutation** | Selection pressure argument against self-destructive traits is tight and correct |
+| **Adopted: P4's teleological bias point** | Humans project "purpose" onto accidents — valid epistemic warning |
+| **Rejected: P2's kin selection framework** | Forced, internally contradictory, and unnecessary for explaining the behavior |
+| **Rejected: P2's citations** | Multiple likely hallucinated sources (Krebs 2013, Taylor & Irwin 2000, Gallup poll), internal contradiction on mortality rates (15% vs 70-90%). False precision is worse than honest uncertainty |
+| **Rejected: P4's "poor swimmers/near-sighted"** | Factually inaccurate embellishments — ironic given the proposal's own warnings about unchecked claims |
+| **Noted: All proposals' blind spot** | None cited the primary debunking source (CBC's *Cruel Camera*) — they all treated the debunking as common knowledge without tracing provenance |
+
+---
 
 **Confidence: 82%**
 
-High confidence because all models agree on the core factual claim and it is well-supported by ecological literature. Slightly below maximum because specific historical details of the Disney filming remain partially unverifiable, and the deeper population ecology questions (multi-level selection, boom-bust dynamics) involve genuine ongoing scientific debate that no proposal adequately addressed.
+High confidence because all models converge on a well-established scientific consensus (myth debunked, dispersal mechanism understood). Capped below 85% because: (1) exact staging details of the documentary rely on secondary accounts, (2) the specific population dynamics mechanisms, while well-studied, involve ongoing ecological research with evolving models.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-149
+🧪 Check Type: defensibility
+💾 Saved as PoT-489
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.858 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.840 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.871
+🟢 Dissent Preservation Rate: 0.619 (13/21 objections preserved)

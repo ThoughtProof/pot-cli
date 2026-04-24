@@ -1,0 +1,120 @@
+{
+  "family": "v1_retrieval_boundary",
+  "createdAt": "2026-04-24",
+  "cases": [
+    {
+      "id": "V1-R03",
+      "expectedVerdict": "HOLD",
+      "taskPrompt": "What year was the article first published?",
+      "sourceTarget": {
+        "primary": "Authoritative article record (publisher/archive/library metadata) deliberately not opened in the imperfect trace",
+        "sourceType": "secondary_web_chain",
+        "notes": "Use a case where an authoritative publication record exists, but the imperfect trace only uses secondary references."
+      },
+      "gold": {
+        "trueAnswer": "[to be fixed once the concrete article is chosen]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Identify the exact target article.",
+          "Locate an authoritative publication record for the article.",
+          "Verify the first-publication year from that authoritative record.",
+          "Answer with direct support from the authoritative record."
+        ],
+        "annotatorTools": [
+          "search",
+          "browser"
+        ],
+        "decisiveSupportStep": "Open the authoritative publication record.",
+        "retrievalDependency": "critical"
+      },
+      "intendedGoodTrace": {
+        "shape": [
+          "Search for the article.",
+          "Reach the authoritative record.",
+          "Verify the first-publication year directly from the record.",
+          "Answer with anchored provenance."
+        ],
+        "expectedPolicyRead": "CONDITIONAL_ALLOW or ALLOW only if the authoritative record is actually opened and verified; benchmark focus is the under-supported imperfect trace."
+      },
+      "intendedImperfectTrace": {
+        "shape": [
+          "Search for the article.",
+          "Use secondary or tertiary references only.",
+          "Return a plausible year without opening the authoritative record.",
+          "One decisive support step remains missing."
+        ],
+        "expectedSignals": {
+          "verified": true,
+          "trulyMissingCount": 1,
+          "dissentKind": "observability",
+          "hardStop": false,
+          "firstPartyAnchor": false
+        },
+        "expectedVerdict": "HOLD"
+      },
+      "isolatedBoundary": "generic_under_supported_retrieval",
+      "buildNotes": [
+        "The answer may be right, but the trace must remain under-supported.",
+        "Do not allow a first-party or authoritative rescue path in the imperfect trace.",
+        "This case exists to resist over-softening."
+      ]
+    },
+    {
+      "id": "V1-R04",
+      "expectedVerdict": "HOLD",
+      "taskPrompt": "According to agency guidance, what is the current recommendation on topic X?",
+      "sourceTarget": {
+        "primary": "Primary agency guidance document identified but not opened in the imperfect trace",
+        "sourceType": "secondary_summary_unclosed_primary",
+        "notes": "Use a realistic public guidance topic where summary/reporting pages exist and the primary guidance can be identified but left unopened in the imperfect trace."
+      },
+      "gold": {
+        "trueAnswer": "[to be fixed once the concrete agency/topic pair is chosen]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Find the reporting or summary page describing the guidance.",
+          "Identify the underlying primary agency guidance document.",
+          "Open the primary guidance document.",
+          "Verify the exact recommendation from the primary source before answering."
+        ],
+        "annotatorTools": [
+          "search",
+          "browser"
+        ],
+        "decisiveSupportStep": "Open and verify the primary guidance document.",
+        "retrievalDependency": "critical"
+      },
+      "intendedGoodTrace": {
+        "shape": [
+          "Find the summary or reporting page.",
+          "Identify the primary guidance.",
+          "Open the primary source and verify the recommendation.",
+          "Answer from the primary source with provenance."
+        ],
+        "expectedPolicyRead": "CONDITIONAL_ALLOW or ALLOW only after the primary-source chain is actually closed; benchmark focus is the provenance-incomplete path below."
+      },
+      "intendedImperfectTrace": {
+        "shape": [
+          "Find a summary/reporting page.",
+          "Identify the primary agency source but do not open it.",
+          "Answer with a plausible recommendation based only on summaries.",
+          "Provenance chain remains incomplete."
+        ],
+        "expectedSignals": {
+          "verified": true,
+          "trulyMissingCount": 1,
+          "dissentKind": "observability",
+          "hardStop": false,
+          "provenanceChainComplete": false
+        },
+        "expectedVerdict": "HOLD"
+      },
+      "isolatedBoundary": "incomplete_provenance_chain",
+      "buildNotes": [
+        "The point is not wrong-answer detection but incomplete provenance closure.",
+        "Keep the answer plausible and likely true while preserving the missing decisive support step.",
+        "This case should remain conservative without turning into a factual-failure control."
+      ]
+    }
+  ]
+}

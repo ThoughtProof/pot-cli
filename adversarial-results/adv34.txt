@@ -3,64 +3,91 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-165 created in 146.2s
+✔ Block PoT-505 created in 127.8s
 
 📊 SYNTHESIS:
 
-# Can a Cavity Heal Itself? — Synthesized Answer
 
-## Clear Answer: No — with one important nuance.
 
-**A true cavity (physical hole into dentin) cannot heal itself.** However, the *precursor* to a cavity — early enamel demineralization (white spot lesion) — can sometimes be arrested or partially remineralized under aggressive intervention. These are fundamentally different conditions.
+## Verdict: ALLOW
+
+---
+
+# Can a Cavity Heal Itself?
+
+**No.** Once a cavity has physically breached the enamel surface (cavitation), it cannot heal itself. This is the consensus across all four models and is consistent with established clinical dentistry. The core reasoning is sound and uncontested.
+
+---
 
 ## The Critical Distinction
 
-**Pre-cavity (white spot lesion):** Subsurface mineral loss with intact enamel surface. Remineralization is possible (~30-40% arrest rates reported across the literature) with:
-- High-fluoride therapy (5000ppm prescription toothpaste)
-- Meticulous oral hygiene and dietary changes
-- Professional fluoride varnish application
-- Adequate salivary flow
+**Remineralization ≠ Regeneration.** This category error (identified most clearly by Proposal 1) is the heart of the misconception.
 
-But "arrested" ≠ "healed." The zone remains structurally weaker than intact enamel.
+- **Pre-cavitation (white spot lesions):** Subsurface mineral loss with intact enamel surface. Fluoride, saliva, and dietary changes can remineralize these lesions. This is real, evidence-based, and routinely practiced. Estimated 30–60% of early lesions can be arrested or reversed with professional fluoride protocols.
+- **Cavitated lesions (actual cavity):** Physical structural collapse of enamel. Enamel is acellular post-eruption — no ameloblasts remain to deposit new tissue (Proposal 4's strongest contribution). Bacteria colonize the exposed dentin. No natural mechanism exists to regenerate lost tooth structure. Professional intervention is required.
 
-**Cavitated lesion (true cavity):** Once bacteria physically occupy a defect in dentin, no biological mechanism exists to regenerate the lost mineralized structure. Enamel has no living cells post-eruption; dentin's odontoblasts can produce reactionary dentin at the pulp border, but cannot repair the breach from within the cavity.
+---
 
-## What Happens If You Wait
+## What All Models Missed: Tertiary Dentin and Arrested Caries
 
-- **Progression is the norm.** Untreated cavitated lesions advance toward the pulp, though timelines vary enormously by location, depth, patient age, diet, and bacterial load (all four models disagreed on specifics — see below)
-- **Cost escalation is real:** A ~$200-400 filling today prevents a $2,000+ root canal/crown or $3,000-6,000 implant later
-- **Pain and infection risk increases** with every month of delay
+The Critic correctly identified two shared blind spots:
 
-## Important Omission Across All Models
+1. **Tertiary (reparative) dentin:** Odontoblasts can deposit reparative dentin in response to slow caries progression. This doesn't heal the cavity — the structural defect remains, bacteria persist — but it's a genuine biological defense that slows pulpal involvement. Ignoring it leaves a gap that cavity-healing proponents could exploit.
 
-**Silver Diamine Fluoride (SDF)** — an FDA-cleared, non-invasive treatment — can arrest even *cavitated* caries lesions, particularly in pediatric and geriatric populations. This doesn't "heal" the cavity but stops progression without drilling. None of the four models mentioned this, representing a significant shared blind spot that complicates the universal "you must get a filling" narrative.
+2. **Arrested cavitated caries:** Proposal 3 was the only one honest enough to acknowledge this. Cavitated lesions *can* arrest under extreme preventive conditions (radical dietary change, fluoride exposure, low-caries-risk environments). Arrest ≠ healing — the hole remains, the tooth is compromised — but this nuance matters for epistemic completeness. Proposals 1, 2, and 4 either denied or ignored this reality.
 
-Additionally, the Nyvad classification system documents **inactive cavitated lesions** — caries that arrested despite cavitation. The absolute "0% chance" framing all models used is slightly overstated. Arrest ≠ healing, but it does mean not every untreated cavity inevitably becomes an emergency.
+---
+
+## Evidence Quality Warning
+
+The Critic identified **significant fabrication risk in Proposal 2's citations**. Multiple references (Nyvad 1997 DOI, "Fujian study 2012," specific Cochrane parameters) could not be verified and show hallmarks of AI confabulation — precise DOIs, sample sizes, and statistics without confirmable sources. **Citation density is not evidence quality.** Proposal 2's numbers should not be treated as verified.
+
+Proposals 1 and 3 also cite unverified statistics (e.g., "<30 microns" threshold, "0.5–1.5 mm/year" progression) but present them with less false precision.
+
+---
+
+## What Can Go Wrong
+
+The asymmetric risk framing (Proposal 1's strongest argument) is decisive:
+
+- **Believing cavities self-heal → delayed treatment → larger restorations, root canals ($1,500+ vs. $150–200 for a filling), extractions, infection, and in severe cases, systemic spread (cellulitis, sepsis)**
+- **Believing cavities don't self-heal → at worst, slightly earlier intervention on a lesion that might have arrested**
+
+The downside of the false belief is catastrophically worse than the downside of the true belief. This alone makes "cavities can self-heal" indefensible as general advice.
 
 ---
 
 ## Where Models Disagreed
 
-| Issue | Range of Claims | Why They Disagreed |
-|-------|----------------|-------------------|
-| **Time to pulp involvement** | 1 year (P1) to 18-36 months (P3) | No verified source exists for a single "average" — it depends on lesion-specific factors. Models fabricated different point estimates. |
-| **Remineralization success rates** | 24% to 40% | Convergence around 30-40% likely reflects training data overlap rather than independent verification. Actual rates vary by study design. |
-| **Can cavitated lesions arrest?** | "100% progress" (P1) vs. "2% arrest" (P2) vs. implicit acknowledgment of arrest (P3) | P1/P4 used absolute language; P3 distinguished arrest from healing. The literature supports that some cavitated lesions *can* arrest — P3's framing was most accurate. |
-| **Implant costs** | $1,500 (P4) to $6,000+ (reality) | P4's figure was likely wrong; others were in the right ballpark for US averages. |
+| Issue | Disagreement | Resolution |
+|---|---|---|
+| Can cavitated lesions arrest? | P2: "0% repair" / P4: "guarantee of failure" vs. P3: "rare but possible" | **P3 is most honest.** Arrest is documented but rare and not equivalent to healing. |
+| Depth thresholds for remineralization | P1: <30μm (unverified) vs. others: unspecified | **No reliable consensus number adopted.** |
+| Evidence sourcing | P2: heavy citations (many suspect) vs. P4: zero citations | **Neither extreme is ideal.** Honest uncertainty > fabricated precision. |
 
-## Unverified Claims Flagged by Critique
+---
 
-Multiple specific citations across proposals could not be verified: the "Cochrane 2019" and "Nyvad 1997 10-year follow-up" in P1, the "UCSF cohort n=1,400" and "Cochrane 2022" in P2, and P3's first-person clinical anecdote (generated by an AI, not a dentist). **Do not cite any of these downstream without independent verification.**
+## Synthesis Decisions
 
-## Bottom Line
+- **Adopted from P1:** Category error framing, asymmetric risk argument, honest edge-case handling. Core structure of the answer.
+- **Adopted from P3:** Acknowledgment of arrested caries — the most epistemically honest position among the four.
+- **Adopted from P4:** Biological mechanism (acellular enamel, no ameloblasts post-eruption). Best-explained foundational reasoning.
+- **Rejected from P2:** Citation apparatus. Too many unverifiable references. The evidence hierarchy is structurally sound but the specific sources cannot be trusted. Retained the general framework (RCTs > histology > clinical trials) without the suspect specifics.
+- **Rejected from P4:** ThoughtProof section (irrelevant), "guarantee" language (overstated).
+- **Added from Critic:** Tertiary dentin and arrested caries as necessary completions.
 
-Schedule the dentist. Early lesions *may* arrest with aggressive fluoride therapy. True cavities will not regrow tooth structure — but SDF or restoration can stop them from destroying the tooth. Delay guarantees higher cost and worse outcomes.
+---
 
-**Confidence: 78%**
-Core dental science is well-established and all models agreed on fundamentals. Docked from 85% cap due to: (1) multiple unverifiable citations across proposals, (2) shared blind spot on SDF/non-restorative approaches, (3) oversimplified progression timelines, and (4) US-centric cost framing presented as universal.
+**Confidence: 82%**
+
+High-consensus factual question with well-established clinical science. Capped below 85% due to unverified statistics across proposals and minor edge-case complexity around arrested caries.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-165
+🧪 Check Type: defensibility
+💾 Saved as PoT-505
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.841 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.838 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.856
+🟢 Dissent Preservation Rate: 0.941 (16/17 objections preserved)

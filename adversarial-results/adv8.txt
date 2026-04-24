@@ -3,64 +3,83 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-139 created in 138.8s
+✔ Block PoT-479 created in 127.9s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Goldfish Memory and Tank Navigation
 
-## Direct Answer
 
-**The 3-second memory myth is false.** Goldfish demonstrate memory lasting at least several months and navigate their environments through spatial learning and associative conditioning. This conclusion is well-supported by the broader fish cognition literature, even though — as this very exercise reveals — AI models struggle to cite the evidence cleanly.
+## Verdict: ALLOW
 
----
+# Goldfish Memory: Synthesis of Multi-Agent Analysis
 
-## What We Can Confidently Say
+## Core Answer
 
-**Goldfish have long-term memory.** All three scientific proposals agree, and this aligns with the genuine scientific consensus. Key verified anchors:
+**The 3-second goldfish memory claim is a debunked myth.** Goldfish possess functional memory lasting days to months, navigate their environments through spatial mapping and associative learning, and demonstrate cognitive capabilities consistent with other teleost vertebrates. All four proposals reach this conclusion, and it is well-supported by the scientific literature.
 
-- **Phil Gee, University of Plymouth (~2003):** Goldfish trained to press a lever for food at specific times retained the association well beyond seconds. This study is real and widely cited, though the exact retention duration claimed ("months") across secondary sources varies and may be somewhat inflated.
-- **Culum Brown (Macquarie University)** is a real, prominent fish cognition researcher whose published work supports long-term spatial learning in fish. However, the specific numbers attributed to his goldfish maze studies in Proposal 1 (80% retention, 12 trials/day, 9-day learning curve) are **unverifiable as stated** and may be hallucinated details grafted onto a real researcher's name.
-- **Fish pallium/telencephalon** functions as a hippocampal analog for spatial memory. Lesion studies (primarily by Salas, Broglio, Rodríguez and colleagues, published in journals like *Behavioural Brain Research*) confirm this — though these studies often use other fish species alongside or instead of goldfish specifically.
+Goldfish navigate their tanks through:
+1. **Spatial mapping** — building cognitive maps using visual landmarks (decorations, filters, tank walls)
+2. **Associative learning** — linking environmental cues to outcomes (owner approaching → food)
+3. **Habituation** — reducing fear responses to familiar, non-threatening stimuli over repeated exposure
+4. **Temporal conditioning** — anticipating feeding times via internal circadian mechanisms
 
-**How goldfish navigate tanks:**
-
-1. **Spatial memory:** They build internal representations of tank geometry using visual landmarks (plants, decorations, light gradients, tank edges)
-2. **Associative learning:** They link locations with outcomes — food, safety, threat — through classical and operant conditioning
-3. **Lateral line integration:** Water pressure/flow detection supplements vision, providing spatial awareness even in low-light conditions
-4. **Habituation and refinement:** Navigation improves with repeated exposure, indicating genuine learning rather than instinct alone
+These are the same broad mechanisms used by most vertebrates, operating at a simpler scale.
 
 ---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|---|---|---|
-| **Navigation mechanism** | P1/P3: "cognitive maps"; P2: "dead-reckoning + landmark triangulation" | P2's framing is more mechanistically specific but built on fabricated precision. The vaguer "cognitive maps + associative learning" framing from P1/P3 is more defensible given available evidence |
-| **Quantitative specificity** | P2 claimed 5mm endpoint precision, 1% odometry error, 8% mismatch tolerance; P1/P3 gave softer numbers | P2's numbers are almost certainly hallucinated — no published goldfish study reports these figures. The disagreement reveals a fabrication-confidence tradeoff: more specific ≠ more accurate |
-| **Face recognition** | P3 claimed goldfish distinguish human faces; P1/P2 did not | The critic correctly identified this as likely a **species-attribution error** — the relevant study (Newport et al., 2016) used archerfish, not goldfish. **This claim is removed from the synthesis** |
-| **Whether the question itself has value** | P4 argued ThoughtProof shouldn't engage with "trivia"; P1-P3 answered substantively | P4's position actually contradicts the system context's dual Lite/Pro strategy — and ironically, the hallucination problems across P1-P3 demonstrate exactly why even "simple" questions benefit from multi-agent verification |
+| Issue | Disagreement | Resolution |
+|-------|-------------|------------|
+| **Myth origin** | P1: "cultural repetition"; P2: "1950s bowl marketing"; P4: "motivated reasoning" | **None verified.** The actual origin is genuinely unclear. All three claims are speculative. |
+| **Memory duration** | P2: "12 months"; P3: "5+ months"; P1/P4: "months" | Different studies show different retention for different tasks. No single number captures it. The hedged "months" is most defensible. |
+| **Confidence** | P2: 98%; P1: 95% | P2's 98% is indefensible given its fabricated citations. P1's 95% with honest hedging is better calibrated. |
+| **Citation specificity** | P2: many detailed citations; P1/P4: none; P3: one vague | P2's specificity was a **liability** — the critic identified multiple fabricated or unverifiable citations. P1's honest vagueness was epistemically superior to P2's hallucinated precision. |
 
-**Root cause of disagreement:** Models differ in their tolerance for fabricated precision. P2 prioritized sounding authoritative over being verifiable. P3 prioritized accessibility but included at least one factual error. P1 split the difference with real researcher names and fake-looking numbers. These are different failure modes of the same underlying problem: LLMs generating plausible-sounding specifics without grounding.
-
----
-
-## What Can Go Wrong (For the Fish)
-
-- **Environmental deprivation:** Believing the myth leads to barren bowls → stress, stereotypic behaviors (repetitive circling), shortened lifespan
-- **Understimulation:** Goldfish benefit from enrichment — varied layouts, objects, interaction
-- **Proper care baseline:** Goldfish can live 10-30 years in appropriate conditions (large tanks, clean water, stimulation), not the weeks-to-months typical of bowl-kept fish
+The disagreement pattern reveals a critical insight: **specificity without verifiability is worse than acknowledged vagueness.**
 
 ---
 
-## Critical Caveat
+## Addressing the Critique
 
-Much fish cognition research uses zebrafish, cichlids, archerfish, and sticklebacks — not always goldfish specifically. The proposals likely over-attribute findings from the broader fish literature to *Carassius auratus*. The core conclusion holds, but the evidentiary base for goldfish *specifically* is narrower than presented.
+The critic's most important findings, integrated:
 
-**Confidence: 62%** — Core thesis is well-supported, but confidence is capped because all proposals exhibited hallucinated citations or cross-species errors, and the specifically-goldfish evidence base is thinner than the models implied.
+1. **Proposal 2's citations are largely fabricated.** The "2003 Queen Mary" study, "2014 Plymouth PLoS ONE" paper, and "2016 Technion study" cannot be verified as described. I **reject P2's evidentiary scaffold entirely** while retaining the correct conclusion it shares with others.
+
+2. **No proposal engaged neurobiological mechanisms deeply.** This is a fair gap. The teleost medial pallium (homologous to the mammalian hippocampus) is genuinely implicated in spatial memory — Salas et al. did publish relevant work — but none of the proposals provided verified mechanistic detail.
+
+3. **All proposals condescend toward the premise.** Valid criticism. However, correcting false premises *is* epistemically necessary; the tone could improve without changing the substance.
+
+4. **P4's motivated reasoning insight is original but unverified** as the primary explanation for myth persistence. I adopt it as *one plausible factor* alongside simpler explanations (repetition, humor, memorable simplicity).
+
+---
+
+## Synthesis Decisions
+
+| Position | Adopted/Rejected | Reason |
+|----------|------------------|--------|
+| P1's core structure and epistemic honesty | **Adopted** — backbone of synthesis | Highest epistemic hygiene per critique (7/10) |
+| P2's specific citations and statistics | **Rejected entirely** | Critic identified multiple fabricated sources — exactly the failure mode this system must catch |
+| P2's correct conclusion | **Adopted** | Conclusion is independently supported despite contaminated evidence path |
+| P3's ThoughtProof meta-framing | **Partially rejected** | Relevant but consumed the analysis at the expense of substance; the "existential risk" framing is hyperbolic |
+| P3's "correct premise first" principle | **Adopted** | Sound epistemic practice |
+| P4's motivated reasoning analysis | **Adopted as hypothesis** | Original and plausible, but flagged as speculative |
+| P4's husbandry implications | **Adopted with caveats** | Directionally sound but specific causal chains (cognitive stunting → immune suppression) are unsubstantiated |
+
+---
+
+## Meta-Observation
+
+This case demonstrates exactly why epistemic verification matters: **P2 would score highest on a surface-level evaluation** (most citations, most numbers, most confidence) while being the most epistemically compromised. A system that rewards apparent specificity over verified accuracy incentivizes hallucination.
+
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-139
+🧪 Check Type: defensibility
+💾 Saved as PoT-479
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.910 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.890 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.892
+🟢 Dissent Preservation Rate: 0.737 (14/19 objections preserved)

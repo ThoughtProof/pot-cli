@@ -52,7 +52,12 @@ function includesAll(haystack: string, needles: string[]): boolean {
   return needles.every((needle) => haystack.includes(needle));
 }
 
-function answersEquivalent(taskId: string, answer: string, groundTruth: string): boolean {
+function answersEquivalent(taskId: string, answer: string, groundTruth: string, finalCorrect?: boolean | null): boolean {
+  // If final_correct is explicitly false, answers are NOT equivalent
+  if (finalCorrect === false) {
+    return false;
+  }
+
   const normalizedAnswer = normalizeAnswer(answer);
   const normalizedGroundTruth = normalizeAnswer(groundTruth);
   if (normalizedAnswer === normalizedGroundTruth) {
@@ -134,7 +139,7 @@ export function firstPartyTraceToPlanRecord(
   const annotatorToolsParsed = parseAnnotatorTools(annotatorToolsText);
   const hasGroundTruth = input.ground_truth != null && String(input.ground_truth).trim().length > 0;
   const verified = hasGroundTruth
-    ? answersEquivalent(input.task_id, input.answer, input.ground_truth!)
+    ? answersEquivalent(input.task_id, input.answer, input.ground_truth!, input.final_correct)
     : (typeof input.final_correct === 'boolean' ? input.final_correct : false);
 
   const goal: GoalNode = {

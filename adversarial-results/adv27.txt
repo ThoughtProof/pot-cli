@@ -3,54 +3,85 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-158 created in 117.2s
+✔ Block PoT-498 created in 118.0s
 
 📊 SYNTHESIS:
 
-# What Color is a Mirror?
+## Verdict: CONDITIONAL_ALLOW
 
-## Answer: Mirrors are **green** — faintly, measurably, and reproducibly.
+# What Color Is a Mirror? — Synthesis
 
-A perfect mirror would reflect all visible wavelengths equally and have no color. Real mirrors aren't perfect. Standard household mirrors (soda-lime glass with aluminum or silver backing) reflect ~92–95% of visible light, but with a slight spectral bias: green wavelengths (~500–550nm) are reflected ~2–3% more efficiently than red or blue wavelengths.
+## Core Answer
 
-This bias has two compounding sources:
-1. **The metal coating itself** — Silver's reflectance dips in the blue/violet region (~93% at 400nm) and climbs above 500nm (~97–98%). It is *not* spectrally flat.
-2. **The glass substrate** — Soda-lime glass contains iron(III) oxide impurities that absorb more at both the blue/UV *and* red/IR ends of the spectrum, creating a broad transmission and reflection peak in the green.
+A standard household mirror is **a very faint green** when measured by its material spectral reflectance, but its defining physical property is near-perfect *specular* reflection across the visible spectrum, meaning it functionally has no intrinsic color of its own. If forced to a single word: **green** (for real mirrors) or **colorless** (for ideal mirrors). "Silver" is folk-language shorthand. "White" is incorrect.
 
-## The Decisive Experiment
-
-Place two mirrors face-to-face and look into the resulting tunnel. After ~10–20 reflections, the images acquire a distinct **greenish cast**. By ~30+ reflections, the tint is unmistakable. Each bounce compounds the tiny per-reflection bias, making the mirror's intrinsic color visible. This is reproducible by anyone with two bathroom mirrors and is well-documented in optics demonstrations.
+---
 
 ## Where Models Disagreed
 
-| Question | "No Color" (P1) | "Green" (P2, P3) | "Silver" (P4) |
-|----------|-----------------|-------------------|---------------|
-| Mirrors have spectral bias? | Own table proved YES, but claimed NO | YES | Claimed NO |
-| Mirror tunnel shows green? | Not addressed | YES — central evidence | Dismissed as "internet meme" |
-| What determines color? | Function (reflection) | Measured spectral reflectance | Coating material |
+| Dimension | P1 (Silver-white) | P2 (Colorless) | P3 (Faint green) | P4 (White) |
+|---|---|---|---|---|
+| Green tint real? | Yes | No ("myth") | Yes | No ("flaw") |
+| Source of green | Coating absorption | Glass impurities (dismissed) | Glass iron oxide impurities | Glass impurities (dismissed) |
+| Specular vs. diffuse | Not addressed | Not addressed | **Correctly distinguished** | Conflated (critical error) |
 
-**Why they disagreed:**
-- **P1 and P4** treated mirrors as *functionally* colorless or defined "color" as the material of the coating rather than the spectral profile of reflected light. P1's own reflectance table (showing non-uniform values across wavelengths) actually contradicted its thesis. P4 used circular reasoning ("silver because made of silver") and dismissed measurable green bias without counter-evidence.
-- **P2 and P3** grounded their answer in spectrophotometric data and the reproducible mirror-tunnel experiment. They disagreed slightly on mechanism — P2 emphasized glass absorption while P3 credited both coating and glass — but converged on the same answer.
+**Why they disagreed:** Fundamentally, proposals diverged on (1) whether the green tint is a real property or a manufacturing artifact, and (2) whether "color" means spectral reflectance profile or perceptual appearance. P2 and P4 dismissed the green as noise; P1 and P3 treated it as signal. P3 uniquely identified the specular/diffuse distinction that makes "white" categorically wrong.
 
-## What Can Go Wrong With This Answer
+---
 
-1. **Construction-dependent caveat**: Ultra-low-iron glass mirrors (used in high-end optics, solar panels, some premium bathroom mirrors) show significantly less green bias. The "green" answer applies most strongly to standard soda-lime glass mirrors — which constitute the vast majority of mirrors people encounter.
-2. **Single-reflection imperceptibility**: For everyday use, the green tint is invisible. You will never notice it brushing your teeth. It only becomes apparent through compounding (mirror tunnels) or precise spectrophotometry.
-3. **Front-surface mirrors**: Astronomical or scientific mirrors without glass substrates have different spectral profiles (aluminum front-surface mirrors are more spectrally uniform). The green answer is specific to household mirrors.
-4. **No proposals cited specific published studies** — reflectance figures are in the right ballpark but none provided verifiable journal citations. The mirror-tunnel observation is well-documented in optics education but the specific percentage figures (93–94% green vs. 90–91% red) should be treated as approximate.
-5. **Philosophical framing matters**: If you mean "what color does a mirror *look*?" the answer is "whatever it reflects." If you mean "what is a mirror's intrinsic spectral bias?" the answer is green. The physics question has a definitive answer; the semantic question doesn't.
+## Synthesis Reasoning
 
-## Bottom Line
+**Adopted from P3 (DeepSeek) — primary backbone:**
+P3 provides the most technically accurate account. It correctly identifies iron oxide impurities in soda-lime glass as the dominant source of green tinting, properly distinguishes specular from diffuse reflection (the only proposal to do so), and frames the question itself as a partial category error. The critique scored it highest (8/10) and I concur.
 
-A standard household mirror is **faintly green** — approximately 2–3% more reflective at green wavelengths than red or blue, due to both the metal coating's spectral non-uniformity and the soda-lime glass substrate's iron impurities. You can verify this yourself with two mirrors and your own eyes.
+**Adopted from P1 (Claude) — epistemic framing:**
+P1's three-layer structure (folk → physics → experimental) is the best pedagogical framework. The infinity mirror demonstration is a compelling, verifiable illustration. However, I **reject** P1's attribution of the green tint to "the quantum absorption profile of aluminum/silver coatings." The critique correctly identifies this as a meaningful error — the green comes primarily from the glass substrate, not the metallic coating. I also reject P1's final recommendation of "silver-white" as the best single answer; it's the folk answer, not the most defensible one.
 
-**Confidence: 72%**
+**Rejected — P2 (Grok):**
+P2 dismisses the green tint as a "myth" while simultaneously providing CIE Lab values (a*≈-1) that confirm a green shift exists — a direct self-contradiction the critique caught. Multiple citations (NIST, Guardian Glass, CIE values) appear unverifiable and potentially fabricated. The 99% confidence claim is epistemically reckless for a question with genuine frame-dependence. The critique's 4/10 score is deserved.
 
-Confidence is capped below 85% because: (1) specific reflectance percentages were not traced to verified published sources across any proposal, (2) the answer is construction-dependent and "standard household mirror" covers a range of manufacturing specs, and (3) there is a legitimate semantic dimension to "what color" that admits multiple valid framings.
+**Rejected — P4 (Gemini):**
+P4's core claim that "a mirror is white" is wrong by standard optical definitions. White requires diffuse (Lambertian) reflection; mirrors produce specular reflection. The critique caught an even more damaging error: P4 calls mirrors "retro-reflective," which is a distinct and different optical phenomenon (think road signs). The forced ThoughtProof analogy adds zero epistemic value. The critique's 3/10 is earned.
+
+---
+
+## Critical Shared Blind Spot
+
+All four proposals treat "mirror" as monolithic. The answer genuinely depends on mirror type:
+- **Front-surface mirrors** (no glass) → no green tint → effectively colorless
+- **Standard second-surface mirrors** (soda-lime glass) → measurable green tint
+- **Low-iron glass mirrors** (e.g., Starphire/UltraClear) → near-zero tint
+
+This distinction resolves most of the inter-proposal disagreement.
+
+---
+
+## Unverified Claims Flagged by Critique
+- P2's "NIST data: 98.5% at 550 nm" — no verifiable source
+- P2's CIE Lab values (L*≈95, a*≈-1, b*≈1) — plausible but unconfirmed
+- P2's "Guardian Glass data" — no citation provided
+- P1's "~1-2% spectral preference" — unconfirmed specific figure
+- P1's "~510nm" peak — approximately correct range but coating-dependent
+
+---
+
+## Synthesis Decisions Summary
+| Decision | Source | Rationale |
+|---|---|---|
+| ✅ Faint green as material answer | P3 | Best technical accuracy, confirmed by critique |
+| ✅ Three-layer epistemic framework | P1 | Strong pedagogical structure |
+| ✅ Specular/diffuse distinction | P3 | Eliminates "white" definitively |
+| ❌ Green from coating absorption | P1 | Misattribution; primarily a glass substrate effect |
+| ❌ "Mirrors are colorless" as final answer | P2 | Self-contradictory, overclaimed confidence |
+| ❌ "Mirrors are white" | P4 | Factually wrong (specular ≠ diffuse), compounded by "retro-reflective" error |
+
+**Confidence: 68%**
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-158
+🧪 Check Type: defensibility
+💾 Saved as PoT-498
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.834 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.859 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.834
+🟢 Dissent Preservation Rate: 1.000 (12/12 objections preserved)

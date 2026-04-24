@@ -3,69 +3,84 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-162 created in 152.3s
+✔ Block PoT-502 created in 152.4s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Are Amalgam Fillings Toxic? Should They Be Replaced?
 
-## Bottom Line
 
-**No, dental amalgam is not toxic at clinically significant levels for the general population, and routine replacement is unnecessary and can cause harm.** However, the full picture is more nuanced than any simple "safe/unsafe" framing allows, and the global regulatory trend is toward phase-down.
+## Verdict: CONDITIONAL_ALLOW
 
-## What the Evidence Actually Supports
+# Synthesized Position: Dental Amalgam Safety
 
-Amalgam fillings (~50% mercury) release approximately **1–5 µg/day of mercury vapor**. All four models agreed on this range, and it is broadly consistent with the published literature.
+**Amalgam fillings are not toxic at typical exposure levels. Routine replacement is not justified and introduces iatrogenic harm. However, the quantitative safety arguments presented across all proposals contain meaningful errors that must be documented.**
 
-**Critical correction flagged by the critic:** All proposals cited different WHO safety thresholds (30, 40, and 45 µg/day). The WHO Provisional Tolerable Weekly Intake for inorganic mercury is approximately **2 µg/kg body weight/week**, translating to roughly **20 µg/day for a 70 kg adult** — meaning the safety margin, while still real, is **smaller than any individual proposal claimed**. Even so, a person with multiple amalgam fillings remains below this threshold.
+---
 
-Large-scale trials (including the NIH-funded Children's Amalgam Trials, ~1,000+ children, 5-year follow-up) found no measurable neurocognitive or renal differences between amalgam and composite groups. Every major regulatory body (FDA, ADA, WHO, EU SCENIHR) has assessed amalgam as safe for general use.
+## Core Conclusion (Adopted from All Proposals, Validated)
 
-## Risks of Routine Replacement
+The directional consensus is correct: dental amalgam is safe for most adults, and prophylactic removal creates more risk than it mitigates. This is supported by the FDA (2020), ADA, WHO, FDI, and the EU SCENIHR (2015). The New England Children's Amalgam Trial (Bellinger et al., JAMA 2006, 534 children, 5 years) found no statistically significant differences in neurological or renal outcomes versus composites — the strongest single piece of evidence cited across proposals.
 
-- **Transient mercury spike:** Removal increases vapor exposure significantly (estimates range 3–40x transiently — the wide range reflects genuine measurement variability)
-- **Tooth damage:** Removal sacrifices healthy tooth structure and increases pulp exposure risk
-- **Cost:** ~$150–400+ per filling, typically not covered by insurance for elective removal
-- **Composite limitations:** Composites do bond adhesively (requiring *less* initial tooth removal than amalgam — correcting Proposal 3's error), but may have shorter longevity in large posterior restorations
+**Removal risks are concrete and well-documented:** mercury vapor spikes during drilling, loss of healthy tooth structure, pulp trauma, and initiation of a restoration cycle that shortens tooth lifespan.
 
-## When Replacement IS Indicated
+---
 
-1. Restoration is failing (cracks, marginal breakdown, secondary caries)
-2. Verified mercury allergy (contact dermatitis/lichenoid reaction confirmed by patch testing)
-3. Full-coverage crown is planned anyway
-4. For **new** restorations in pregnant/breastfeeding women or children under 15 — use alternatives (precautionary, per EU policy)
+## Critical Error Flagged by Critique: Safety Threshold Comparisons
+
+**Every proposal botched the quantitative safety argument differently:**
+
+- **P1** compared elemental mercury exposure to a methylmercury WHO threshold while explicitly noting they're different substances — an internal contradiction
+- **P2** compared an air concentration metric (EPA RfC: 0.3 µg/m³) to a daily absorption figure — apples to oranges
+- **P3** used the EPA methylmercury RfD (0.1 µg/kg/day) for elemental mercury — wrong mercury species entirely
+- **P4** claimed "orders of magnitude" below thresholds without specifying which thresholds — rhetorical inflation
+
+**This does not invalidate the safety conclusion**, but it means no proposal provided a clean quantitative proof. The correct framing: daily elemental mercury absorption from amalgam (~1–5 µg) is below levels associated with adverse effects in epidemiological studies, and population-level evidence over 150+ years has not demonstrated harm at these exposures. The threshold comparison is messy because regulatory standards were designed for different exposure contexts (occupational, dietary), not dental amalgam specifically.
+
+---
+
+## Shared Blind Spots (Adopted from Critique)
+
+The critique identified serious omissions that no proposal addressed:
+
+1. **Scandinavian bans:** Norway, Sweden, and Denmark banned amalgam. Dismissing this without explanation is intellectually incomplete — though notably, these bans were primarily environmental (mercury waste), not toxicological.
+2. **Genetic polymorphisms:** CPOX4, BDNF, APOE4 variants affect mercury metabolism. Population studies are underpowered to detect harm in genetically susceptible subgroups.
+3. **Upper-tail exposure:** Patients with bruxism, acidic diets, or 10+ fillings may exceed the "average" 1–5 µg estimate substantially.
+4. **"No evidence of harm" ≠ "evidence of no harm"** — a critical epistemic distinction all proposals blurred.
+
+---
+
+## Exceptions (Best List from P1, Supplemented by Critique)
+
+Replace amalgam only when: (1) filling is mechanically failing, (2) confirmed mercury hypersensitivity via patch test, (3) pregnancy/breastfeeding (avoid both placement and removal per FDA), (4) children under 6 (FDA 2020) or under 15 (EU 2018), (5) renal impairment reducing mercury clearance, (6) potentially for patients with relevant genetic polymorphisms (emerging evidence, not yet standard of care).
+
+---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|-------|-------------|----------------|
-| WHO safety threshold | 30 / 40 / 45 µg/day cited | **All likely wrong**; actual figure ~20 µg/day. Safety margin is real but overstated. |
-| Allergy prevalence | 0.01% to <1% | Patch-test positivity (1–3%) ≠ clinical reactions (~0.1%). Proposals confused different measures. |
-| Mercury spike during removal | 5–10x vs. 4–40x | Wide methodological variation in studies; the broader range is more honest |
-| EPA threshold (Proposal 4) | Cited 30 µg/m³ vs. actual RfC of 0.3 µg/m³ | Potentially a **100x error** — devastating if used to reassure patients |
+Disagreements were minor in direction but significant in execution. Daily exposure estimates split 1–3 µg (P2, P4) vs. 1–5 µg (P1, P3) — the broader range is better supported. P2 presented fabricated or unverifiable citations (Cochrane 2021 with 15 RCTs, Swedish 2018 study) in a table designed to appear rigorous — **the most epistemically dangerous proposal despite reaching the right conclusion.** P3 omitted vulnerable populations entirely. P4 uniquely raised the Minamata Convention regulatory risk — the most original insight.
 
-## Shared Blind Spots All Models Missed
+---
 
-**1. Global phase-down trend:** Norway, Sweden, and Denmark have effectively banned amalgam. The EU banned it for children under 15 and pregnant women (2018) and is pursuing broader phase-out. "Completely safe" is hard to reconcile with "being actively phased out." The phase-down is partly environmental, but also precautionary.
+## Synthesis Decisions
 
-**2. Vulnerable subpopulations:** Genetic variants affecting mercury metabolism (CPOX4, APOE4, glutathione polymorphisms), autoimmune conditions, and renal impairment may create real subpopulation risks that "safe for the general population" masks.
+| Decision | Rationale |
+|----------|-----------|
+| **Adopted** P1's exception framework | Most complete, includes FDA 2020 specifics |
+| **Adopted** P4's Minamata regulatory risk point | Unique, legitimate, forward-looking |
+| **Adopted** Critique's blind spot analysis in full | Unaddressed counter-evidence was the strongest failure |
+| **Rejected** P2's citation table | Multiple unverifiable/fabricated sources flagged |
+| **Rejected** all four threshold comparisons | Each contained a different mercury-form or metric error |
+| **Rejected** P3 as standalone | Too thin, wrong EPA standard, missing key populations |
 
-**3. Bioaccumulation:** Autopsy studies do show correlations between amalgam fillings and brain mercury levels. Long-term effects of decades of low-level accumulation remain genuinely uncertain.
+**Confidence: 62%**
 
-**4. One-sided conflict-of-interest analysis:** All proposals flagged "biological dentist" profit motives but none acknowledged that dental associations and amalgam manufacturers also have institutional and financial stakes in defending amalgam's safety record.
-
-**5. Patient autonomy:** A fully informed patient requesting removal is exercising their right to bodily autonomy — this isn't "malpractice" (as Proposal 2 suggested), provided informed consent is thorough.
-
-## Recommendation
-
-**Monitor intact amalgam fillings. Replace only for clinical indications or verified allergy. For new restorations, mercury-free alternatives are increasingly preferred and clinically appropriate.** Decisions should be individualized, not driven by fear or by blanket reassurance.
-
-Confidence: 72%
-
-*Capped below 85% because: (a) all models shared directional bias and fabricated different supporting numbers for the same thresholds; (b) genuine scientific uncertainty remains about long-term bioaccumulation and subpopulation risks; (c) the global regulatory trend toward phase-down introduces policy-level ambiguity that pure toxicology doesn't resolve.*
+The directional conclusion (safe, don't replace) is well-supported (~80%+), but confidence is capped because: all proposals failed the quantitative safety argument, none engaged strongest counter-evidence, genetic susceptibility literature is unaddressed, and complete model agreement with shared blind spots warrants skepticism per scoring rules.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-162
+🧪 Check Type: defensibility
+💾 Saved as PoT-502
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.857 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.852 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.919
+🟢 Dissent Preservation Rate: 0.947 (18/19 objections preserved)

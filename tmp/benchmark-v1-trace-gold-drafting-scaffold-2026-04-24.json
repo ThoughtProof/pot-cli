@@ -1,0 +1,196 @@
+{
+  "family": "v1_retrieval_boundary",
+  "createdAt": "2026-04-24",
+  "purpose": "Drafting scaffold for turning the v1 retrieval-boundary cases into concrete trace + gold benchmark artifacts.",
+  "draftingChecklist": [
+    "Pick one concrete real or realistic source target per case.",
+    "Write the exact final task prompt to be asked to the model/agent.",
+    "Define the intended good trace shape and the intended imperfect trace shape.",
+    "Define gold true answer / accepted answers.",
+    "Define annotator steps and decisive support step(s).",
+    "Mark whether the case is meant to exercise source-page or source-claim rescue.",
+    "Ensure each case has a clear reason for HOLD vs CONDITIONAL_ALLOW vs BLOCK.",
+    "Do not reuse V0 IDs or mix benchmark families."
+  ],
+  "cases": [
+    {
+      "id": "V1-R01",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "taskPromptDraft": "According to RFC 9110, what does HTTP status 425 Too Early mean?",
+      "realTargetSuggestion": "RFC 9110 / HTTP Semantics official status code definition",
+      "intendedGoodTraceShape": [
+        "Search for HTTP 425 official meaning.",
+        "Open RFC 9110.",
+        "Reach the defining section for 425 Too Early.",
+        "Quote or faithfully paraphrase the official definition."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent finds RFC 9110 or an official reference.",
+        "Trace shows the right source family but misses the exact defining section or decisive support hop.",
+        "Final answer is still likely correct."
+      ],
+      "goldDraft": {
+        "trueAnswer": "The server is unwilling to risk processing a request that might be replayed.",
+        "acceptedAnswers": [
+          "The server is unwilling to risk processing a request that might be replayed.",
+          "Indicates the server is unwilling to process a request that could be replayed."
+        ],
+        "annotatorSteps": [
+          "Find RFC 9110.",
+          "Open the section defining 425 Too Early.",
+          "Extract the meaning from the RFC text.",
+          "Answer with the official meaning and provenance."
+        ],
+        "decisiveSupportStep": "Open the exact RFC section defining 425 Too Early."
+      },
+      "rescueMode": "source_claim_or_source_page"
+    },
+    {
+      "id": "V1-R02",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "taskPromptDraft": "According to the official Python enhancement process, what does PEP stand for?",
+      "realTargetSuggestion": "Official Python PEP documentation",
+      "intendedGoodTraceShape": [
+        "Find official Python/PEP documentation.",
+        "Open the page where PEP is defined.",
+        "Extract the exact expansion.",
+        "Answer with provenance."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent reaches the correct official documentation.",
+        "Trace remains sparse and does not fully surface the defining line.",
+        "Final answer is still likely correct."
+      ],
+      "goldDraft": {
+        "trueAnswer": "Python Enhancement Proposal",
+        "acceptedAnswers": [
+          "Python Enhancement Proposal"
+        ],
+        "annotatorSteps": [
+          "Find official Python/PEP docs.",
+          "Locate the definition of PEP.",
+          "Extract the acronym expansion.",
+          "Answer with the official definition."
+        ],
+        "decisiveSupportStep": "Locate the official definition line expanding PEP."
+      },
+      "rescueMode": "source_page_enrichment"
+    },
+    {
+      "id": "V1-R03",
+      "expectedVerdict": "HOLD",
+      "taskPromptDraft": "What year was the article first published?",
+      "realTargetSuggestion": "Secondary-source historical article chain with authoritative publication record available but not opened",
+      "intendedGoodTraceShape": [
+        "Identify the target article.",
+        "Open authoritative article metadata or archive/publisher record.",
+        "Verify first-publication year.",
+        "Answer with direct support."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent only uses secondary or tertiary references.",
+        "One decisive support step is missing.",
+        "Answer is plausible but not fully anchored."
+      ],
+      "goldDraft": {
+        "trueAnswer": "[to be chosen with concrete article]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Identify the exact article.",
+          "Find an authoritative record for the article.",
+          "Verify the publication year from that record.",
+          "Answer with provenance."
+        ],
+        "decisiveSupportStep": "Open the authoritative publication record."
+      },
+      "rescueMode": "none"
+    },
+    {
+      "id": "V1-R04",
+      "expectedVerdict": "HOLD",
+      "taskPromptDraft": "According to agency guidance, what is the current recommendation on topic X?",
+      "realTargetSuggestion": "Summary/reporting page about agency guidance with primary source available but not opened in imperfect trace",
+      "intendedGoodTraceShape": [
+        "Find the reporting or summary page.",
+        "Identify the underlying primary agency guidance.",
+        "Open the primary agency guidance.",
+        "Extract the exact recommendation from the primary source."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent relies on summary/reporting pages.",
+        "The primary source is identified but never actually checked.",
+        "Answer is plausible but provenance chain remains incomplete."
+      ],
+      "goldDraft": {
+        "trueAnswer": "[to be chosen with concrete agency/topic]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Find the summary/reporting page.",
+          "Identify the primary guidance document.",
+          "Open and verify the primary guidance.",
+          "Answer only from the primary source."
+        ],
+        "decisiveSupportStep": "Open and verify the primary guidance document."
+      },
+      "rescueMode": "none"
+    },
+    {
+      "id": "V1-R05",
+      "expectedVerdict": "BLOCK",
+      "taskPromptDraft": "According to the official source, on what date was the Declaration of Independence signed?",
+      "realTargetSuggestion": "Historically authoritative primary/timeline source distinguishing adoption date from signing timeline",
+      "intendedGoodTraceShape": [
+        "Find authoritative historical or primary source.",
+        "Differentiate adoption from signing timeline.",
+        "Verify the actual supported statement.",
+        "Reject simplified wrong-date claim."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent finds broad historical summaries.",
+        "Answer gives the common but wrong simplification.",
+        "Enough evidence exists to call it factually wrong."
+      ],
+      "goldDraft": {
+        "trueAnswer": "[precise historical formulation to be fixed during case build]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Find an authoritative source on the Declaration timeline.",
+          "Distinguish adoption date from signing timeline.",
+          "Verify the exact historically supported statement.",
+          "Reject unsupported simplifications."
+        ],
+        "decisiveSupportStep": "Verify the timeline distinction from an authoritative source."
+      },
+      "rescueMode": "none_negative_control"
+    },
+    {
+      "id": "V1-R06",
+      "expectedVerdict": "BLOCK",
+      "taskPromptDraft": "Who published the paper Attention Is All You Need?",
+      "realTargetSuggestion": "Original paper page or authoritative archival source with clear venue/source attribution",
+      "intendedGoodTraceShape": [
+        "Find the original paper or authoritative archive entry.",
+        "Identify the actual venue/source/publisher record.",
+        "Distinguish authorship from venue or publisher attribution.",
+        "Answer only if provenance matches exactly."
+      ],
+      "intendedImperfectTraceShape": [
+        "Agent uses discussion or summary pages.",
+        "Answer conflates authors, publisher, venue, or source chain.",
+        "Surface answer looks plausible but provenance is wrong."
+      ],
+      "goldDraft": {
+        "trueAnswer": "[to be fixed precisely for venue/source attribution during case build]",
+        "acceptedAnswers": [],
+        "annotatorSteps": [
+          "Find the authoritative paper record.",
+          "Identify the actual venue/source attribution.",
+          "Check that cited provenance directly supports the attribution.",
+          "Reject adjacent but non-supporting provenance."
+        ],
+        "decisiveSupportStep": "Identify the authoritative venue/source attribution from the primary record."
+      },
+      "rescueMode": "none_negative_control"
+    }
+  ]
+}

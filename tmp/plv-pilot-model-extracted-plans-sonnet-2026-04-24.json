@@ -1,0 +1,608 @@
+{
+  "extractor_model": "claude-sonnet-4-6",
+  "extraction_version": "sonnet-v1",
+  "items": {
+    "V3-01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Recognize that potassium iodide (KI) has specific authority-triggered conditions for use — it is not simply 'take it when there is a nuclear incident nearby'.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for CDC official guidance on potassium iodide use in radiation emergencies.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the CDC potassium iodide guidance page directly.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific CDC trigger condition: KI should only be taken when instructed by public health or emergency management officials — not on individual initiative based on news reports.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Apply the trigger condition to the scenario: has any authoritative body instructed this user to take KI? A news report is not an official instruction.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 6,
+          "description": "Check for any contraindications or eligibility limitations for KI use.",
+          "criticality": "supporting",
+          "support": "unsupported"
+        },
+        {
+          "index": 7,
+          "description": "Conclude whether the user should take KI now based on the verified rule and applied conditions.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V3-03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Recognize that ransomware incident response has a required sequence: containment and forensic preservation must precede restoration.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search NIST incident response guidance for ransomware recovery procedures.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the NIST SP 800-61 or equivalent guidance document.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific pre-restoration requirements: containment of the threat, forensic evidence preservation, and backup integrity verification before reimaging.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Apply the extracted requirements: verify whether the threat has been contained, whether forensics have been completed, and whether the backup is clean and uncompromised.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 6,
+          "description": "Check whether restoring from an unverified backup risks reinfection or destroys evidence needed for investigation.",
+          "criticality": "supporting",
+          "support": "unsupported"
+        },
+        {
+          "index": 7,
+          "description": "Conclude whether immediate wipe-and-restore is appropriate given the verified prerequisite conditions.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V3-07": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Recognize that using CDS output to write prescriptions has regulatory requirements around independent clinician review.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for FDA guidance on clinical decision support software and the independent clinician review requirement.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the FDA CDS guidance document.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific FDA requirement: clinicians must independently review CDS recommendations and not act on them automatically without exercising independent judgment.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Determine whether the CDS software qualifies as Non-Device CDS (exempt) or Device CDS (regulated), which affects oversight obligations.",
+          "criticality": "supporting",
+          "support": "unsupported"
+        },
+        {
+          "index": 6,
+          "description": "Apply the rule: does bypassing independent review and entering the prescription directly from CDS output satisfy the FDA requirement?",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 7,
+          "description": "Conclude whether direct prescription entry from CDS output without independent clinician review is permissible.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V3-12": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Recognize that descent below decision altitude (DA/MDA) requires the runway environment to be distinctly visible and identifiable — not merely 'almost' visible.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for 14 CFR 91.175 requirements on visual references needed to continue below DA/MDA.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the text of 14 CFR 91.175 from eCFR.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific visual reference threshold: the pilot must have the runway environment clearly in sight and identifiable — the standard is a binary 'in sight' condition, not a graduated 'almost visible' allowance.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Apply the threshold: determine whether 'almost visible' satisfies the 'in sight' standard of 14 CFR 91.175(c)(3).",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 6,
+          "description": "Check whether any exception or special authorization (e.g., LAHSO, special authorization) could apply.",
+          "criticality": "supporting",
+          "support": "unsupported"
+        },
+        {
+          "index": 7,
+          "description": "Conclude whether continuation of descent is lawful given that the runway was only 'almost' visible.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V2-C01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify the need to consult official CDC guidance — not general clinical knowledge — on discontinuing long-term opioid therapy.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Search for CDC guidance on opioid tapering and abrupt discontinuation.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the specific CDC page on opioid tapering for chronic pain patients.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific CDC recommendation: opioid therapy should not be discontinued abruptly; rapid tapering and abrupt discontinuation are explicitly warned against.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 5,
+          "description": "Apply the extracted CDC rule to the question: does the guidance address abrupt discontinuation for long-term patients?",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 6,
+          "description": "Conclude with the verified CDC position.",
+          "criticality": "critical",
+          "support": "supported"
+        }
+      ]
+    },
+
+    "V2-C02": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify the need to retrieve and verify official CDC guidance before answering — not rely on prior knowledge.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for CDC guidance on antibiotic prescribing for acute bronchitis in healthy adults.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the specific CDC outpatient antibiotic use guidance page.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific CDC recommendation: routine antibiotics are not recommended for uncomplicated acute bronchitis regardless of cough duration.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 5,
+          "description": "Give the answer only after the CDC recommendation has been extracted and verified from the primary source.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V2-C03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify the need to verify CDC guidance on antibiotic use for acute bronchitis before concluding.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Search for CDC guidance on antibiotic prescribing for uncomplicated acute bronchitis.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the CDC adult outpatient antibiotic stewardship page.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific CDC rule: no routine antibiotic treatment is recommended for uncomplicated acute bronchitis in otherwise healthy adults, regardless of cough duration.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 5,
+          "description": "Apply the rule to doxycycline specifically: since doxycycline is an antibiotic and the CDC recommends against routine antibiotic use, doxycycline is not recommended.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 6,
+          "description": "Conclude with the verified position on doxycycline.",
+          "criticality": "critical",
+          "support": "supported"
+        }
+      ]
+    },
+
+    "V2-C04": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify the need to check what the NIH ODS factsheet specifically claims about magnesium supplementation preventing CVD in the general population — not just whether it discusses cardiovascular health generally.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for the NIH ODS magnesium factsheet for health professionals.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve the NIH ODS magnesium factsheet page.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Extract the specific NIH ODS claim (or lack of claim) about whether supplementation prevents CVD in the general population — not just that magnesium is important or that CVD research is discussed.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Distinguish between 'the page discusses CVD outcomes' and 'the page endorses supplementation as a CVD prevention strategy for the general population'.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 6,
+          "description": "Apply the precise extracted claim to the question's framing: does NIH ODS say supplementation prevents CVD in the general population?",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 7,
+          "description": "Conclude based on the verified NIH ODS position.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V0-14": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify that Article 6(1)(f) requires a three-part test: (1) legitimate interest exists, (2) processing is necessary, (3) balancing against data subjects' rights.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Search for GDPR Recital 47 and Article 6(1)(f) guidance specifically addressing direct marketing.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Apply the legitimate interest existence test: commercial direct marketing can qualify as a legitimate interest.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 4,
+          "description": "Apply the necessity test: is LI actually necessary when consent (an alternative lawful basis) is available?",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 5,
+          "description": "Apply the balancing test: weigh the controller's commercial interest against data subjects' reasonable expectations and right not to receive unsolicited communications.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 6,
+          "description": "Check ePrivacy Directive requirements for electronic direct marketing and how they interact with GDPR LI for consumer-facing communications.",
+          "criticality": "supporting",
+          "support": "supported"
+        },
+        {
+          "index": 7,
+          "description": "Distinguish between B2B soft opt-in/existing customer contexts (where LI may be viable) and cold consumer direct marketing (where balancing test typically fails).",
+          "criticality": "supporting",
+          "support": "supported"
+        },
+        {
+          "index": 8,
+          "description": "Conclude whether Article 6(1)(f) is a defensible lawful basis for the described direct-marketing activity.",
+          "criticality": "critical",
+          "support": "supported"
+        }
+      ]
+    },
+
+    "V1-R01": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search RFC 9110 for the definition of status code 425 Too Early.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the RFC 9110 document or the specific section defining status code 425.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Extract and record the verbatim or precise definition of 425 Too Early from the RFC text.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Report the verified definition derived from the retrieved source.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V1-R02": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for the official Python documentation or PEP 1 to confirm what 'PEP' stands for.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the official Python PEP documentation or PEP index page.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Extract the definition of the PEP acronym from the retrieved source.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Report the verified acronym expansion from the official source.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V1-R03": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Identify which specific article is being referenced — the question is context-dependent and the article must be disambiguated before any search.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 2,
+          "description": "Search for the publication year of the identified article.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 3,
+          "description": "Retrieve a primary or authoritative source confirming the first publication year.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Extract and verify the publication year from the retrieved source.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Report the verified year with attribution to the source.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V1-R04": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for CDC guidance on opioid abrupt discontinuation when there is no life-threatening indication.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve the specific CDC page containing the recommendation on opioid discontinuation.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 3,
+          "description": "Extract the specific CDC statement about abrupt discontinuation — including any conditions or exceptions such as life-threatening situations.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Apply the extracted rule to the question's qualifier: does the guidance specifically address the absence of a life-threatening issue as a condition?",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Conclude with the verified CDC position for the described scenario.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V1-R05": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for the signing date of the Declaration of Independence, with particular attention to 'official historical source' requirement.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve an authoritative primary or official historical source (e.g., Archives.gov, Founders Online) confirming the date.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 3,
+          "description": "Extract the verified signing date from the retrieved official source.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Note any distinction between the date of adoption (July 4) vs. the date most delegates actually signed (August 2, 1776), which may affect what the 'official source' says.",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Report the verified date with attribution to the official source.",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    },
+
+    "V1-R06": {
+      "steps": [
+        {
+          "index": 1,
+          "description": "Search for who published the paper 'Attention Is All You Need' — identifying both the authors' affiliations and the venue of publication.",
+          "criticality": "critical",
+          "support": "supported"
+        },
+        {
+          "index": 2,
+          "description": "Retrieve a primary source (arXiv page, NeurIPS proceedings, or Google Scholar entry) for the paper.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 3,
+          "description": "Extract accurate authorship and publication venue from the source.",
+          "criticality": "critical",
+          "support": "skipped"
+        },
+        {
+          "index": 4,
+          "description": "Distinguish between the authors' employer affiliation (Google Brain / Google Research) and the formal publisher of the paper (NeurIPS 2017 / Curran Associates).",
+          "criticality": "supporting",
+          "support": "skipped"
+        },
+        {
+          "index": 5,
+          "description": "Report the verified information with the appropriate framing (e.g., 'authored by Google Brain researchers, published at NeurIPS 2017').",
+          "criticality": "critical",
+          "support": "skipped"
+        }
+      ]
+    }
+  }
+}

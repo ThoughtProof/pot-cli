@@ -3,56 +3,69 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-150 created in 169.7s
+✔ Block PoT-490 created in 139.7s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: The Tongue Taste Map — Myth, Reality, and Development
+## Verdict: CONDITIONAL_ALLOW
 
-## The Core Truth (All Models Agree)
+# The Tongue Map: Synthesized Analysis
 
-The classic "tongue map" — discrete zones for sweet (tip), bitter (back), sour (sides), salty (edges) — **is a myth**. All regions of the tongue detect all five established basic tastes (sweet, salty, sour, bitter, umami). What exists are modest **regional differences in sensitivity**, not exclusive zones.
+## Core Finding
 
-## The Historical Error
+The classical tongue map — depicting discrete zones for sweet (tip), bitter (back), sour (sides), and salty (edges) — is a **debunked myth**. All basic tastes (sweet, salty, sour, bitter, umami) are detectable across the entire tongue wherever taste buds exist. What actually develops is a **distributed taste detection system** beginning in the second trimester, not a zonal map.
 
-David Hänig's 1901 study (*Zur Psychophysik des Geschmackssinnes*) measured slight regional sensitivity variations. **Edwin Boring, in 1942**, replotted this data in *Sensation and Perception in the History of Experimental Psychology* without Hänig's baseline, creating the visual impression of discrete zones. This was a misrepresentation, not a mistranslation. The myth then propagated through textbooks well into the 2000s–2010s.
+## Historical Origin (Corrected)
 
-*Note: Multiple models misattributed Boring to 1901 or called this a "mistranslation" — both errors flagged by the critique.*
+The myth traces to D.P. Hänig's 1901 paper, which measured **subtle sensitivity gradients** — not discrete zones. The critical distortion came from **Edwin Boring's 1942 replotting** of Hänig's data in his textbook *Sensation and Perception in the History of Experimental Psychology*, which stripped the baseline and made relative differences appear as absolute zones. Three of four proposals mischaracterized this as a "mistranslation" — only Proposal 3 correctly identified Boring and the mechanism. The myth's origin story has itself become somewhat mythologized.
 
-## How Taste Detection Actually Develops
+## What Actually Develops
 
-**Embryonic patterning (weeks 4–8):** Tongue epithelium forms with cranial neural-crest mesenchyme. Shh and Wnt/β-catenin signaling gradients specify where papillae form — fungiform (anterior), foliate (lateral), circumvallate (posterior). These are structural "real estate," not taste-specific zones. *Important nuance: anterior tongue epithelium is ectoderm-derived (first pharyngeal arch), while posterior is endoderm-derived.*
+- **Weeks 7–8 gestation:** Taste papillae precursors form across the tongue
+- **Weeks 13–15:** Functional taste buds appear; fetuses respond to amniotic fluid flavors
+- **Birth:** Full distributed taste detection capability present; neonates show reflexive acceptance of sweet, rejection of bitter (Steiner, 1973)
+- **Childhood–Adulthood:** Sensitivity shaped by dietary exposure, genetics (supertaster variation), and aging
 
-**Innervation and maturation (weeks 8–15):** Three cranial nerves (VII/chorda tympani — anterior; IX/glossopharyngeal — posterior; X/vagus — epiglottis/pharynx) innervate the papillae. BDNF from axons is required for taste bud maturation — without innervation, placodes form but buds fail to mature.
+Taste buds (~2,000–10,000 in adults, with significant individual variation) contain 50–100 receptor cells. **Critically:** individual receptor cells are largely taste-specific (labeled-line model per Chandrashekar et al., 2006), but each bud contains multiple cell types, so the bud as a unit detects multiple tastes. This distinction was missed or misrepresented across all proposals.
 
-**Receptor cell differentiation:** Within each taste bud, individual Type II receptor cells predominantly express receptors for **one** taste quality (T1R2/T1R3 for sweet, T1R1/T1R3 for umami, T2Rs for bitter). However, the *bud as a unit* detects multiple tastes because it contains diverse cell types. This is a key distinction several models got wrong — individual cells are mostly narrowly tuned, but taste buds are generalists.
+## Sensitivity Gradients Are Real (But Not Zones)
 
-**Postnatal refinement:** Taste receptor cells regenerate approximately every 10–14 days (though recent research suggests some cells persist longer). Taste bud density is highest in early childhood and declines with age. Genetic variation (e.g., TAS2R38 polymorphisms) affects sensitivity uniformly across the tongue, not by zone.
+Minor regional differences exist: TAS2R (bitter) receptors are somewhat denser in posterior circumvallate papillae; sweet/salty receptors slightly more concentrated anteriorly. These are **broad overlapping gradients**, not boundaries. Overcorrecting to "zero variation" would also be wrong.
+
+## Receptor Mechanism Note
+
+Sweet, bitter, and umami detection uses GPCRs (T1R and T2R families). However, sour taste (OTOP1) and salty taste (ENaC) operate via **ion channels, not GPCRs** — a factual error in Proposal 4's recommendation to focus solely on GPCRs.
 
 ## Where Models Disagreed
 
-| Topic | Disagreement | Resolution |
-|-------|-------------|------------|
-| **Taste bud count** | 2,000–8,000 vs. 5,000–10,000 vs. 10,000 vs. 20,000 at birth | The literature gives ~5,000–10,000 for adults; the "20,000 at birth declining 50%" claim lacks strong primary sourcing |
-| **Cell-level tuning** | Cells as generalists vs. one-quality-per-cell vs. "20–40% broadly tuned" | Mainstream view: Type II cells are predominantly narrowly tuned; the bud is the generalist unit. The "20–40%" figure is unverified |
-| **Historical attribution** | Boring in 1901 (wrong) vs. mistranslation (oversimplified) vs. 1901 zone theory | Hänig (1901) showed variations; Boring (1942) created the misleading visualization |
-| **Developmental mechanisms** | One model cited "~25 semaphorin/NT combinations" biasing receptor expression | Likely fabricated — no primary source supports this specific claim |
+| Issue | Resolution |
+|-------|-----------|
+| **Boring attribution** | P3 correct; P1/P4 omitted Boring; P2 mischaracterized the mechanism |
+| **Citation reliability** | P2's citation table is largely unverifiable/hallucinated; P1's "Bartoshuk 1974" unverified (likely 1993); P3 most conservative and trustworthy |
+| **Confidence calibration** | P4's 99% rejected as overconfident; P1's 92% adopted as better calibrated |
+| **Cell vs. bud detection** | P2 incorrectly implied individual cells detect all tastes; corrected above |
+| **Taste bud count** | P1/P2 stated "~10,000" without noting the 2,000–10,000 range; corrected above |
 
-## What Can Go Wrong
+## Synthesis Decisions
 
-- **Clinically:** Chorda tympani damage causes significant loss of anterior taste buds, with permanent threshold elevation — undermining any "zone" theory since all modalities are affected together
-- **Beyond the tongue:** Taste buds also exist on the soft palate, epiglottis, and pharynx — the tongue-centric map ignores this entirely
-- **Frontier science:** Active research on additional taste modalities (fat/oleogustus, kokumi) may further complicate any "mapping" model
-- **Epistemically:** This myth persists because it's visually intuitive. All four AI models agreed on the headline but diverged significantly on supporting details — consensus masked factual disagreement in the specifics
+- **Adopted from P1:** Developmental timeline, epistemic risk framing, confidence calibration approach, supertaster mention
+- **Adopted from P3:** Correct Boring/1942 attribution, neural wiring explanation (chorda tympani/glossopharyngeal), conservative claim structure
+- **Adopted from P4:** Risk categories (educational, clinical, commercial) — though stripped of unverified specifics
+- **Rejected from P2:** Entire citation table (largely unverifiable), claim that individual cells detect all tastes, misrepresentation of Chandrashekar 2006. This proposal exemplifies why epistemic auditing matters — it *looks* authoritative while being the least reliable
+- **Rejected from P4:** 99% confidence, GPCR-only framing, unverified consumer fraud claims
+- **Rejected from P1:** "Bartoshuk 1974" date (unverified; likely 1993), "50% taste bud loss by 75" (unverified specific figure)
 
-## For ThoughtProof
+**Condition for ALLOW:** Flag that several specific citations across proposals could not be verified; the core scientific consensus is sound but granular sourcing requires independent verification.
 
-This question demonstrates that **multi-agent agreement on conclusions can coexist with wildly inconsistent supporting evidence**. Recency-weighted citation tracking and cell-level disagreement flagging would catch cases where confident consensus rests on shaky details.
+**Confidence: 82%**
 
-**Confidence: 78%** — Core myth-debunking is well-established science; developmental details carry more uncertainty; specific numerical claims vary across sources.
+Capped below 85% due to: unverifiable citations across proposals, shared narrative simplification about the myth's origin, and residual uncertainty about fine-grained receptor distribution data.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-150
+🧪 Check Type: defensibility
+💾 Saved as PoT-490
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.879 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.848 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.897
+🟢 Dissent Preservation Rate: 0.806 (29/36 objections preserved)

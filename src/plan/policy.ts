@@ -660,7 +660,7 @@ function evaluateRetrievalPolicy(ctx: PolicyContext, findings: PolicyFinding[]):
   }
 
   if (ctx.provenanceChainComplete && ctx.answerConfidence !== 'low') {
-    return ctx.answerCorrectBySanityCheck === true ? 'ALLOW' : 'CONDITIONAL_ALLOW';
+    return 'CONDITIONAL_ALLOW';
   }
 
   if (!ctx.provenanceChainComplete && ctx.answerConfidence !== 'low') {
@@ -827,6 +827,16 @@ export function evaluatePlanPolicy(
       description: 'The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.',
       stepIds: wrongAnswers.flatMap((flag) => (flag.stepId ? [flag.stepId] : [])),
       count: wrongAnswers.length,
+    });
+  } else if (record.metadata.verified === false && record.goal.trueAnswer != null) {
+    // If verified is explicitly false and we have a ground truth, treat as wrong answer
+    findings.push({
+      id: `policy:wrong_answer:${record.traceId}`,
+      type: 'wrong_answer',
+      severity: 'high',
+      description: 'The agent answer does not match the known correct answer (verified=false with ground truth), so the overall plan outcome is not defensible.',
+      stepIds: [],
+      count: 1,
     });
   } else if (!record.metadata.verified) {
     findings.push({

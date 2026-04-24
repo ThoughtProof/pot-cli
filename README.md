@@ -92,7 +92,7 @@ Copy `.potrc.json.example` to `~/.potrc.json` and add your API keys:
     { "name": "xAI", "model": "grok-4-1-fast", "apiKey": "YOUR_KEY" },
     { "name": "Moonshot", "model": "kimi-k2.5", "apiKey": "YOUR_KEY" },
     { "name": "Anthropic", "model": "claude-sonnet-4-5-20250929", "provider": "anthropic", "apiKey": "YOUR_KEY" },
-    { "name": "DeepSeek", "model": "deepseek-chat", "apiKey": "YOUR_KEY" }
+    { "name": "DeepSeek", "model": "deepseek-v4-flash", "apiKey": "YOUR_KEY" }
   ],
   "critic": { "name": "Anthropic", "model": "claude-opus-4-6", "provider": "anthropic", "apiKey": "YOUR_KEY" },
   "synthesizer": { "name": "Anthropic", "model": "claude-opus-4-6", "provider": "anthropic", "apiKey": "YOUR_KEY" },

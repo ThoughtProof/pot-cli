@@ -3,65 +3,76 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-138 created in 130.4s
+✔ Block PoT-478 created in 129.0s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Viking Horned Helmets Had Zero Tactical Advantage — Because They Never Existed
 
-## Core Conclusion
 
-All four models unanimously agree, and the historical consensus is clear: **Vikings did not wear horned helmets in battle.** The premise is false. If horns had been worn, they would have been a severe tactical *liability*, not an advantage.
+## Verdict: ALLOW
 
-## The Historical Reality
+# Vikings Did Not Wear Horned Helmets in Battle — The Premise Is False
 
-There is essentially **no** archaeological evidence of Viking combat helmets with horns. The key fact — which the critique rightly flagged — is that we possess only **one** near-complete Viking-era helmet: the **Gjermundbu helmet** (~970 AD, Norway), a simple rounded iron helmet with a spectacle-style face guard. A small number of additional fragments exist, but nothing approaching the "hundreds" or "1,000+" claimed by some proposals.
-
-The horned Viking image traces primarily to **Carl Emil Doepler's** costume designs for Wagner's *Der Ring des Nibelungen* (1876 Bayreuth premiere), though Romantic nationalist art from earlier in the 1800s contributed precursor imagery. Some pre-Viking **Vendel-era** decorative plates and the contested **Viksø helmets** (Bronze Age Denmark, ~900 BCE — ceremonial, not combat) show horned/antlered headgear in ritual contexts, but these predate the Viking Age by centuries to millennia.
-
-## Why Horns Would Be Tactically Disastrous
-
-The qualitative tactical arguments are sound across all proposals, even where specific numbers were unreliable:
-
-1. **Enemy leverage**: Horns provide handholds for opponents to wrench the wearer's head, strip the helmet, or expose the throat — catastrophic in the close-quarters shield wall combat Vikings actually practiced.
-
-2. **Weight and balance**: Any protrusion adds mass positioned to maximize neck strain and reduce reaction speed. Viking combat demanded rapid head movement for peripheral awareness.
-
-3. **Snagging hazard**: Protruding horns catch on shields, weapons, ship rigging, and other warriors. Vikings fought in dense formations and aboard vessels — snag points are dangerous.
-
-4. **Deflection reversal**: A well-designed helmet deflects blows *away* from the head. Horns can redirect a glancing strike *into* the face or neck.
-
-5. **Resource waste**: Iron was valuable in Viking Age Scandinavia. Practical helmets optimized protection-to-weight ratio; decorative horns would squander scarce material.
-
-## Where Models Disagreed
-
-| Issue | Disagreement | Why It Matters |
-|-------|-------------|----------------|
-| **Number of helmet finds** | Ranged from "1,000+" (P1, **wrong**) to "hundreds of fragments" (P3, overstated) to unspecified (P2, P4) | The archaeological record is *sparse*, making absolute claims risky. Only one near-complete helmet exists. |
-| **Hypothetical horn weight** | 0.5 kg to 5 kg across proposals | **None of these are sourced** — all models were speculating about a hypothetical object. The disagreement reveals fabrication, not research. |
-| **Specific statistics and citations** | P1 cited a "2019 JASC simulation" and "2022 Oxford study"; P2 cited "Royal Armouries 2021 pig carcass tests" | The critique identified these as **likely hallucinated**. No model could verify them. This is the most important signal: fabricated precision masquerading as evidence. |
-| **Pre-Wagner myth origins** | All proposals attributed the myth primarily to Doepler/Wagner 1876 | This oversimplifies. Swedish Gothic Society illustrations and broader Romantic nationalism contributed earlier threads. The Vendel-era decorative tradition and Oseberg tapestry fragments (contested) add nuance none addressed. |
-
-The disagreements stemmed not from different frameworks but from **different levels of willingness to fabricate specifics**. Models that appeared most authoritative (P1) were actually least reliable.
-
-## What Could Complicate This Analysis
-
-- **Ceremonial use**: Horned/antlered headgear almost certainly existed in pre-Viking ritual contexts. If the question intends ceremonial settings, the analysis shifts.
-- **Sparse archaeological record**: We're reasoning from very limited helmet finds. Future discoveries could add nuance (though reversing the consensus is extremely unlikely after 150+ years of excavation).
-- **Psychological intimidation**: Theoretically possible but unsupported by evidence, and outweighed by mechanical disadvantages.
-
-## Bottom Line
-
-The question rests on a false premise born from 19th-century opera costumes. Real Viking warriors were pragmatists who optimized their limited resources for survival. Horns on helmets would have gotten them killed faster.
-
-**Confidence: 82%**
-
-High confidence on the core historical claim (Vikings didn't wear horned helmets). Slightly reduced because: (1) the archaeological sample is genuinely small; (2) tactical disadvantage arguments, while sound directionally, rely on unverified quantitative claims across all proposals; (3) nuances around pre-Viking ceremonial traditions and contested evidence like the Oseberg tapestry are insufficiently explored.
+The question contains a **false embedded assumption**. There is no tactical advantage to analyze because horned helmets were never used by Vikings in combat. All four proposals unanimously reach this conclusion, and the historical evidence overwhelmingly supports it.
 
 ---
 
+## The Core Answer
+
+**Archaeological evidence:** The Gjermundbu helmet — the only near-complete Viking Age helmet ever found — is a simple rounded iron cap with a nose guard. No horned helmets have been recovered from Viking-era (793–1066 CE) combat contexts.
+
+**The horned helmets that exist** (Veksø helmets, Denmark, ~900 BCE) predate the Viking Age by ~1,800 years and were ceremonial, not martial.
+
+**Origin of the myth:** 19th-century Romantic nationalism, amplified by costume designer Carl Emil Doepler's work for Wagner's *Ring* cycle at Bayreuth (1876), then cemented by Hollywood. However — and this is a blind spot shared by all proposals — the myth has deeper roots in classical-era depictions of northern "barbarians" with horned headgear (Roman coins, Greek accounts). The 19th century *amplified* an older misidentification, not created it from nothing.
+
+**Contemporary sources:** Norse sagas describe combat gear without mentioning horns, and the Bayeux Tapestry (1070s) depicts Norman warriors in hornless helmets. These are corroborative but secondary to the archaeological record.
+
+## Why Horns Would Be Tactically Catastrophic
+
+Even as a counterfactual, horns fail every practical test:
+
+1. **Leverage points** — enemies could grab, hook, or catch weapons on horns, wrenching the wearer's head and creating disorientation or helmet removal
+2. **Deflection failure** — combat helmets must be smooth to shed blows; horns catch incoming strikes and redirect force *into* the wearer
+3. **Weight and balance** — raised center of gravity increases neck fatigue and reduces situational awareness
+4. **Shield wall incompatibility** — protrusions snag on adjacent shields and equipment in the tight formations Vikings actually used
+
+---
+
+## Where Models Disagreed
+
+| Issue | Resolution |
+|---|---|
+| **Confidence levels** | P2 and P3 claimed 100% — epistemically indefensible for any empirical claim. P1's 97% with explicit uncertainty reasoning was the only properly calibrated estimate. |
+| **Depth vs. fabrication** | P2 appeared most data-rich but contained **multiple likely hallucinated citations** (~1,000 helmets excavated, "Matthew Gore's 2018 experiments," a "2022 Oxford study"). These could not be verified and bear classic hallucination markers. |
+| **ThoughtProof framing** | P4 shoehorned platform context; P1 made a natural meta-point about epistemic auditing. |
+
+---
+
+## Synthesis Decisions
+
+- **Adopted from P1:** Core epistemic framing (reject the false premise before engaging), honest confidence calibration, Veksø helmet mention, Kirk Douglas reference (verified, though causal weight moderated)
+- **Adopted from P3:** Blade deflection analysis — physically sound and unique among proposals
+- **Adopted from P4:** Gjermundbu as "only near-complete" helmet (most precise phrasing); tactical point about weapon catch geometry
+- **Rejected from P2:** All specific quantified claims (torque figures, "~1,000 helmets," named studies, reenactment percentages). The Critic correctly identified these as likely fabricated. **P2 is the exact failure mode epistemic auditing must catch: confident hallucination dressed as scholarship.**
+- **Rejected from P3 & P4:** 100%/99% confidence claims without stated uncertainty reasoning
+- **Added from Critic:** Longer lineage of the myth (classical-era roots), shared blind spot about ceremonial/ritual dimensions of pre-Viking horned headgear
+
+---
+
+## Meta-Note
+
+This case demonstrates ThoughtProof's core value proposition: P2 *looks* the most authoritative (specific numbers, named sources, quantified percentages) while containing the highest density of unverifiable claims. A single-model system would present that confidently. Multi-agent verification with red-teaming catches it.
+
+**Confidence: 82%**
+
+Capped below 85% per protocol. The historical consensus is overwhelming, but minor uncertainty remains regarding undiscovered artifacts and the precise genealogy of the myth. The Critic's identification of shared blind spots (classical-era roots, ceremonial traditions) justifies withholding maximum confidence.
+
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-138
+🧪 Check Type: defensibility
+💾 Saved as PoT-478
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.860 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.830 — 🔴 Very High (models fundamentally disagree — treat with caution)
+✅ Decision Surface: ALLOW 82%
+🟢 Synthesis Balance Score: 0.923
+🟢 Dissent Preservation Rate: 0.933 (14/15 objections preserved)

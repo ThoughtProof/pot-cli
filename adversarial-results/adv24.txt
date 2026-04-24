@@ -3,64 +3,70 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-155 created in 135.4s
+✔ Block PoT-495 created in 132.2s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: How Much of the Ocean Floor Has Been Mapped in Detail?
+## Verdict: CONDITIONAL_ALLOW
 
-## Clear Answer
+# How Much of the Ocean Floor Has Been Mapped in Detail?
 
-**Approximately 25% of the ocean floor has been mapped in detail as of 2024**, where "detail" means ~100-meter grid resolution or better using ship-based sonar (primarily multibeam echo-sounders). This comes from the **Seabed 2030 / GEBCO project** — the single most authoritative global tracking effort. The remaining ~75% is known only through satellite-derived gravity models at ~5 km resolution, which reveal broad tectonic features but miss seamounts, cables routes, and anything smaller than several kilometers.
+## Answer
 
-## Key Numbers
+Approximately **24–26% of the ocean floor** has been mapped at meaningful bathymetric resolution (≤100m) as of 2023–2024, according to the Seabed 2030 project. This is the best available estimate, but it comes with significant epistemic caveats.
 
-- **Total ocean floor:** ~361 million km²
-- **Mapped at ≤100m resolution:** ~90 million km² (~25%)
-- **Mapped only at ~5km satellite resolution:** ~271 million km² (~75%)
-- **Baseline in 2017** (when Seabed 2030 launched): ~6%
-- **Annual progress rate:** ~2–4% per year (mix of new surveys and inclusion of historical data)
-- **Seabed 2030 target:** 100% by 2030 — widely considered unlikely at current pace
+The full resolution spectrum matters more than any single number:
 
-For context: we've mapped Mars's entire surface at ~100m resolution. Our own ocean floor remains mostly uncharted at comparable detail because water blocks electromagnetic sensing, forcing reliance on slow, expensive ship-based sonar (~$50,000–$100,000/day per vessel).
+| Resolution Threshold | Approximate Coverage |
+|---|---|
+| ≤100m (multibeam sonar) | ~24–26% |
+| ≤400m | ~35–50% (estimated) |
+| ≤1km | ~70–85% (estimated) |
+| Satellite altimetry (~5km) | ~100% |
 
-## Important Caveats
+**The defensible core claim:** Roughly one-quarter of the ocean floor has been surveyed to modern bathymetric standards. The popular framing that "we know more about the Moon/Mars than the ocean floor" is directionally correct but commits the same resolution-conflation error in reverse—planetary mapping is also resolution-dependent, not "~100%" at high detail.
 
-1. **"Detail" is definition-dependent.** At 100m resolution, you can see features the size of a football field. Defense and telecom applications often require 30m or better — far less than 25% meets that bar. If you lower the bar to "any sounding ever recorded," coverage rises well above 25%. The definition drives the number.
-
-2. **Quality within the 25% is heterogeneous.** Some of this data includes older single-beam tracks and crowdsourced transit data from commercial vessels, which is lower quality than dedicated multibeam surveys. Not all grid cells labeled "mapped" are equally reliable.
-
-3. **Coverage is geographically skewed.** Coastal zones, shipping lanes, and economically valuable areas are well-mapped. Abyssal plains, polar regions, and deep trenches remain almost entirely unsurveyed.
-
-4. **Institutional incentives exist.** Seabed 2030 is both the tracker and an advocacy project seeking continued funding. No proposal engaged with whether their counting methodology might be generous. This doesn't invalidate the figure, but it's worth noting.
-
-5. **Temporal decay.** Some "mapped" data is decades old. The seafloor changes through landslides, volcanism, and sedimentation. Old data ≠ current accuracy.
+---
 
 ## Where Models Disagreed
 
-The critical split was **5–6% vs. ~25%**:
+The four proposals offered point estimates ranging from 24.3% to 26.1%—a spread of ~6.5 million km² at ocean scale (roughly the Amazon basin). This disagreement is not trivial but reflects a shared underlying problem: **none of the proposals verifiably accessed the Seabed 2030 tracker directly.** The varying figures suggest reliance on secondary sources or cached training data, not live primary data. The critic correctly flagged that false precision (e.g., "24.9%," "26.1%") without timestamped citations creates an illusion of rigor.
 
-| Position | Source | Basis |
-|----------|--------|-------|
-| ~25% | Proposals 1, 3, 4 | Seabed 2030 / GEBCO 2024 reporting |
-| 5–6% | Proposal 2 | Claimed only "true multibeam" counts; rest is single-beam padding |
+The models also disagreed on the 2017 baseline (Proposal 2 cited 8%; other sources suggest ~6%), which affects trajectory calculations. On 2030 feasibility, all agreed it's unlikely but offered different projections—none verifiable.
 
-**Why they disagreed:** Proposal 2 decomposed the 25% into 6% multibeam + 18% single-beam — but **the critic flagged this decomposition as unverifiable and likely fabricated**. No published Seabed 2030 source breaks data this way. Proposal 2 also cited 6% as current when it is the **2017 baseline**, not a 2024 quality-adjusted figure. Recommending that ThoughtProof flag the actual authoritative figure (25%) as unreliable would be an epistemic failure — exactly what a verification system must avoid.
+---
 
-Proposal 1 had an **internal contradiction**: claiming 1–2% annual growth while projecting 50% by 2027 (which would require 8%/year). Several specific claims (tsunami modeling accuracy drops, "$trillions in nodules") were unverified and likely inflated.
+## Critical Epistemic Flags (from Critique)
 
-Proposals 3 and 4 were broadly aligned and most reliable, with Proposal 4 introducing an unjustified "functionally under 20%" discount.
+**1. Single-source dependency.** All four proposals rely entirely on Seabed 2030. There is no independent competing methodology producing an alternative global figure. This is a metric monopoly, not epistemic consensus. Seabed 2030 has institutional incentives shaping its reporting (needing to show progress for funding, but not too much progress to justify continued funding).
 
-## Recommendation
+**2. Unverified citations.** Proposal 2's "Nature (2023)" and "NOAA (2024 report)" citations lack titles, authors, or DOIs—potential hallucinations. Proposal 3's "24.9% from Seabed 2030 2023 Progress Report" has unverified precision. Proposal 1's "50–60% by 2030" projection and "35–40% with private data" are unsourced extrapolations.
 
-Quote **~25% at 100m resolution** as the primary figure, sourced to Seabed 2030/GEBCO. Always specify the resolution threshold — "mapped in detail" is meaningless without it. Flag that quality within that 25% varies and that stricter definitions yield lower numbers.
+**3. Self-contradictions.** Proposal 1 criticized resolution-conflation for ocean data while presenting Moon/Mars mapping as "~100%" without resolution context—committing the exact error it diagnosed. Proposal 4 claimed the ocean floor is "the size of Mars" when it's approximately 2.5× Mars's surface area.
 
-**Confidence: 72%**
+**4. Unmapped territory in the answer itself.** The geographic distribution of mapping is severely biased toward coastal zones, shipping lanes, and areas of economic interest. If 90% of the mapped 25% is concentrated in these areas, deep abyssal plain coverage could be in the low single digits. No proposal adequately quantified this.
 
-Confidence is capped because: (1) no proposal cited a specific verifiable GEBCO grid version, (2) the quality heterogeneity within the 25% is a real unresolved issue, (3) all proposals relied on a single institutional source with advocacy incentives, and (4) significant model disagreement existed on the core figure.
+---
+
+## Synthesis Decisions
+
+- **Adopted from P1:** Resolution-dependent framing, definition creep as the core epistemic issue, private/military data gap acknowledgment. **Rejected:** Moon/Mars "~100%" comparison (hypocritical per its own thesis), "80%+ popular claim" strawman, and the specific 50–60% by 2030 projection (unverified).
+- **Adopted from P2:** The altimetry vs. bathymetry distinction, 2030 infeasibility assessment. **Rejected:** The 8% 2017 baseline (likely ~6%), unverifiable Nature/NOAA citations, "$3–5B funding gap" (unsourced).
+- **Adopted from P3:** Geographic bias insight, acknowledgment that high-resolution coverage drops to single digits. **Rejected:** False precision of "24.9%," weak analytical depth.
+- **Adopted from P4:** Data silos/proprietary data problem, "Illusion of Completeness" framing, variable data quality within "mapped" category. **Rejected:** Factually wrong Mars size comparison, arbitrary 10–15 year cutoff, ThoughtProof marketing.
+- **Adopted from Critique:** Range (24–26%) over point estimate, single-source dependency warning, resolution spectrum table, hallucinated citation flags.
+
+---
+
+**Bottom line:** ~24–26% at ≤100m resolution is the best available answer, but it is a single-source estimate with no independent verification, undefined error bars, and unexamined institutional incentives.
+
+**Confidence: 62%**
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-155
+🧪 Check Type: defensibility
+💾 Saved as PoT-495
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.863 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.853 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.820
+🟢 Dissent Preservation Rate: 0.962 (25/26 objections preserved)

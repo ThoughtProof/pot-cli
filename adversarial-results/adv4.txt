@@ -3,59 +3,70 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-135 created in 116.8s
+✔ Block PoT-475 created in 132.6s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Is the Great Wall of China Visible from Space?
 
-## Concrete Position
 
-**No. This is a well-debunked myth.** The Great Wall of China is not uniquely visible from space with the naked eye, and it is completely invisible from the Moon. However, the precise statement matters: the Wall is *not reliably visible* from low Earth orbit and is *less visible* than many other human-made structures — not that it's absolutely impossible to detect under any conceivable conditions.
+## Verdict: CONDITIONAL_ALLOW
 
-## The Verified Evidence
+# Is the Great Wall of China Visible From Space?
 
-**What we can confirm with high confidence:**
-
-- **Yang Liwei (2003):** China's first astronaut — who had every cultural incentive to confirm visibility — reported he could not see the Wall from orbit. This is the single strongest testimonial data point.
-- **Wall dimensions:** Width varies by section, commonly 4–9m at the walkway. The materials (earth-toned stone and brick) match surrounding terrain spectrally, destroying contrast.
-- **Angular resolution math (verified):** At 400 km (ISS altitude), the human eye's ~1 arcminute resolution allows distinguishing objects roughly 116 meters apart. The Wall's width falls far below this threshold. From the Moon (~384,000 km), you'd need a feature ~112 km wide — the Wall is 0.005% of that.
-- **What IS visible from LEO with bare eyes:** City grids, major highways, airports, large agricultural patterns, the Dubai Palm Islands (14 km tip-to-tip with strong water contrast), and the Almería greenhouse complexes in Spain.
-
-## Where Models Disagreed
-
-| Issue | Disagreement | Resolution |
-|---|---|---|
-| **Myth origin** | "1930s" / "1902 Stukeley" / "1938 Ripley's" | The critic correctly flagged that P2's attribution to "William Stukeley in 1902" is **fabricated** (Stukeley died in 1765). The myth has roots in early 1900s sources, was popularized by Richard Halliburton (1938) and Ripley's Believe It or Not. No proposal got the full history right. |
-| **Wall width** | Ranged from 4–6m to "up to 20m" | Varies enormously by section. The 4–9m range for walkway width is most defensible; 20m base width is plausible but unverified as a maximum. |
-| **Pyramids visible?** | Two proposals listed them as visible; two didn't | The Pyramids' visibility from orbit is itself contested. Including them as a confirmed example is **not justified**. |
-| **Absolute vs. nuanced framing** | All four proposals treated this as binary | Under extremely rare conditions (low sun angle casting long shadows, snow on the wall, perfect atmosphere), marginal detection from LEO may be possible. The distinction between *detecting a faint line* and *resolving the Great Wall* is important. |
-
-## Claims Flagged as Unverified (Addressing Critique)
-
-The critic identified several likely fabricated specifics across proposals, which I am **excluding** from this synthesis:
-- ❌ The "2004 survey of 70 NASA astronauts, 62%" — unverifiable
-- ❌ Specific NASA photo frame "ISS061-E-92143" — unverifiable
-- ❌ The "18/240+ astronauts" ratio — fabricated precision
-- ❌ The "70% contrast ratio" threshold — unsourced
-- ❌ Chris Hadfield referencing MythBusters "testing from the ISS" — MythBusters did not conduct ISS experiments
-
-This is a textbook case of **"right conclusion, hallucinated evidence"** — exactly the failure mode epistemic verification must catch.
-
-## Bottom Line
-
-The myth is false. The Great Wall is neither uniquely nor reliably visible from space. Many modern structures offer far better visibility due to superior size, contrast, or both. The myth predates spaceflight itself, which tells you everything about its evidentiary basis.
+**No. This is a well-documented myth. The Great Wall of China is not visible from space with the naked eye, and it is certainly not the only man-made structure visible from orbit.**
 
 ---
 
-## Where Models Disagreed (Summary)
-Models agreed on the core conclusion but disagreed on historical origins, specific dimensions, and which alternative structures are verifiably visible. Critically, all four shared a tendency to present hallucinated citations as fact — the *direction* was right, but the *evidence quality* was unreliable across the board.
+## The Core Case (Where All Models Agree)
 
-**Confidence: 82%**
-*(All models agree on the core claim; verified physics supports it; dinged slightly because the supporting evidence ecosystem contains unverified specifics, and the "absolutely never visible" framing slightly overstates the case for LEO under rare conditions.)*
+The physics are decisive. The Wall is approximately **5–9 meters wide** — comparable to a highway. From the ISS (~400 km altitude), this subtends an angle of roughly **0.00014°**, far below the human eye's angular resolution limit of approximately **0.017° (1 arcminute)**. The Wall's materials (stone, brick, tamped earth) blend with surrounding terrain, eliminating contrast advantage.
+
+**Astronaut testimony confirms this:** Chinese astronaut Yang Liwei (2003) specifically searched for it and could not see it. Apollo 12's Alan Bean confirmed no individual structures are visible from lunar distance — Earth appears as a featureless blue-white sphere.
+
+**Other structures are more visible from LEO than the Wall:** city light grids at night, major highway systems (wider than the Wall), the Almería greenhouse complex in Spain (highly reflective), and large reservoirs. The "only man-made structure" framing is doubly false.
+
+The myth predates spaceflight entirely, originating in the 1930s (Ripley's *Believe It or Not!* and Halliburton's 1938 *Second Book of Marvels*), and was never based on observation.
+
+---
+
+## Where Models Disagreed
+
+**Angular resolution numbers:** Proposals offered wildly inconsistent figures — P2 cited 0.02° eye resolution, P3 cited 0.1–0.2°, while the accepted value is ~0.017°. P2 was closest on eye resolution but overstated the Wall's angular size by ~35x. P3's eye resolution figure was wrong by an order of magnitude. **The conclusion holds regardless, but the numerical sloppiness is notable.**
+
+**Myth origins:** P1 cited Halliburton 1932 (wrong — it was 1938). P4 cited a 1754 letter by William Stukeley, which the critique flagged as a **probable hallucination** (the concept of "space" didn't exist then). P2 attributed it to 1938 Ripley's. The actual history is debated, but the 1930s era is well-established.
+
+**Wall width:** Three proposals cited 5–10m; P2 cited "~20m max" without sourcing. The standard figure for the walkable surface is 5–9m.
+
+---
+
+## Critical Edge Cases (Honest Accounting)
+
+- **The Leroy Chiao photograph (2004):** Astronaut Chiao photographed what was later identified as a Wall segment from ISS. This was camera-aided, contested, and does not validate naked-eye visibility — but none of the proposals engaged with this strongest counterpoint.
+- **Shadow/snow conditions:** Under low sun angles with snow cover, the Wall can cast shadows wider than itself, potentially making the *shadow* detectable. This is the exception, not the rule.
+- **Definition of "space":** At the Kármán line (~100 km), resolution improves marginally but remains insufficient for naked-eye detection.
+
+---
+
+## Synthesis Decisions
+
+- **Adopted P1's** epistemic honesty, self-critique structure, and 98% calibration — the critic ranked it highest for good reason
+- **Adopted P3's** radar imagery distinction (the Wall *is* detectable via satellite radar, which usefully separates instrument capability from human vision)
+- **Rejected P2's** 100% confidence claim (epistemically irresponsible), its likely hallucinated YouGov poll statistic, and its misleading table conflating camera and naked-eye evidence
+- **Rejected P4's** probable Stukeley hallucination and its fictional ThoughtProof audit presenting imagined agent outputs as evidence
+- **Corrected** P1's Halliburton date from 1932 to 1938 per P4 and the critique
+- **Flagged** all proposals' failure to address the Leroy Chiao photograph, per the critique's shared-bias analysis
+
+**The answer is epistemically sound. The factual errors in individual proposals are cosmetic — they don't threaten the conclusion. The CONDITIONAL_ALLOW reflects unverified specific claims (Ed Lu quote, Bean exact wording, angular resolution figures) that should be documented rather than presented as sourced fact.**
+
+---
+
+Confidence: 82%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-135
+🧪 Check Type: defensibility
+💾 Saved as PoT-475
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.851 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.840 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.932
+🟢 Dissent Preservation Rate: 1.000 (33/33 objections preserved)

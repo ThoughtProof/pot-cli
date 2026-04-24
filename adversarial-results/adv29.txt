@@ -3,62 +3,72 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-160 created in 120.6s
+✔ Block PoT-500 created in 112.8s
 
 📊 SYNTHESIS:
 
-# The Driest Place on Earth: Synthesized Answer
+## Verdict: CONDITIONAL_ALLOW
 
-## Bottom Line
+# The Driest Place on Earth: Synthesized Assessment
 
-**The McMurdo Dry Valleys in Antarctica are the driest place on Earth by most standard definitions** — but this answer carries more uncertainty than any single source typically admits.
+## Core Answer
 
-## The Honest Case for McMurdo
-
-All four models agree, and the scientific literature broadly supports this. The Dry Valleys are a ~4,500 km² ice-free region where katabatic winds and surrounding mountains create an extraordinarily arid environment. NASA uses the site as a Mars analog — one of the most concretely verifiable claims across all proposals.
-
-**What we can defensibly say:**
-- Annual precipitation (as snow water equivalent) is **somewhere between <1mm and <10mm/year** — the honest range given measurement difficulty
-- The region has maintained hyper-arid conditions for **roughly 2 million years** based on geological evidence, though this refers to sustained environmental aridity, not literally zero precipitation events
-- By virtually every comparative metric, McMurdo is drier than the Atacama Desert's hyperarid core
-
-## Where Models Disagreed (Critical Signal)
-
-| Metric | Range Across Proposals |
-|--------|----------------------|
-| McMurdo precipitation | 0.1mm to 10mm/year — **two orders of magnitude** |
-| Atacama precipitation | 0.76mm to 15mm — wildly inconsistent, with one proposal contradicting itself internally |
-
-**Why they disagreed:** No model had reliable access to a single authoritative, recent measurement. Precipitation measurement in the Dry Valleys is genuinely difficult — wind-driven snow, sublimation, sparse instrumentation, and the distinction between snowfall and effective water availability all create massive uncertainty. Each model grabbed a different number from different contexts and presented it with false decimal-point precision.
-
-## Critique Points Addressed
-
-**1. "No rain ≠ No precipitation":** All four proposals conflated these. It doesn't rain in Antarctica because it's too cold — that's trivially true. Snow does fall and sublimate. The 2-million-year claim refers to geological hyper-aridity and absence of liquid water/glacial coverage, not literally zero precipitation events.
-
-**2. Fabricated citations:** Several citations flagged by the critic (specific NASA datasets, GRACE-based rankings, exact paper quotes) could not be verified and likely represent hallucinated precision around roughly correct facts. I am **not** endorsing any specific citation from the proposals.
-
-**3. The definition problem none addressed well:** "Driest" depends on what you measure. By total precipitation, McMurdo wins. By atmospheric humidity, some hot desert sites may compete. By "effective aridity" (water available to biology/surfaces), the question is genuinely open — McMurdo has subsurface ice that technically represents moisture, while Atacama's hyperarid core may be more thoroughly desiccated at the surface level. Proposal 4 (DeepSeek) was most honest about this definition-dependence.
-
-**4. Scale matters:** At the regional level, McMurdo wins convincingly. At the micro-site level, specific locations in both McMurdo and Atacama approach zero, making comparison nearly meaningless.
-
-## What Could Prove This Wrong
-
-1. **Redefinition:** If "driest" is redefined to mean "lowest effective surface moisture" rather than "lowest precipitation," the Atacama's hyperarid core could compete
-2. **Better instrumentation:** Modern sensor networks in the Atacama's absolute core could reveal micro-sites functionally drier than McMurdo at comparable scales
-3. **Climate change:** Antarctic precipitation is projected to increase, potentially shifting rankings over decades
-
-## Recommendation
-
-**Use "McMurdo Dry Valleys, Antarctica" as your answer** — it is defensible and represents scientific consensus. But be honest about what we don't know: the exact precipitation figure is poorly constrained, the answer is definition-dependent, and the margin over the Atacama's hyperarid core is less dramatic than most sources (including these proposals) suggest.
+The **McMurdo Dry Valleys in Antarctica** are the driest place on Earth by total precipitation (water equivalent), though this answer is **definition-dependent and measurement-limited** in ways all four proposals understate.
 
 ---
 
-**Confidence: 72%**
+## Where Models Disagreed
 
-The directional answer (McMurdo) is well-supported, but confidence is capped because: (1) all models shared the same biases (conflating rain/precipitation, ignoring definition-dependence); (2) precipitation figures varied by 100x across proposals revealing genuine measurement uncertainty; (3) the strongest counter-arguments were inadequately addressed by every model; and (4) multiple citations were flagged as unverifiable or likely hallucinated.
+The most telling disagreement is quantitative: Proposal 1 says <100mm, Proposal 2 says <10mm, Proposal 3 says <50mm, and Proposal 4 avoids a specific figure. **A 10x range on the central metric, combined with high stated confidence, reveals that none are working from precise verified data.** This disagreement stems from conflating different valley sub-regions, different measurement periods, and different inclusion criteria for snow/ice versus liquid water.
+
+All four agree on the conclusion but diverge on supporting evidence quality — which is the more important signal.
+
+---
+
+## Addressing the Critique
+
+The Critic's analysis is the most epistemically valuable contribution here. Key findings I incorporate:
+
+**1. The "2 million years" claim** (appearing in Proposals 1, 3, 4) conflates geomorphological surface-exposure age with precipitation measurement. No instrument existed 2 million years ago. This is inferred aridity, not recorded aridity. All proposals treat it as harder evidence than it is.
+
+**2. Citation reliability is poor.** Proposal 2's "New Zealand Antarctic Research Institute" does not exist (it's Antarctica New Zealand). The Doran et al. (2002) paper was published in *Nature*, not JGR as claimed. The Bull 1966 citation about Atacama fog in a glaciology journal is suspicious. Steig et al. (2009) addressed Antarctic warming trends, not GRACE-based water flux in the Dry Valleys. These are likely hallucinated or misattributed citations dressed up as rigor.
+
+**3. Proposal 4's verification badge** citing "Antarctic Treaty System records" as climatological data is fabricated — the ATS is a governance framework. The 200mph katabatic wind claim for the Dry Valleys specifically is unverified and likely exaggerated.
+
+**4. The Atacama is dismissed too quickly.** The Critic correctly notes that Atacama soil chemistry (Ewing et al., 2006) shows 10-23 million years of minimal water interaction — potentially a stronger aridity signal than anything cited for McMurdo. None of the proposals engaged this evidence.
+
+---
+
+## Synthesis Decisions
+
+| Position | Decision | Reason |
+|----------|----------|--------|
+| **Proposal 1 (Claude)** | **Primary basis adopted** | Most intellectually honest, best caveats, least overclaimed. The Critic scored it highest (6/10). |
+| **Proposal 2 (Grok)** | **Conclusion adopted, citations rejected** | Multiple fabricated/misattributed sources make the evidence chain unreliable despite correct directionality. |
+| **Proposal 3 (DeepSeek)** | **Partially adopted** | Brevity limited exposure to error, but NSF/NASA misattribution and "millions of years" overclaim noted. |
+| **Proposal 4 (Gemini)** | **Conclusion adopted, specifics rejected** | 200mph wind claim, fake verification badge, and ATS-as-data-source are disqualifying for evidentiary weight. |
+| **Critic's Atacama counterpoint** | **Adopted as mandatory caveat** | The soil-chemistry aridity evidence for the Atacama interior is a genuine complication that no proposal addressed. |
+
+## Defensible Answer
+
+McMurdo Dry Valleys are very likely the driest place on Earth by total annual precipitation (water equivalent), receiving somewhere in the range of **<10-50mm/year** in the inner valleys. However:
+
+- **Measurement uncertainty is substantial** — sparse instrumentation over short periods in Antarctica vs. denser, longer records in the Atacama
+- **The ranking is definition-dependent** — by rainfall alone, by humidity, or by soil-chemistry aridity duration, the Atacama competes or wins
+- **The "millions of years" framing is inferred, not measured**
+- The Atacama is the correct answer for "driest hot desert" or "driest inhabited place"
+
+---
+
+## Confidence: 68%
+
+Capped below 70% because: (1) this is partly a definitional/subjective question, (2) all proposals share directional bias while disagreeing 10x on the core metric, (3) the Critic identified legitimate Atacama counterevidence that none addressed, and (4) citation reliability across proposals was poor.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-160
+🧪 Check Type: defensibility
+💾 Saved as PoT-500
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.819 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.821 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.879
+🟢 Dissent Preservation Rate: 0.813 (13/16 objections preserved)

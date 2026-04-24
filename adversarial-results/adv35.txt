@@ -3,79 +3,74 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-166 created in 124.1s
+✔ Block PoT-506 created in 121.5s
 
 📊 SYNTHESIS:
 
-# Root Canal Treatment: Synthesized Verdict
 
-## Clear Position
 
-**No, root canal treatment does not cause cancer or systemic disease.** This is a thoroughly debunked myth. The procedure is safe, effective, and supported by decades of clinical evidence. The real danger lies in *avoiding* necessary treatment based on misinformation.
+## Verdict: CONDITIONAL_ALLOW
+
+The core answer — that root canal treatment does not cause cancer or systemic disease — is epistemically defensible and unanimously supported across all four proposals. However, significant citation fabrication and unverified specifics across proposals require documentation.
 
 ---
 
-## The Myth's Origin — Accurately Stated
+## Synthesized Answer
 
-The claim traces primarily to **Dr. Weston Price's work in the 1920s** (not 1910s as one model stated), but Price was not acting alone. The **focal infection theory** was a mainstream medical paradigm championed by multiple prominent figures (Frank Billings, Edward Rosenow, Charles Mayo). Major institutions endorsed extracting teeth and tonsils to treat systemic disease through the 1930s-40s. This theory was progressively abandoned as evidence failed to support it.
+**Root canal treatment is not dangerous in the way popularly claimed.** The assertion that it causes cancer or systemic disease is based on discredited early-20th-century research (Weston Price, 1920s) that utilized flawed methodology, was never replicated under modern standards, and was gradually abandoned by the medical-dental consensus through the 1930s-1950s.
 
-The myth's **modern resurgence** is largely attributable to the 2012 documentary *Root Cause* (later removed from Netflix in 2019 after backlash from dental and medical organizations) and alternative health websites — a propagation vector none of the original proposals mentioned.
+**What the evidence supports:**
+- Major professional bodies (AAE, ADA) affirm root canal therapy as safe and effective
+- Root canal success rates are approximately 85-95% at 10 years depending on case complexity and operator skill
+- Bacteremia occurs more frequently during tooth extraction and even routine chewing than during root canal treatment
+- Modern techniques (rubber dams, antimicrobial irrigation, magnification) substantially reduce procedural risks
+- The risk of leaving an infected tooth *untreated* (abscess, bone loss, systemic sepsis) far exceeds the risks of treatment
 
-Price's work was **methodologically flawed** (e.g., implanting infected material under rabbit skin), not necessarily "fraudulent" in the sense of deliberate deception — an important distinction when making evidence-based arguments.
+**Legitimate procedural risks exist** — instrument fracture, incomplete disinfection, missed canals, re-infection — but these are localized complications requiring retreatment or extraction, not systemic disease vectors.
 
-## What the Evidence Actually Shows
-
-**Institutional consensus:** The American Association of Endodontists (AAE), American Dental Association (ADA), and Mayo Clinic all affirm root canal safety. No credible medical organization supports the cancer link.
-
-**Success rates:** Approximately **85–97%** depending on tooth type, operator skill, and study methodology. Molars have lower success rates than anterior teeth; retreatment cases fare worse than primary treatments. This honest range is more credible than cherry-picked single figures.
-
-**Failure rates:** **3–15%**, again varying by context. Failures typically involve retreatment or extraction — they do not cause systemic disease.
-
-> ⚠️ **CRITICAL NOTE FROM CRITIQUE:** Two proposals (Grok and Kimi) cited highly specific studies with precise hazard ratios and confidence intervals (e.g., "JAMA 2019 veterans study, n=2 million"; "BMJ 2022 Danish cohort, n=1.1 million") that **could not be independently verified** and bear hallmarks of LLM fabrication. I am deliberately excluding these citations. The safety case does not require fabricated evidence — it stands on verified institutional consensus and the absence of credible contradictory findings.
-
-## What Can Actually Go Wrong
-
-**With the procedure (real, manageable risks):**
-- Treatment failure requiring retreatment (3–15%)
-- Missed canal anatomy in complex teeth
-- Instrument separation inside canal (rare, often manageable)
-- Post-treatment discomfort for 3–7 days (normal)
-- Vertical root fracture (rare, typically in older treatments)
-- Reinfection, usually from delayed crown placement
-
-**With avoiding treatment (the greater danger):**
-- Abscess formation → facial swelling, systemic infection
-- Progressive bone loss around the tooth root
-- Risk of sepsis from untreated spreading infection
-- Tooth loss requiring implant ($3,000–6,000+) vs. root canal + crown ($1,500–2,500)
-- More invasive, more expensive treatment overall
-
-## Addressing the Legitimate Nuance
-
-Root-canal-treated teeth **can harbor residual bacteria** — this is documented and not disputed. Modern proponents of the myth claim anaerobic bacteria produce toxins inside sealed canals. The scientific consensus, however, is that these residual bacteria at the levels present in properly treated teeth **do not cause systemic disease**. Dismissing this concern entirely is less persuasive than acknowledging it and explaining why the evidence doesn't support the systemic harm claim.
+**Critical nuance the proposals underweighted:**
+1. Research on persistent bacteria in dentinal tubules is legitimate science (e.g., Ricucci & Siqueira in JOE). Whether chronic low-grade periapical pathology from incompletely treated teeth contributes to systemic inflammatory burden over decades is genuinely understudied. This is *not* the same as "root canals cause cancer" — but it's the steelman version of the concern, and dismissing all skepticism as Price-derived nonsense is itself epistemically sloppy.
+2. Quality variation matters enormously. A root canal by a board-certified endodontist with CBCT imaging is fundamentally different from one in an under-resourced setting without magnification. Only Proposal 1 acknowledged this.
+3. Epidemiological studies showing no cancer link carry confounders — access to dental care correlates with socioeconomic status, which independently affects cancer risk. No proposal addressed this.
 
 ---
 
 ## Where Models Disagreed
 
-| Issue | Disagreement | Why It Matters |
-|---|---|---|
-| **Failure rates** | Ranged from 2–5% to 3–15% | Different definitions of "failure" and tooth types studied. The wider range (3–15%) is most honest. |
-| **Price characterization** | "Fraud" vs. "flawed methodology" vs. "single dentist" | Calling it "fraud" overstates; calling Price "a single dentist" understates his influence. |
-| **Citation reliability** | Two models generated numerous specific citations; two avoided them | The critique flagged likely hallucinated references — a serious epistemic failure when arguing against misinformation. |
-| **Specificity vs. safety** | Some models gave precise statistics; others stayed general | Precision without verification is worse than honest generality. |
+The most revealing disagreement was **citation chaos**. Three proposals cited what appears to be the same or overlapping research and generated three different journal names (JAMA Internal Medicine, JAMA Oncology, JAMA Otolaryngology), three different sample sizes (6,000+; 38,000; 40,000+), and incompatible details. Proposal 2 cited *JAMA Oncology* for a 2013 study — but that journal launched in **2015**. This is fabricated citation, the exact failure mode epistemic verification should catch.
+
+Confidence ranged from 92% (P1) to 98% (P4), with confidence inversely proportional to rigor — P4's 98% came with less evidence and more hand-waving than P1's 92%.
+
+Implant failure rates: Proposal 2 claimed 20-30%, contradicting mainstream literature reporting 90-97% survival at 10 years. This is materially wrong and would mislead clinical decision-making.
 
 ---
 
-## Bottom Line
+## Synthesis Decisions
 
-Get the root canal if your dentist recommends it. The myth is based on century-old science that was abandoned for good reason. The real risk is the untreated infection, not the treatment.
+| Decision | Rationale |
+|----------|-----------|
+| **Adopted P1's structure and uncertainty framing** | Best epistemic hygiene — explicit 8% uncertainty with reasoning |
+| **Adopted P1's immunocompromised edge case** | Legitimate clinical nuance others ignored |
+| **Adopted P3's point about alternative treatment risks** | Important asymmetry: extraction + implant carries its own risks |
+| **Rejected P2's specific citations** | JAMA Oncology didn't exist in 2013; implant failure rate likely fabricated; aggressive tone masks weak sourcing |
+| **Rejected P4's ThoughtProof branding** | Platform authority that doesn't yet exist is theater, not verification |
+| **Rejected all specific study citations** | Cannot verify any as stated — treated as illustrative rather than authoritative |
+| **Added steelman argument** | Critic correctly identified that no proposal addressed the strongest version of skeptic concerns |
+| **Capped confidence below all proposals** | Citation fabrication across the board warrants humility |
 
-**Confidence: 82%**
-*High confidence on core safety claim (universal institutional and model agreement). Docked for: inability to independently verify specific epidemiological studies cited; legitimate nuance about residual bacteria that deserves more research attention; and the inherent limitation that absence of evidence for harm is not identical to evidence of absence.*
+---
+
+**Recommendation:** Root canal treatment is safe, evidence-based standard of care. Proceed if clinically indicated. Seek a board-certified endodontist for complex cases. The cancer/systemic disease claim fails every epistemic standard.
+
+Confidence: 68%
+
+*Capped due to: (1) all specific citations across proposals are unverified or fabricated, (2) subjective/clinical question with legitimate understudied edge cases, (3) cross-proposal citation disagreements signal shared hallucination patterns.*
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-166
+🧪 Check Type: defensibility
+💾 Saved as PoT-506
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.833 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.814 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.935
+🟢 Dissent Preservation Rate: 0.944 (17/18 objections preserved)

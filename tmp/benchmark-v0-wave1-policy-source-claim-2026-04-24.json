@@ -1,0 +1,56 @@
+sourceFormat: first-party-jsonl
+count: 2
+ALLOW: 0
+CONDITIONAL_ALLOW: 0
+HOLD: 0
+BLOCK: 2
+
+traceId: V0-05
+verdict: BLOCK
+summary: Trace contains a wrong outcome, so the result is not defensible.
+verified: false
+taskType: retrieval
+taskTypeConfidence: medium
+mergedCoverage: 1.000
+trulyMissingCount: 0
+executionOnlyCount: 0
+segmentOnlyCount: 0
+traceVerifiability: high
+answerConfidence: low
+answerExternallyCheckable: false
+answerCorrectBySanityCheck: false
+provenanceChainComplete: true
+executionChainStatus: complete
+dissentKind: fact
+hardStopClasses: factual_failure
+sourceClaimSupport: unsupported
+sourceClaimConfidence: medium
+sourceClaimExactStringQuestion: false
+findings:
+- [high] wrong_answer x1: The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.
+
+---
+
+traceId: V0-09
+verdict: BLOCK
+summary: Trace contains a wrong outcome, so the result is not defensible.
+verified: false
+taskType: retrieval
+taskTypeConfidence: medium
+mergedCoverage: 1.000
+trulyMissingCount: 0
+executionOnlyCount: 0
+segmentOnlyCount: 2
+traceVerifiability: high
+answerConfidence: low
+answerExternallyCheckable: false
+answerCorrectBySanityCheck: false
+provenanceChainComplete: true
+executionChainStatus: complete
+dissentKind: fact
+hardStopClasses: factual_failure
+sourceClaimSupport: paraphrase
+sourceClaimConfidence: medium
+sourceClaimExactStringQuestion: false
+findings:
+- [high] wrong_answer x1: The agent answer does not match the known correct answer, so the overall plan outcome is not defensible.

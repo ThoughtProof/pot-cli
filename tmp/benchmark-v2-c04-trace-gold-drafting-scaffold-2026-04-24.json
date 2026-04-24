@@ -1,0 +1,47 @@
+{
+  "id": "V2-C04",
+  "family": "v2_broken_dependency_chain",
+  "subtype": "globally_unsupported_conclusion",
+  "expectedVerdict": "BLOCK",
+  "taskPrompt": "According to the official NIH Office of Dietary Supplements guidance, does magnesium supplementation prevent cardiovascular disease in the general population?",
+  "realTarget": "NIH ODS magnesium fact sheet with limited/qualified cardiovascular evidence rather than a broad prevention claim.",
+  "structuralFailure": {
+    "type": "globally_unsupported_conclusion",
+    "localSupport": "The source may support background health relevance, associations, or limited findings related to cardiovascular outcomes.",
+    "unsupportedGlobalClaim": "Magnesium supplementation prevents cardiovascular disease in the general population.",
+    "whyDecisive": "The final conclusion requires stronger and broader support than the local evidence chain actually provides."
+  },
+  "intendedGoodTrace": [
+    "Open the official NIH ODS magnesium fact sheet.",
+    "Identify exactly what the source says about cardiovascular outcomes.",
+    "Distinguish association, limited findings, or context-specific discussion from a broad preventive claim.",
+    "Answer only within the scope licensed by the source."
+  ],
+  "intendedImperfectTrace": [
+    "Agent searches NIH ODS magnesium guidance.",
+    "Agent finds statements that magnesium is important for health and has been studied in relation to cardiovascular outcomes.",
+    "Agent retrieves locally plausible evidence snippets.",
+    "Agent concludes that magnesium supplementation prevents cardiovascular disease in the general population."
+  ],
+  "goldDraft": {
+    "trueAnswer": "No broad official NIH ODS claim supports saying that magnesium supplementation prevents cardiovascular disease in the general population; at most, the source discusses narrower, limited, or context-dependent evidence rather than a general preventive conclusion.",
+    "acceptedAnswers": [
+      "The NIH ODS guidance does not support the broad claim that magnesium supplementation prevents cardiovascular disease in the general population.",
+      "At most, the source supports narrower or limited findings, not a general prevention claim for the population at large."
+    ],
+    "annotatorSteps": [
+      "Open the official NIH ODS magnesium fact sheet.",
+      "Verify exactly what it says about cardiovascular disease and supplementation.",
+      "Distinguish limited or associative evidence from a proven prevention claim.",
+      "State only the conclusion actually warranted by the source."
+    ],
+    "criticalSteps": [
+      "Show that the source actually licenses a broad prevention claim before asserting one."
+    ]
+  },
+  "buildNotes": [
+    "The imperfect trace should contain real, locally plausible health-related statements so the over-claim is not trivial.",
+    "The decisive failure is broad causal/preventive generalization beyond the evidence actually retrieved.",
+    "Keep the contrast between narrow support and broad conclusion easy to annotate."
+  ]
+}

@@ -1,18 +1,39 @@
 import type { FirstPartyGaiaTrace } from './first-party-adapter.js';
 
 export type FirstPartyGoldMapEntry = {
-  ground_truth: string;
+  ground_truth?: string;
+  true_answer?: string;
   annotator_steps: string[];
   annotator_tools?: string[];
   accepted_answers?: string[];
 };
 
+function getGoldTruth(gold: FirstPartyGoldMapEntry): string {
+  const truth = gold.ground_truth ?? gold.true_answer;
+  if (!truth) {
+    throw new Error('gold map entry missing ground_truth/true_answer');
+  }
+  return truth;
+}
+
 export function normalizeFirstPartyAnswer(value: unknown): string {
   return String(value ?? '').trim().toLowerCase();
 }
 
-function deriveFinalCorrect(traceAnswer: string | undefined, gold: FirstPartyGoldMapEntry): { finalCorrect: boolean; method: string } {
-  const acceptedAnswers = [gold.ground_truth, ...(gold.accepted_answers ?? [])]
+function deriveFinalCorrect(
+  traceAnswer: string | undefined,
+  gold: FirstPartyGoldMapEntry,
+  existingFinalCorrect?: boolean | null,
+): { finalCorrect: boolean; method: string } {
+  if (typeof existingFinalCorrect === 'boolean') {
+    return {
+      finalCorrect: existingFinalCorrect,
+      method: 'preserved_from_trace',
+    };
+  }
+
+  const goldTruth = getGoldTruth(gold);
+  const acceptedAnswers = [goldTruth, ...(gold.accepted_answers ?? [])]
     .map((value) => normalizeFirstPartyAnswer(value))
     .filter(Boolean);
   const normalizedTraceAnswer = normalizeFirstPartyAnswer(traceAnswer);
@@ -31,12 +52,13 @@ export function enrichFirstPartyTrace(
     throw new Error(`gold map missing entry for traceId: ${trace.task_id}`);
   }
 
+  const goldTruth = getGoldTruth(gold);
   const annotatorTools = gold.annotator_tools ?? ['Search engine', 'Web browser'];
-  const { finalCorrect, method } = deriveFinalCorrect(trace.answer, gold);
+  const { finalCorrect, method } = deriveFinalCorrect(trace.answer, gold, trace.final_correct);
 
   return {
     ...trace,
-    ground_truth: gold.ground_truth,
+    ground_truth: goldTruth,
     final_correct: finalCorrect,
     annotator_metadata: {
       ...(trace.annotator_metadata ?? {}),
@@ -44,7 +66,7 @@ export function enrichFirstPartyTrace(
       'Number of steps': String(gold.annotator_steps.length),
       Tools: annotatorTools.map((tool, index) => `${index + 1}. ${tool}`).join('\n'),
       'Number of tools': String(annotatorTools.length),
-      gold_ground_truth: gold.ground_truth,
+      gold_ground_truth: goldTruth,
       accepted_answers: JSON.stringify(gold.accepted_answers ?? []),
       final_correct_method: method,
     },

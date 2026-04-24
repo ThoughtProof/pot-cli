@@ -3,67 +3,86 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-163 created in 136.5s
+✔ Block PoT-503 created in 131.0s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Do All Wisdom Teeth Need to Be Extracted?
+## Verdict: CONDITIONAL_ALLOW
 
-## Clear Recommendation: No — But the Evidence Is Weaker Than Anyone Admits
+# Synthesized Answer: Routine Prophylactic Extraction of All Wisdom Teeth Is Not Supported — But the Real Answer Is Patient-Specific
 
-Not all wisdom teeth need extraction. **Individualized clinical assessment should replace routine prophylactic removal.** However, the confidence level on specific numbers is far lower than any single source typically claims.
+## Core Consensus
 
-## Where Models Disagreed — And Why This Matters Most
+All four proposals agree: **blanket extraction of all wisdom teeth is not justified.** This consensus is directionally correct, but the Critic rightly flags that the question as posed ("do all wisdom teeth need to be extracted?") is somewhat of a straw man — few serious clinicians advocate removing fully erupted, functional, asymptomatic teeth. The genuine clinical debate centers on **asymptomatic impacted teeth**, and the proposals blur this critical distinction.
 
-The four proposals agreed directionally but **diverged dramatically on the fundamental base rate**:
+## What the Evidence Actually Says
+
+The Cochrane review (Ghaeminia et al., most recently updated 2016, with the body of evidence reaffirmed in subsequent assessments) found **insufficient evidence to recommend OR oppose** prophylactic removal. This is a state of **equipoise** — not evidence against extraction. All four proposals systematically mischaracterize this as "evidence against," which the Critic correctly identifies as the most significant shared epistemic failure.
+
+**What IS well-supported:**
+- Fully erupted, functional, maintainable wisdom teeth do not require extraction
+- Extraction carries real procedural risks: dry socket (5–10%), temporary nerve injury (1–5%), permanent nerve damage (<1–2%), infection (2–5%)
+- Crowding is not a strong indication — the link between third molars and anterior crowding is weak
+- Specific pathology (pericoronitis, cysts, adjacent tooth resorption, unrestorable caries) clearly justifies extraction
+
+**What remains genuinely uncertain:**
+- The optimal management of asymptomatic impacted teeth in young patients
+- The age-dependent risk tradeoff (extraction at 17 vs. managing complications at 40)
+- Long-term pathology rates for retained impacted teeth (estimates range wildly from 25% to 60%+ depending on impaction type and follow-up)
+
+## Where Models Disagreed
+
+The proposals showed alarming variance on key numbers while reaching identical conclusions:
 
 | Metric | Range Across Proposals |
 |--------|----------------------|
-| % remaining problem-free | **30% to 88%** |
-| Permanent nerve damage rate | **0.1% to 5%** |
+| Future pathology risk (retained) | 25–85% |
+| Permanent nerve damage | 0.5–5% |
 
-This 3× spread on the core question — *how many asymptomatic wisdom teeth actually cause problems?* — reveals that **none of the proposals were working from verified primary sources.** The disagreement stems from: (1) different definitions of "problem" (any radiographic change vs. symptomatic disease), (2) different follow-up durations, (3) different populations studied, and (4) likely hallucinated or misattributed citations. The honest answer is: the true base rate probably falls in the **30-60% remaining problem-free range** over 10-20 years, depending heavily on impaction type, patient age, and hygiene compliance.
+This spread — particularly Proposal 2's internally contradictory 85% figure (which would *support* extraction) — reveals that the models were working backward from a conclusion rather than forward from data. The agreement on direction masked deep disagreement on magnitude.
 
-## What We Can Say With Reasonable Confidence
+## Unverified Claims Addressed
 
-**Extract when:**
-1. **Active pathology exists** — pericoronitis, non-restorable caries, cyst/tumor, bone loss threatening the adjacent second molar
-2. **High-risk anatomy** — partial eruption with no viable eruption path, mesioangular impaction against the second molar, recurrent soft tissue infection
-3. **Systemic planning** — anticipated bisphosphonate therapy (a genuinely valuable insight from Proposal 2), orthodontic treatment requiring space
+Per the Critic's analysis, I **reject or flag** the following:
+- **P1's "2020 JDR analysis"** — likely hallucinated or conflated citation. Cannot anchor conclusions on this.
+- **P2's statistics throughout** — the "92% confidence," AAOMS litigation data, NICE "1,000+ cases" characterization, and "85% future pathology" figure are unreliable. P2 is the least trustworthy source.
+- **P4's "30% increase in complications after age 25"** — unsourced, suspiciously precise. The direction (complications increase with age) is well-established; the magnitude is not confirmed.
+- **All proposals' financial incentive arguments** — the Critic correctly identifies this as a genetic fallacy. Incentive misalignment is worth noting but does not determine clinical correctness.
 
-**Monitor when:**
-- Fully erupted, functional, cleanable, probing depths ≤3mm, no radiographic pathology
+## The Missing Framework (Critic's Best Insight)
 
-**Key age consideration:** Extraction between ages 18-24 carries lower surgical risk (less-developed roots, more elastic bone, faster healing). Delaying until 35+ increases complication rates meaningfully — though the exact multiplier (claimed as "5×" by one proposal) is unverified.
+The most valuable contribution from the Critic: none of the proposals model this as a **decision-theoretic problem**. The correct clinical answer is not binary but patient-specific, weighing:
+1. Impaction type and angulation
+2. Patient age and root development stage
+3. Proximity to inferior alveolar nerve
+4. Realistic monitoring compliance probability
+5. Patient's healthcare access trajectory
 
-## Critique Points Explicitly Addressed
+## Recommendation
 
-**Hallucinated citations:** Multiple proposals cited specific papers (AAOMS 2016, Cochrane 2020, JADA 2018, BDJ 2019) that could not be verified at those dates or with those figures. The one broadly verified guideline: **NICE (UK, 2000) does recommend against prophylactic extraction of pathology-free impacted wisdom teeth.**
+**Do not extract asymptomatic, fully erupted, functional wisdom teeth.** For asymptomatic impacted teeth, the decision requires individualized clinical assessment — not a blanket policy in either direction. The state of evidence is **equipoise**, which means both "extract all" and "never extract prophylactically" overstate the evidence.
 
-**The compliance problem (shared blind spot):** All proposals assumed "watchful waiting" means reliable annual monitoring. In reality, patients frequently drop out of surveillance. The real-world alternative to extraction is often **no monitoring until emergency** — which changes the risk calculus substantially, especially in resource-limited settings.
+Radiographic monitoring every 2–3 years is the minimum standard for retained teeth. Patients with poor compliance likelihood or limited future healthcare access may reasonably tip toward earlier intervention.
 
-**Second molar damage (underweighted):** Mesioangular impactions causing distal caries or resorption of the second molar can result in losing **two teeth instead of one.** This was inadequately addressed across all proposals.
+## Synthesis Decisions
 
-**Financial incentive framing:** One proposal framed routine extraction as near-conspiratorial. While financial incentives in healthcare are real and worth noting, this commits the genetic fallacy — the practice should be evaluated on evidence, not on who profits. Dismissed as analytical basis.
+| Source | Adopted | Rejected | Reason |
+|--------|---------|----------|--------|
+| P1 | Indication list, honest "what can go wrong" | JDR citation, dismissal of probabilistic prevention | Hallucinated source; overcorrects against preventive reasoning |
+| P2 | General direction only | Nearly all specific statistics and citations | Widespread hallucination per Critic |
+| P3 | Restraint, Cochrane framing (partially) | *Primum non nocere* as argument | Rhetorical, not analytical |
+| P4 | Compliance tension, crowding debunking | Unsourced "70-80%" and "30%" figures | Unverifiable precision |
+| Critic | Equipoise reframing, decision-theoretic gap, straw-man identification | — | Most epistemically rigorous contribution |
 
-**The "12%" figure:** Used as the rhetorical anchor of the most aggressive anti-extraction proposal, this number is **unverified and likely too low.** Building an entire clinical position on a single unconfirmed statistic is exactly the epistemic failure this analysis should flag.
+**Confidence: 62%**
 
-## Bottom Line
-
-The default should be **informed, individualized decision-making** — not routine extraction, but also not dismissive retention. A panoramic radiograph by age 20-25, clinical examination of eruption status and periodontal health, and honest discussion of both surgical risks and retention risks constitutes the evidence-supported standard.
-
-**The strongest practical framework** (adapted from Proposal 2, with corrections): categorize each tooth as (1) diseased now → extract, (2) high anatomical/systemic risk → likely extract early, or (3) low risk and functional → monitor with commitment to actual follow-up.
-
-## Where All Models Shared Bias
-
-All underweighted: compliance failure in monitoring, second molar damage, population variation in impaction rates, and resource-limited settings where monitoring infrastructure doesn't exist.
-
-**Confidence: 55%**
-
-Capped below 60% because: (a) all models reached the same conclusion but the critic identified shared blind spots, (b) virtually no specific statistical claim survived verification, (c) the core base rate disagreement (30-88%) reveals fundamental evidentiary weakness, and (d) this is inherently a clinical judgment question where individual anatomy dominates population statistics.
+Capped below 70% due to: subjective/strategic clinical question, shared directional bias across all models, systematic mischaracterization of Cochrane equipoise, and multiple unverified statistics.
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-163
+🧪 Check Type: defensibility
+💾 Saved as PoT-503
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.847 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.798 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.928
+🟢 Dissent Preservation Rate: 0.850 (17/20 objections preserved)

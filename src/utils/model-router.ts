@@ -83,6 +83,7 @@ async function callAnthropic(
   config: ProviderConfig,
   messages: ChatMessage[],
   maxTokens: number,
+  temperature?: number,
 ): Promise<ModelResponse> {
   const apiKey = process.env[config.apiKeyEnv];
   if (!apiKey) throw new Error(`Missing env: ${config.apiKeyEnv}`);
@@ -100,6 +101,7 @@ async function callAnthropic(
     body: JSON.stringify({
       model: config.model,
       max_tokens: maxTokens,
+      ...(temperature !== undefined ? { temperature } : {}),
       system: systemMsg,
       messages: chatMsgs.map(m => ({ role: m.role, content: m.content })),
     }),
@@ -127,6 +129,7 @@ async function callOpenAICompat(
   config: ProviderConfig,
   messages: ChatMessage[],
   maxTokens: number,
+  temperature?: number,
 ): Promise<ModelResponse> {
   const apiKey = process.env[config.apiKeyEnv];
   if (!apiKey) throw new Error(`Missing env: ${config.apiKeyEnv}`);
@@ -140,6 +143,7 @@ async function callOpenAICompat(
     body: JSON.stringify({
       model: config.model,
       max_tokens: maxTokens,
+      ...(temperature !== undefined ? { temperature } : {}),
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     }),
   });
@@ -167,15 +171,15 @@ async function callOpenAICompat(
 export async function callModel(
   modelName: string,
   messages: ChatMessage[],
-  options: { maxTokens?: number } = {},
+  options: { maxTokens?: number; temperature?: number } = {},
 ): Promise<ModelResponse> {
   const config = resolveModel(modelName);
   const maxTokens = options.maxTokens ?? 1024;
 
   if (config.type === 'anthropic') {
-    return callAnthropic(config, messages, maxTokens);
+    return callAnthropic(config, messages, maxTokens, options.temperature);
   }
-  return callOpenAICompat(config, messages, maxTokens);
+  return callOpenAICompat(config, messages, maxTokens, options.temperature);
 }
 
 export function listModels(): string[] {
@@ -205,6 +209,7 @@ export async function callModelStructured<T>(
     parse: (text: string) => T;
     retries?: number;
     maxTokens?: number;
+    temperature?: number;
     onRetry?: (attempt: number, error: Error) => void;
   },
 ): Promise<{ data: T; raw: string; model: string; attempts: number }> {
@@ -214,7 +219,7 @@ export async function callModelStructured<T>(
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
-      const response = await callModel(modelName, messages, { maxTokens: options.maxTokens });
+      const response = await callModel(modelName, messages, { maxTokens: options.maxTokens, temperature: options.temperature });
       raw = response.content;
       const data = options.parse(raw);
       return { data, raw, model: response.model, attempts: attempt };

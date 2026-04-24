@@ -3,66 +3,70 @@
 ✓ Generators completed
 ✓ Critic completed
 ✓ Synthesizer completed
-✔ Block PoT-169 created in 143.2s
+✔ Block PoT-509 created in 124.2s
 
 📊 SYNTHESIS:
 
-# Synthesized Answer: Is Teeth Whitening Harmful to Enamel?
+## Verdict: CONDITIONAL_ALLOW
 
-## Clear Position
+# Synthesis: Is Teeth Whitening Harmful to Tooth Enamel?
 
-**Teeth whitening with peroxide-based products is generally safe for intact enamel when used within established guidelines, but the safety margin is narrower than most sources suggest, and the evidence base has real limitations.**
+## Core Answer
 
-## What We Can Say With Reasonable Confidence
+**No — teeth whitening with peroxide-based agents at standard concentrations is not harmful to intact enamel in the short-to-medium term.** Effects on enamel microhardness are transient and reversible through salivary remineralization. However, the categorical claim "whitening is safe" requires important qualifications, and long-term cumulative data remains insufficient for high confidence.
 
-**The mechanism is well-understood:** Hydrogen peroxide and carbamide peroxide oxidize chromogens (stain molecules) primarily in dentin. Peroxide penetrates enamel — enamel is semi-permeable, not impervious (correcting a factual error in Proposal 1's framing).
+## Where Models Agreed (High-Signal Consensus)
 
-**Temporary surface effects are real:** Whitening causes measurable microhardness reduction at the enamel surface. The literature broadly supports that this is partially reversible via salivary remineralization, but the completeness and timeframe of recovery are study-dependent and not definitively settled.
+All four proposals converge on the same core position: peroxide-based whitening at recommended concentrations does not cause permanent enamel damage when protocols are followed. This convergence is meaningful but must be discounted by the Critic's identification of **shared biases** — particularly that the underlying literature is predominantly short-term, often manufacturer-funded, and tested under controlled conditions that don't reflect real-world consumer behavior.
 
-**Professional concentrations:** In-office systems (Zoom, Boost, etc.) typically use **25–38% hydrogen peroxide** — NOT 6% as Proposal 2 incorrectly stated. At-home trays typically use 10–16% carbamide peroxide (~3.5–5.6% H₂O₂ equivalent).
+The agreeable, defensible claims:
+- Enamel microhardness changes during treatment are **transient and reversible** via remineralization
+- Tooth sensitivity ≠ structural enamel damage (this conflation drives most public fear)
+- DIY/unregulated products (charcoal, high-acid formulations, abrasives) pose genuinely greater enamel risk than peroxide chemistry
+- Pre-existing enamel compromise materially changes the risk profile
 
-**Sensitivity is common:** Reported incidence ranges from 15–78% across studies depending on protocol and measurement. It is primarily a pulpal/dentinal response, not evidence of enamel destruction, and typically resolves within days to two weeks.
+## Where Models Disagreed (Critical Signal)
 
-## Where the Evidence Gets Murky
+**1. Remineralization Timeline:** P1 and P2 say 1–2 weeks; P3 says 24–48 hours. This is a 3–7x disagreement on a clinically important parameter. The Critic correctly flags this as the most important unresolved question. **Adopted position:** The literature supports a range of days to weeks depending on degree of demineralization, concentration used, and individual salivary factors. I reject P3's 24–48 hour claim as overly optimistic and adopt the more conservative 1–2 week estimate while noting variability.
 
-**Reversibility is the central unresolved question.** Proposals fundamentally disagreed: P1 and P4 claimed full reversibility, P2 claimed irreversibility, P3 said baseline recovery in 7–14 days. The honest answer: surface remineralization does occur, but whether it is *complete* at every depth depends on the extent of mineral loss, salivary factors, and individual variation. For low-concentration protocols used as directed, the clinical significance of any residual loss appears minimal — but "minimal" is not "zero."
+**2. Safe Concentration Ceiling:** P2 calls ≤35% H₂O₂ safe; P1 flags >30% as the danger zone. **Adopted position:** These are not truly contradictory — in-office 35% H₂O₂ can be safe with professional isolation and limited exposure time, but the risk profile escalates meaningfully above 30%. P1's framing is more epistemically honest.
 
-**Most studies are in vitro.** Extracted teeth in lab conditions lack saliva, pellicle, and dietary variables. All four proposals cited lab data as though it maps directly to clinical reality. It doesn't perfectly.
+**3. Quantitative Precision:** P2 and P4 offered specific numbers (e.g., "0% long-term risk," "<1% irreversible harm," "90%+ consensus") that the Critic flagged as fabricated or unverifiable. **These are rejected entirely.** False precision is worse than acknowledged uncertainty.
 
-**Industry funding bias is unaddressed.** A significant portion of whitening safety research is manufacturer-funded. None of the proposals flagged this.
+## Addressing Critique Points
 
-## Practical Safety Guidance (Conservative Synthesis)
+The Critic's most damaging finding: **P2 (Grok) likely hallucinated citations**, including a purported Cochrane Review (2019) with specific statistics that don't match any identifiable publication. P2's "0% long-term risk" claim is epistemically indefensible. **P2 is weighted minimally in this synthesis — its structure is adopted only where corroborated by other proposals.**
 
-- **In-office (25–38% HP):** 1–3 sessions/year under professional supervision
-- **Home trays (10–16% CP):** 14-day cycles, minimum 3-month intervals between cycles
-- **OTC strips:** Follow manufacturer instructions; avoid products with pH below 5.5
-- **Never use:** Charcoal powders, DIY lemon/baking soda hacks, or unregulated high-concentration gels — these cause genuine, irreversible abrasion and erosion
-- **Pre-screen required:** Active decay, cracks, significant erosion, recent orthodontic debonding, or gingival recession all increase risk substantially
-- **Enamel is not universally healthy:** Erosive tooth wear affects 30–50% of adults in some populations; developmental defects affect ~25% of teeth. "Safe for healthy enamel" may exclude more people than assumed
+The Critic's systemic concerns are well-founded and adopted:
+- **Publication bias** in the bleaching safety literature is real and unaddressed by all proposals
+- **Cumulative exposure** over decades of consumer use is genuinely understudied
+- **In vitro vs. in vivo** gaps mean laboratory findings may not fully predict real-world outcomes
+- **Financial incentives** in the source literature are undeclared potential confounders
 
-## Where Models Disagreed
+## Defensible Position
 
-| Issue | Disagreement | Why |
-|---|---|---|
-| **Reversibility of enamel changes** | Fully reversible vs. irreversible/additive | Different interpretation of remineralization literature; in vitro vs. in vivo extrapolation |
-| **Safe frequency** | 1–2x/year to 3–4x/year | No consensus protocol exists; proposals extrapolated differently from limited long-term data |
-| **In-office HP concentration** | 6% vs. 15–40% vs. 35% | P2 made a clear factual error (6%); others were in reasonable range |
-| **Framing** | "Not harmful" vs. "small but real cumulative risk" | Reflects different priors: pro-whitening advocacy vs. precautionary framing |
+Teeth whitening is **conditionally safe**: safe for intact enamel at standard concentrations under appropriate protocols, with escalating risk from (1) high concentrations without professional supervision, (2) acidic/low-pH formulations, (3) pre-existing enamel compromise, and (4) cumulative overuse. The primary epistemic error in public discourse is conflating temporary sensitivity with permanent structural damage.
 
-## Critical Note on Citation Quality
+**The genuine uncertainty zone** — and the honest answer to "we don't fully know" — is long-term cumulative effects from repeated consumer whitening over decades.
 
-The Critic correctly identified that **multiple specific citations across all proposals were unverifiable** — including Cochrane reviews, profilometry tables, and dose-response thresholds presented with false precision. This is the core failure mode: authoritative-sounding numbers without traceable sources. The guidance above is based on broadly accepted principles rather than any single fabricated citation.
+## Synthesis Decisions
 
-## Recommendation
+| Decision | Rationale |
+|---|---|
+| **Adopted P1's framing** ("conditionally safe") | Best calibrated, most epistemically honest |
+| **Adopted P4's mechanistic detail** | Redox mechanism, "blue tooth" observation add genuine value |
+| **Adopted P3's logical framing** | Correctly identifies the misuse ≠ inherent harm fallacy |
+| **Rejected P2's citations and quantitative claims** | Likely hallucinated, internally contradictory |
+| **Rejected all proposals' confidence levels** | Shared bias and evidence-base limitations warrant lower confidence |
+| **Adopted Critic's systemic concerns** | Publication bias, cumulative exposure gaps, and ecological validity are material |
 
-For most adults with healthy, intact enamel: professional or ADA-accepted whitening used conservatively is low-risk. But get a dental exam first, follow protocols, and don't chase unnaturally white results. The real enamel threats in your daily life — acidic beverages, GERD, abrasive habits — likely outweigh responsible whitening, though this comparative framing should not dismiss whitening risks entirely.
-
-**Confidence: 62%**
-
-Capped below 70% because: (1) this is a health/clinical question where individual variation matters enormously; (2) models disagreed on the fundamental reversibility question; (3) most specific citations were unverifiable; (4) in vitro to in vivo translation is imperfect; (5) shared pro-whitening bias was identified across all proposals.
+Confidence: 72%
 
 ⚠️ Multi-model analysis — not verified truth. Disagreements highlighted above.
 
-💾 Saved as PoT-169
+🧪 Check Type: defensibility
+💾 Saved as PoT-509
 📈 Model Diversity Index: 0.667
-⚖️  Dissent Score: 0.859 — 🔴 Very High (models fundamentally disagree — treat with caution)
+⚖️  Dissent Score: 0.825 — 🔴 Very High (models fundamentally disagree — treat with caution)
+🟢 Synthesis Balance Score: 0.864
+🟡 Dissent Preservation Rate: 0.556 (10/18 objections preserved)

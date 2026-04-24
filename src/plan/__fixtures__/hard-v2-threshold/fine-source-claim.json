@@ -1,5 +1,14 @@
 {
-  "hard-H01": { "support": "exact", "confidence": "high", "exactStringQuestion": false },
-  "hard-H04": { "support": "exact", "confidence": "high", "exactStringQuestion": false },
-  "hard-H07": { "support": "exact", "confidence": "high", "exactStringQuestion": false }
+  "hard-H01": {
+    "support": "exact",
+    "confidence": "high",
+    "source": "RFC 5321 Section 4.5.3.1.1",
+    "claimText": "The maximum total length of a local-part is 64 octets."
+  },
+  "hard-H07": {
+    "support": "exact",
+    "confidence": "high",
+    "source": "National Archives",
+    "claimText": "Most of the delegates signed the Declaration of Independence on August 2, 1776."
+  }
 }

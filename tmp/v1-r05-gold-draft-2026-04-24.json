@@ -1,0 +1,17 @@
+{
+  "V1-R05": {
+    "trace_id": "V1-R05",
+    "annotator_steps": [
+      "Find an authoritative historical source on the Declaration of Independence timeline.",
+      "Distinguish the adoption date from the signing timeline.",
+      "Verify the exact historically supported statement from the source.",
+      "Reject the simplified wrong claim that the Declaration was signed on July 4, 1776."
+    ],
+    "true_answer": "The Declaration of Independence was adopted on July 4, 1776, but the signing occurred later and was not completed on that single date.",
+    "accepted_answers": [
+      "It was adopted on July 4, 1776, but signing occurred later.",
+      "July 4, 1776 was the adoption date; the signing happened later.",
+      "The Declaration was adopted on July 4, 1776, not fully signed on that one date."
+    ]
+  }
+}

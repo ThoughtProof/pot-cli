@@ -1,0 +1,81 @@
+{
+  "family": "v1_retrieval_boundary",
+  "createdAt": "2026-04-24",
+  "status": "scorer_ready_draft",
+  "description": "First fully operational v1 retrieval-boundary slice with 6 cases spanning CONDITIONAL_ALLOW, HOLD, and BLOCK.",
+  "summary": {
+    "softeningAnchors": ["V1-R01", "V1-R02"],
+    "holdControls": ["V1-R03", "V1-R04"],
+    "blockGuards": ["V1-R05", "V1-R06"]
+  },
+  "expectedReadout": {
+    "V1-R01": "CONDITIONAL_ALLOW",
+    "V1-R02": "CONDITIONAL_ALLOW",
+    "V1-R03": "HOLD",
+    "V1-R04": "HOLD",
+    "V1-R05": "BLOCK",
+    "V1-R06": "BLOCK"
+  },
+  "artifacts": {
+    "traceDrafts": {
+      "V1-R01": "tmp/v1-r01-trace-draft-2026-04-24.jsonl",
+      "V1-R02": "tmp/v1-r02-trace-draft-2026-04-24.jsonl",
+      "V1-R03": "tmp/v1-r03-trace-draft-2026-04-24.jsonl",
+      "V1-R04": "tmp/v1-r04-trace-draft-2026-04-24.jsonl",
+      "V1-R05": "tmp/v1-r05-trace-draft-2026-04-24.jsonl",
+      "V1-R06": "tmp/v1-r06-trace-draft-2026-04-24.jsonl"
+    },
+    "goldDrafts": {
+      "V1-R01": "tmp/v1-r01-gold-draft-2026-04-24.json",
+      "V1-R02": "tmp/v1-r02-gold-draft-2026-04-24.json",
+      "V1-R03": "tmp/v1-r03-gold-draft-2026-04-24.json",
+      "V1-R04": "tmp/v1-r04-gold-draft-2026-04-24.json",
+      "V1-R05": "tmp/v1-r05-gold-draft-2026-04-24.json",
+      "V1-R06": "tmp/v1-r06-gold-draft-2026-04-24.json"
+    }
+  },
+  "cases": [
+    {
+      "id": "V1-R01",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "role": "softening_anchor",
+      "isolatedBoundary": "first_party_supported_retrieval_softening",
+      "notes": "Official RFC case with correct answer, first-party grounding, and one missing decisive support step."
+    },
+    {
+      "id": "V1-R02",
+      "expectedVerdict": "CONDITIONAL_ALLOW",
+      "role": "softening_anchor",
+      "isolatedBoundary": "first_party_definition_rescue",
+      "notes": "Sparse-trace first-party definition lookup rescued into CONDITIONAL_ALLOW."
+    },
+    {
+      "id": "V1-R03",
+      "expectedVerdict": "HOLD",
+      "role": "hold_control",
+      "isolatedBoundary": "generic_under_supported_retrieval",
+      "notes": "Secondary-source article-year lookup that stays under-supported without authoritative rescue."
+    },
+    {
+      "id": "V1-R04",
+      "expectedVerdict": "HOLD",
+      "role": "hold_control",
+      "isolatedBoundary": "incomplete_provenance_chain",
+      "notes": "Concrete CDC opioid-guidance case; likely-correct answer with unclosed primary-source chain."
+    },
+    {
+      "id": "V1-R05",
+      "expectedVerdict": "BLOCK",
+      "role": "block_guard",
+      "isolatedBoundary": "retrieval_factual_failure_guard",
+      "notes": "Historical date lookup designed as a factual-failure negative control."
+    },
+    {
+      "id": "V1-R06",
+      "expectedVerdict": "BLOCK",
+      "role": "block_guard",
+      "isolatedBoundary": "citation_provenance_mismatch_guard",
+      "notes": "Provenance-sensitive paper-publication attribution failure."
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "V2-C01": {
+    "question": "According to the official CDC guidance, should opioid therapy be discontinued abruptly when a patient has been taking opioids long-term?",
+    "true_answer": "In general, no. CDC guidance warns against abrupt discontinuation for patients on long-term opioid therapy, but that recommendation must be interpreted in light of urgent exceptions such as impending overdose or other life-threatening situations; a categorical answer requires checking whether such an exception applies.",
+    "accepted_answers": [
+      "CDC generally advises against abrupt discontinuation for long-term opioid therapy, but urgent exceptions like impending overdose or other life-threatening situations must be considered before stating that categorically.",
+      "The general CDC recommendation is not to discontinue abruptly, except that emergency or life-threatening exceptions must be checked first."
+    ],
+    "annotator_steps": [
+      "Open the relevant official CDC opioid guidance.",
+      "Verify the general recommendation against abrupt discontinuation.",
+      "Verify whether the guidance includes an exception for impending overdose or another life-threatening issue.",
+      "Only then state the final conclusion."
+    ],
+    "critical_steps": [
+      "Explicitly check whether an impending overdose or other life-threatening exception applies before giving a categorical answer."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "missing_prerequisite_step",
+      "expected_verdict": "BLOCK",
+      "notes": "Gold draft is intentionally structured so the missing emergency-exception check is the decisive structural failure."
+    }
+  },
+  "V2-C02": {
+    "question": "According to the official CDC guidance, should clinicians avoid prescribing antibiotics for acute bronchitis in otherwise healthy adults?",
+    "true_answer": "Yes. CDC outpatient guidance generally discourages routine antibiotic prescribing for uncomplicated acute bronchitis in otherwise healthy adults.",
+    "accepted_answers": [
+      "Yes. Clinicians should generally avoid prescribing antibiotics for acute bronchitis in otherwise healthy adults.",
+      "CDC guidance generally discourages routine antibiotics for uncomplicated acute bronchitis in otherwise healthy adults."
+    ],
+    "annotator_steps": [
+      "Open the relevant CDC outpatient antibiotic guidance.",
+      "Verify the recommendation for uncomplicated acute bronchitis in otherwise healthy adults.",
+      "Check that the scope matches the question.",
+      "Only then state the final conclusion."
+    ],
+    "critical_steps": [
+      "Retrieve and verify the official CDC guidance before stating the answer."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "wrong_order_dependency",
+      "expected_verdict": "HOLD",
+      "notes": "Gold draft is intentionally structured so the main defect is wrong execution order, not a hard wrong answer."
+    }
+  },
+  "V2-C03": {
+    "question": "According to the official CDC guidance, is doxycycline recommended for routine treatment of acute bronchitis in otherwise healthy adults?",
+    "true_answer": "In general, no \u2014 because CDC guidance discourages routine antibiotic use for uncomplicated acute bronchitis in otherwise healthy adults, and doxycycline is an antibiotic within that scope.",
+    "accepted_answers": [
+      "No in general, because doxycycline is an antibiotic and CDC guidance discourages routine antibiotics for uncomplicated acute bronchitis in otherwise healthy adults.",
+      "The correct conclusion is generally no, but only after explicitly linking the CDC anti-antibiotic guidance to doxycycline as a member of that class."
+    ],
+    "annotator_steps": [
+      "Open the CDC outpatient antibiotic guidance.",
+      "Verify the recommendation against routine antibiotics for uncomplicated acute bronchitis.",
+      "Verify that doxycycline is an antibiotic relevant to the recommendation.",
+      "Explicitly connect those facts before concluding."
+    ],
+    "critical_steps": [
+      "Explicitly connect the general CDC anti-antibiotic recommendation to doxycycline before stating the answer."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "partial_chain_completion",
+      "expected_verdict": "HOLD",
+      "notes": "Gold draft is intentionally structured so the decisive failure is an unfinished dependency chain rather than a hard false answer."
+    }
+  },
+  "V2-C04": {
+    "question": "According to the official NIH Office of Dietary Supplements guidance, does magnesium supplementation prevent cardiovascular disease in the general population?",
+    "true_answer": "No broad official NIH Office of Dietary Supplements guidance supports the claim that magnesium supplementation prevents cardiovascular disease in the general population; the source may discuss narrower, limited, or context-dependent evidence, but not a general prevention conclusion.",
+    "accepted_answers": [
+      "The NIH ODS guidance does not support saying that magnesium supplementation prevents cardiovascular disease in the general population.",
+      "At most, the source supports narrower or limited findings, not a broad prevention claim for the population at large."
+    ],
+    "annotator_steps": [
+      "Open the official NIH ODS magnesium fact sheet.",
+      "Verify exactly what it says about cardiovascular disease and supplementation.",
+      "Distinguish limited or associative evidence from a proven prevention claim.",
+      "State only the conclusion actually warranted by the source."
+    ],
+    "critical_steps": [
+      "Verify that the official source actually licenses a broad prevention claim before asserting one."
+    ],
+    "metadata": {
+      "family": "v2_broken_dependency_chain",
+      "subtype": "globally_unsupported_conclusion",
+      "expected_verdict": "BLOCK",
+      "notes": "Gold draft is intentionally structured so the decisive failure is a global over-claim beyond what the official source actually supports."
+    }
+  }
+}
