@@ -644,7 +644,12 @@ function evaluateRetrievalPolicy(ctx: PolicyContext, findings: PolicyFinding[]):
     return 'BLOCK';
   }
 
-  if (findings.some((finding) => finding.type === 'truly_missing_step')) {
+  const hasMissingStep = findings.some((finding) => finding.type === 'truly_missing_step');
+  const hasPlanGap = findings.some((finding) => finding.type === 'plan_gap');
+  const hasNonHighCoverage = findings.some((finding) => finding.type === 'coverage' && finding.severity !== 'high');
+  const hasObservabilityGap = hasMissingStep || hasPlanGap || hasNonHighCoverage;
+
+  if (hasObservabilityGap) {
     if (
       (ctx.sourceClaimSupport === 'exact' || ctx.sourceClaimSupport === 'paraphrase')
       && (ctx.sourceClaimConfidence === 'high' || ctx.sourceClaimConfidence === 'medium')
@@ -681,6 +686,24 @@ function evaluateToolChainPolicy(ctx: PolicyContext, findings: PolicyFinding[]):
   return 'HOLD';
 }
 
+function qualifiesForNarrowSupportSoftening(ctx: PolicyContext, findings: PolicyFinding[]): boolean {
+  const hasTrulyMissingStep = findings.some((finding) => finding.type === 'truly_missing_step');
+  if (!hasTrulyMissingStep) {
+    return false;
+  }
+
+  const hasOnlyObservabilityHardStop = ctx.hardStopClasses.length > 0
+    && ctx.hardStopClasses.every((hardStop) => hardStop === 'observability_gap');
+  if (!hasOnlyObservabilityHardStop) {
+    return false;
+  }
+
+  const hasSupportedSourceClaim = (ctx.sourceClaimSupport === 'exact' || ctx.sourceClaimSupport === 'paraphrase')
+    && (ctx.sourceClaimConfidence === 'high' || ctx.sourceClaimConfidence === 'medium');
+
+  return hasSupportedSourceClaim;
+}
+
 function evaluateFallbackPolicy(ctx: PolicyContext, findings: PolicyFinding[]): DecisionSurface {
   if (
     ctx.hardStopClasses.includes('factual_failure')
@@ -691,6 +714,9 @@ function evaluateFallbackPolicy(ctx: PolicyContext, findings: PolicyFinding[]): 
   }
 
   if (findings.some((finding) => finding.type === 'truly_missing_step') || hasCoverageHigh(findings)) {
+    if (qualifiesForNarrowSupportSoftening(ctx, findings)) {
+      return 'CONDITIONAL_ALLOW';
+    }
     return 'HOLD';
   }
 
@@ -711,6 +737,9 @@ function evaluateMixedPolicy(ctx: PolicyContext, findings: PolicyFinding[]): Dec
   }
 
   if (findings.some((finding) => finding.type === 'truly_missing_step')) {
+    if (qualifiesForNarrowSupportSoftening(ctx, findings)) {
+      return 'CONDITIONAL_ALLOW';
+    }
     return 'HOLD';
   }
 
