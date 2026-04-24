@@ -806,7 +806,7 @@
         "criticality": "supporting"
       }
     ],
-    "expected_verdict": "ALLOW"
+    "expected_verdict": "HOLD"
   },
   {
     "id": "GAIA-02",
