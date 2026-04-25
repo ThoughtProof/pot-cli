@@ -12,3 +12,6 @@ system-context.md
 benchmarks/
 blocks/
 .potrc.json
+
+# Temp/experiment files
+tmp/
