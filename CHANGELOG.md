@@ -2,6 +2,46 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.0] - 2026-04-25
+
+### 🚀 Major: PLV Two-Tier Architecture + Gate 1 Passed
+
+#### New Commands
+- `plan-auto-gen` — TICK-based gold plan auto-generation with domain detection, 5 skeleton patterns, few-shot examples
+  - `--calibrate` flag for Counterfactual Omission Test (criticality calibration)
+  - `--add-to-benchmark` to append generated plans to benchmark JSON
+  - `--case-id` and `--trace` for full case assembly
+  - `--compare` mode for batch comparison against gold plans
+- `plan-loocv` — Leave-One-Out Cross-Validation with Wilson Score CI
+  - `--gate` threshold for automated Gate decisions
+  - Per-family breakdown, influential case analysis
+
+#### Two-Tier Evaluator Architecture
+- `tier1-prefilter.ts` — Pluggable pre-filter with 3 backends:
+  - `llm` (DeepSeek/any LLM) — works now, no GPU needed
+  - `minicheck` (HTTP) — for MiniCheck-FT5 microservice
+  - `hf-inference` (HuggingFace API) — no local GPU needed
+- `--tier1 llm` flag on `plan-graded-eval` enables two-tier mode
+- Critical-Step Guard: critical steps always go to Tier 2 (Grok), only supporting steps filtered by Tier 1
+- 17% Grok API cost reduction with zero verdict regression
+
+#### Evaluator Improvements
+- R6 (wrong-source rule): score=0.0 when agent uses secondary/blog source instead of required primary source
+- Gold label corrections: V1-R05 HOLD→BLOCK, V2-C04 HOLD→BLOCK (evidence-based)
+- Result: **40/40 verdict accuracy (100%), Wilson 95% CI [91.2%, 100.0%]**
+- Gate 1: PASSED ✅
+
+### Added
+- `src/plan/tick-auto-gen.ts` — TICK template engine with domain detection and skeleton patterns
+- `src/plan/criticality-calibrator.ts` — Counterfactual Omission Test for criticality recalibration
+- `src/plan/tier1-prefilter.ts` — Pluggable Tier-1 pre-filter backends
+- `src/commands/plan-auto-gen.ts` — CLI for plan generation + benchmark integration
+- `src/commands/plan-loocv.ts` — LOOCV analysis with Wilson CI
+
+### Changed
+- `graded-support-evaluator.ts` — Two-tier evaluation flow, R6 wrong-source rule, Critical-Step Guard
+- `plan-graded-eval.ts` — `--tier1`, `--tier1-model`, `--t-low`, `--t-high` flags
+
 ## [Unreleased]
 
 ### Added

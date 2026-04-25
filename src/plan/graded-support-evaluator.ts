@@ -14,6 +14,7 @@
  */
 
 import { callModelStructured, type ChatMessage } from '../utils/model-router.js';
+import { tier1PreScreen, type Tier1Config, type Tier1Result } from './tier1-prefilter.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -61,6 +62,14 @@ export interface ItemResult {
   verdict: 'BLOCK' | 'HOLD' | 'ALLOW';
   verdict_reasoning: string;
   provenance_violations: string[];
+  tier1_stats?: {
+    total: number;
+    tier1Resolved: number;
+    tier2Required: number;
+    avgConfidence: number;
+    totalLatencyMs: number;
+    backendUsed: string;
+  };
 }
 
 export interface EvalRunResult {
@@ -164,6 +173,16 @@ export function applyScoreFloors(
     result.tier = 'weak';
     result.predicate = 'unsupported';
     result.reasoning += ' [FLOOR: fetch-without-extraction cap]';
+  }
+
+  // R6: wrong-source detector (blog/secondary when official source required)
+  // Detect from reasoning if Grok noted a source mismatch but still gave partial credit
+  const wrongSourceSignals = /wrong source|different source|blog.*(instead|rather than)|secondary.*(instead|rather than)|not the (official|primary|required|actual)|fetched.*blog|used.*blog.*instead/i;
+  if (result.score > 0 && result.score <= 0.5 && wrongSourceSignals.test(result.reasoning)) {
+    result.score = 0.0;
+    result.tier = 'none';
+    result.predicate = 'unsupported';
+    result.reasoning += ' [FLOOR: R6 wrong-source — used secondary/blog instead of required primary source]';
   }
 
   // R1: quote required for score ≥ 0.75
@@ -283,6 +302,13 @@ HARD RULES (non-negotiable):
 
  R5. Abstain over hallucinate. Do not inflate scores.
 
+ R6. Wrong-source: If a step explicitly requires a SPECIFIC source (e.g., "fetch RFC 6749",
+     "retrieve the official NIH page", "access the primary source") and the trace shows
+     the agent used a DIFFERENT source (blog post, secondary article, Wikipedia instead of
+     official source), score MUST be 0.0 — the step was not performed correctly.
+     This is stricter than R4 (performed-but-wrong) because the step's acceptance
+     criterion explicitly names the required source.
+
 Return ONLY valid JSON matching this schema per step. No prose.
 
 {
@@ -301,12 +327,15 @@ When evaluating MULTIPLE steps, return a JSON array of these objects.`;
 
 // ─── Core Evaluation Function ─────────────────────────────────────────────────
 
-export async function evaluateItem(
+// ─── Core: Grok-only evaluation (Tier 2) ─────────────────────────────────────
+
+async function evaluateStepsWithLLM(
   item: EvalInput,
-  model: string = 'grok',
-  options: { maxTokens?: number } = {},
-): Promise<ItemResult> {
-  const stepsInput = item.gold_plan_steps.map(s => {
+  stepsToEvaluate: GoldStep[],
+  model: string,
+  maxTokens: number,
+): Promise<StepEvaluation[]> {
+  const stepsInput = stepsToEvaluate.map(s => {
     const criterion = s.acceptance_criterion ??
       `The trace must show evidence that this step was actually performed with verifiable output: "${s.description}"`;
     return `STEP_ID: step_${s.index}\nGOLD_STEP: ${s.description}\nCRITICALITY: ${s.criticality}\nACCEPTANCE_CRITERION: ${criterion}`;
@@ -334,12 +363,11 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
     { role: 'user', content: userPrompt },
   ];
 
-  const { data: rawEvals, model: usedModel } = await callModelStructured<StepEvaluation[]>(
+  const { data: rawEvals } = await callModelStructured<StepEvaluation[]>(
     model,
     messages,
     {
       parse: (text: string) => {
-        // Find JSON array in response
         const match = text.match(/\[[\s\S]*\]/);
         if (!match) throw new Error('No JSON array found');
         const parsed = JSON.parse(match[0]);
@@ -347,21 +375,136 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
         return parsed as StepEvaluation[];
       },
       retries: 2,
-      maxTokens: options.maxTokens ?? 4096,
-      temperature: 0,  // Deterministic evaluation per Perplexity research recommendation
+      maxTokens,
+      temperature: 0,
     },
   );
 
-  // Apply provenance checks and score floors
+  return rawEvals;
+}
+
+// ─── Tier-1 result → StepEvaluation converter ────────────────────────────────
+
+/**
+ * Convert Tier-1 result to StepEvaluation.
+ *
+ * CRITICAL DESIGN RULE: Tier 1 can only REJECT (unsupported), never APPROVE.
+ * "Supported" per Tier-1 still needs Grok for quote extraction + graded scoring.
+ * Only confident UNSUPPORTED results skip Tier 2.
+ * This avoids the false-positive trap: binary classifiers can't provide evidence quotes.
+ */
+function tier1ToStepEval(t1: Tier1Result, goldStep: GoldStep): StepEvaluation {
+  // Only unsupported results are Tier-1 final
+  // Supported results should have been routed to Tier 2 (see routing logic below)
+  return {
+    step_id: t1.stepId,
+    score: 0.0,
+    tier: 'none',
+    quote: null,
+    quote_location: { line_start: null, line_end: null, char_offset_start: null, char_offset_end: null, turn: null },
+    quote_to_criterion_mapping: null,
+    reasoning: `[TIER1 ${t1.backendUsed}] confidence=${t1.confidence.toFixed(3)} — confidently unsupported, skipped Tier 2`,
+    abstain_if_uncertain: false,
+    predicate: 'unsupported',
+  };
+}
+
+// ─── Core Evaluation Function (Two-Tier) ──────────────────────────────────────
+
+export interface EvalOptions {
+  maxTokens?: number;
+  tier1?: Tier1Config;
+}
+
+export async function evaluateItem(
+  item: EvalInput,
+  model: string = 'grok',
+  options: EvalOptions = {},
+): Promise<ItemResult> {
+  const tier1Config = options.tier1;
+  const allSteps = item.gold_plan_steps;
+  const allStepIds = allSteps.map(s => `step_${s.index}`);
+
+  let tier1Stats: ItemResult['tier1_stats'] = undefined;
+  let tier1ResolvedEvals: StepEvaluation[] = [];
+  let stepsForTier2: GoldStep[] = allSteps;  // Default: all go to Tier 2
+
+  // ── Tier 1 Pre-Screen ──
+  if (tier1Config && tier1Config.enabled !== false) {
+    const t1Input = allSteps.map(s => ({
+      stepId: `step_${s.index}`,
+      description: s.description,
+      criticality: s.criticality,
+    }));
+
+    const t1Result = await tier1PreScreen(item.trace_steps, t1Input, tier1Config);
+
+    tier1Stats = {
+      ...t1Result.stats,
+      backendUsed: t1Result.results[0]?.backendUsed ?? 'unknown',
+    };
+
+    // ROUTING RULES:
+    // 1. CRITICAL steps ALWAYS go to Tier 2 (Grok) — verdicts depend on them
+    // 2. SUPPORTING steps: Tier 1 can fast-reject (unsupported)
+    // 3. Supported + ambiguous supporting steps still go to Tier 2
+    const tier1RejectedSupportingIds = new Set<string>();
+
+    for (const t1r of t1Result.results) {
+      const goldStep = allSteps.find(s => `step_${s.index}` === t1r.stepId);
+      if (!goldStep) continue;
+
+      // Critical steps: ALWAYS Tier 2 regardless of Tier-1 result
+      if (goldStep.criticality === 'critical') continue;
+
+      // Supporting/optional steps: Tier-1 can fast-reject
+      if (t1r.routing === 'tier1_unsupported') {
+        tier1RejectedSupportingIds.add(t1r.stepId);
+        tier1ResolvedEvals.push(tier1ToStepEval(t1r, goldStep));
+      }
+    }
+
+    // Critical steps + non-rejected supporting steps go to Tier 2
+    stepsForTier2 = allSteps.filter(s => !tier1RejectedSupportingIds.has(`step_${s.index}`));
+  }
+
+  // ── Tier 2 (LLM graded evaluation) — only for ambiguous steps ──
+  let tier2Evals: StepEvaluation[] = [];
+
+  if (stepsForTier2.length > 0) {
+    const rawEvals = await evaluateStepsWithLLM(
+      item, stepsForTier2, model, options.maxTokens ?? 4096
+    );
+    tier2Evals = rawEvals;
+  }
+
+  // ── Merge: Tier 1 resolved + Tier 2 evaluated ──
+  const mergedEvals: StepEvaluation[] = [];
+  for (const stepId of allStepIds) {
+    const t1 = tier1ResolvedEvals.find(e => e.step_id === stepId);
+    const t2 = tier2Evals.find(e => e.step_id === stepId);
+    mergedEvals.push(t2 ?? t1 ?? {
+      step_id: stepId,
+      score: 0.0,
+      tier: 'none' as SupportTier,
+      quote: null,
+      quote_location: { line_start: null, line_end: null, char_offset_start: null, char_offset_end: null, turn: null },
+      quote_to_criterion_mapping: null,
+      reasoning: 'Step not evaluated (missing from both tiers)',
+      abstain_if_uncertain: true,
+      predicate: 'skipped' as GradedPredicate,
+    });
+  }
+
+  // ── Apply provenance checks and score floors (Tier 2 results only) ──
   const allViolations: string[] = [];
-  const processedEvals: StepEvaluation[] = rawEvals.map(ev => {
+  const processedEvals: StepEvaluation[] = mergedEvals.map(ev => {
+    // Skip provenance for Tier-1 results (no quotes to check)
+    if (ev.reasoning.startsWith('[TIER1')) return ev;
+
     const violations = verifyProvenance(ev, item.trace_steps);
     allViolations.push(...violations.map(v => `${ev.step_id}: ${v}`));
 
-    // Downgrade on critical provenance failures
-    // PROV_FAIL_01 (score≥0.75 but no quote) = hard downgrade
-    // PROV_FAIL_02 (quote not found) = hard downgrade
-    // PROV_INFO_07 (truncation match) = no downgrade (quote is valid after normalization)
     let processed = { ...ev };
     const hardFails = violations.filter(v => v.startsWith('PROV_FAIL_01') || v.startsWith('PROV_FAIL_02'));
     if (hardFails.length > 0) {
@@ -370,12 +513,11 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
       processed.reasoning += ' [PROVENANCE DOWNGRADE: quote invalid or missing]';
     }
 
-    // Apply deterministic score floors
     processed = applyScoreFloors(processed, item.trace_steps);
     return processed;
   });
 
-  // Derive verdict
+  // ── Derive verdict ──
   const { verdict, reasoning: verdictReasoning } = deriveVerdict(processedEvals, item.gold_plan_steps);
 
   return {
@@ -384,6 +526,7 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
     verdict,
     verdict_reasoning: verdictReasoning,
     provenance_violations: allViolations,
+    tier1_stats: tier1Stats,
   };
 }
 
@@ -392,7 +535,7 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
 export async function evaluateBatch(
   items: EvalInput[],
   model: string = 'grok',
-  options: { concurrency?: number; maxTokens?: number; onProgress?: (done: number, total: number, id: string) => void } = {},
+  options: { concurrency?: number; maxTokens?: number; tier1?: Tier1Config; onProgress?: (done: number, total: number, id: string) => void } = {},
 ): Promise<EvalRunResult> {
   const results: Record<string, ItemResult> = {};
   const concurrency = options.concurrency ?? 3;
@@ -402,7 +545,7 @@ export async function evaluateBatch(
     const batch = items.slice(i, i + concurrency);
     const batchResults = await Promise.all(
       batch.map(async (item) => {
-        const result = await evaluateItem(item, model, { maxTokens: options.maxTokens });
+        const result = await evaluateItem(item, model, { maxTokens: options.maxTokens, tier1: options.tier1 });
         options.onProgress?.(Object.keys(results).length + 1, items.length, item.id);
         return result;
       }),

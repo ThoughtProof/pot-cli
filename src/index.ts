@@ -19,6 +19,8 @@ import { planSweepFirstPartyCommand } from './commands/plan-sweep-first-party.js
 import { planBuildSourceClaimMapCommand } from './commands/plan-build-source-claim-map.js';
 import { planScoreBenchmarkCommand } from './commands/plan-score-benchmark.js';
 import { runGradedEval } from './commands/plan-graded-eval.js';
+import { runAutoGen } from './commands/plan-auto-gen.js';
+import { runLOOCV } from './commands/plan-loocv.js';
 
 const program = new Command();
 
@@ -213,17 +215,61 @@ program
   });
 
 program
+  .command('plan-auto-gen')
+  .description('Auto-generate gold verification plans from questions using TICK + domain skeletons')
+  .option('--question <text>', 'Single question to generate a plan for')
+  .option('--input <file>', 'Input JSON with items [{id, question, gold_plan_steps?}]')
+  .option('--output <file>', 'Output JSON path')
+  .option('--model <model>', 'Model alias (grok, sonnet, deepseek)', 'grok')
+  .option('--domain <domain>', 'Override domain detection (medical, legal, financial, technical, general)')
+  .option('--compare', 'Compare auto-generated plans vs existing gold plans')
+  .option('--calibrate', 'Run criticality calibration pass (Counterfactual Omission Test)')
+  .option('--add-to-benchmark <file>', 'Append generated plan to benchmark JSON file')
+  .option('--case-id <id>', 'Custom case ID (default: AUTO-<hash>)')
+  .option('--trace <file>', 'Agent trace file or inline trace text')
+  .option('--concurrency <n>', 'Parallel generation limit', '2')
+  .action(async (options) => {
+    await runAutoGen({
+      ...options,
+      addToBenchmark: options.addToBenchmark,
+      caseId: options.caseId,
+      trace: options.trace,
+      concurrency: parseInt(options.concurrency, 10),
+    });
+  });
+
+program
   .command('plan-graded-eval')
   .description('Run graded support evaluator (PLV v2) against pilot items with 5-tier scoring + evidence citation')
   .option('--input <file>', 'Input JSON with PLV items')
   .option('--model <model>', 'Model alias (grok, sonnet, deepseek)', 'grok')
   .option('--output <file>', 'Output JSON path')
+  .option('--tier1 <backend>', 'Tier-1 pre-filter backend: llm, minicheck, hf-inference')
+  .option('--tier1-model <model>', 'Tier-1 LLM model alias', 'deepseek')
+  .option('--t-low <number>', 'Tier-1 low confidence threshold', '0.20')
+  .option('--t-high <number>', 'Tier-1 high confidence threshold', '0.80')
   .action(async (options) => {
     const args: string[] = [];
     if (options.input) args.push('--input', options.input);
     if (options.model) args.push('--model', options.model);
     if (options.output) args.push('--output', options.output);
+    if (options.tier1) args.push('--tier1', options.tier1);
+    if (options.tier1Model) args.push('--tier1-model', options.tier1Model);
+    if (options.tLow) args.push('--t-low', options.tLow);
+    if (options.tHigh) args.push('--t-high', options.tHigh);
     await runGradedEval(args);
+  });
+
+program
+  .command('plan-loocv')
+  .description('Leave-One-Out Cross-Validation analysis on pre-computed evaluation results')
+  .option('--input <file>', 'Merged evaluation results JSON (from plan-graded-eval batches)')
+  .option('--gate <number>', 'Gate 1 threshold (default: 0.80)', '0.80')
+  .action(async (options) => {
+    const args: string[] = [];
+    if (options.input) args.push('--input', options.input);
+    if (options.gate) args.push('--gate', options.gate);
+    await runLOOCV(args);
   });
 
 program.parse();
