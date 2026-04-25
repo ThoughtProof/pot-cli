@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { evaluateBatch, type EvalInput, type EvalRunResult, type ItemResult } from '../plan/graded-support-evaluator.js';
 import type { Tier1Config } from '../plan/tier1-prefilter.js';
+import { toPublicVerdict, assertInternalFormat, type InternalVerdict } from '../verdict-mapper.js';
 
 interface GoldVerdicts {
   [id: string]: 'BLOCK' | 'HOLD' | 'ALLOW';
@@ -44,6 +45,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
   let tier1Model = 'deepseek';
   let tier1TLow = 0.20;
   let tier1THigh = 0.80;
+  let outputFormat: 'public' | 'internal' = 'public';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--input' && args[i + 1]) inputPath = args[++i];
@@ -53,6 +55,12 @@ export async function runGradedEval(args: string[]): Promise<void> {
     else if (args[i] === '--tier1-model' && args[i + 1]) tier1Model = args[++i];
     else if (args[i] === '--t-low' && args[i + 1]) tier1TLow = parseFloat(args[++i]);
     else if (args[i] === '--t-high' && args[i + 1]) tier1THigh = parseFloat(args[++i]);
+    else if (args[i] === '--format' && args[i + 1]) outputFormat = args[++i] as 'public' | 'internal';
+  }
+
+  // Guard: --format internal requires THOUGHTPROOF_INTERNAL=1
+  if (outputFormat === 'internal') {
+    assertInternalFormat();
   }
 
   if (!inputPath) {
@@ -211,10 +219,33 @@ export async function runGradedEval(args: string[]): Promise<void> {
     }
   }
 
-  // Save output
+  // Save output — apply verdict mapping for public format
   if (!outputPath) {
     outputPath = inputPath.replace(/\.json$/, '-graded-eval-result.json');
   }
-  writeFileSync(outputPath, JSON.stringify(result, null, 2));
-  console.log(`\nResults saved to: ${outputPath}`);
+
+  if (outputFormat === 'public') {
+    // Map internal verdicts to public 3-tier contract
+    const publicResult: Record<string, any> = {
+      ...result,
+      output_format: 'public',
+      items: {} as Record<string, any>,
+    };
+    for (const [id, item] of Object.entries(result.items)) {
+      const mapped = toPublicVerdict(item.verdict as InternalVerdict);
+      publicResult.items[id] = {
+        ...item,
+        verdict: mapped.verdict,
+        verdict_internal: undefined, // strip internal
+        metadata: mapped.metadata,
+      };
+    }
+    writeFileSync(outputPath, JSON.stringify(publicResult, null, 2));
+    console.log(`\nResults saved to: ${outputPath} (format: public, 3-tier)`);
+  } else {
+    // Internal format — keep engine verdicts as-is
+    const internalResult = { ...result, output_format: 'internal' };
+    writeFileSync(outputPath, JSON.stringify(internalResult, null, 2));
+    console.log(`\nResults saved to: ${outputPath} (format: internal, 5-tier)`);
+  }
 }
