@@ -2,6 +2,16 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.1] - 2026-04-25
+
+### Added
+- `src/verdict-mapper.ts` — Maps internal 5-tier engine verdicts (ALLOW/CONDITIONAL_ALLOW/HOLD/DISSENT/BLOCK) to public 3-tier API contract (ALLOW/BLOCK/UNCERTAIN)
+- `src/__tests__/verdict-mapper.test.ts` — 15 tests with anti-leak regression guard
+- `--format public|internal` flag on `plan-graded-eval` CLI command
+- `metadata.schema_version: 'v2'` on every public API response
+- `THOUGHTPROOF_INTERNAL=1` env guard for internal format output
+- Exhaustive TypeScript switch with `never` compile-time safety
+
 ## [0.8.0] - 2026-04-25
 
 ### 🚀 Major: PLV Two-Tier Architecture + Gate 1 Passed
