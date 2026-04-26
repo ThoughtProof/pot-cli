@@ -143,6 +143,18 @@ export function verifyProvenance(
       violations.push(`PROV_INFO_07: quote matched after normalization`);
     }
 
+    // Audit-trail: record which match path succeeded (or failed) so downstream
+    // logs surface the failure mode without rerunning the matcher. Pure metadata —
+    // does not influence scoring.
+    const matchPath = isSubstring
+      ? 'exact'
+      : isNormalizedMatch
+      ? 'whitespace-normalized'
+      : isFuzzyMatch
+      ? 'fuzzy-truncated'
+      : 'no-match';
+    violations.push(`PROV_TRACE: match_path=${matchPath}`);
+
     // CHECK 3: Quote length sanity
     if (cleanQuote.length < 10) {
       violations.push(`PROV_WARN_06: quote suspiciously short (${cleanQuote.length} chars)`);
