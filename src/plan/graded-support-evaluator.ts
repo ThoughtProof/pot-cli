@@ -304,6 +304,25 @@ export function applyScoreFloors(
     }
   }
 
+  // R7: Cross-step evidence aliasing cap (support mode only).
+  // If the LLM cites Plan-then-Execute / cross-step aliasing in its reasoning,
+  // cap the score at 0.5 PARTIAL. Reaching ≥ 0.75 still requires a verbatim
+  // quote from a SINGLE contiguous span (R1 + R1a). This is a defensive cap:
+  // R1's quote-required floor would already pull score down to 0.5 if quote
+  // is null, but cross-step evidence with a quote pulled from one of the
+  // steps could otherwise score 0.75 — and that would conflate cross-step
+  // partial-evidence with single-step strong-evidence. Order matters: this
+  // runs AFTER R6 so wrong-source still zeroes (R6 trumps R7).
+  if (mode === 'support') {
+    const crossStepSignals = /cross[- ]step|plan[- ]then[- ]execute|R7|spans (multiple|two) (trace )?steps|planning step .* (execution|fetch|search) step|aliasing/i;
+    if (result.score > 0.5 && crossStepSignals.test(result.reasoning)) {
+      result.score = 0.5;
+      result.tier = 'partial';
+      result.predicate = 'partial';
+      result.reasoning += ' [FLOOR: R7 cross-step evidence — capped at 0.5 PARTIAL]';
+    }
+  }
+
   // R1: quote required for score ≥ 0.75
   if (result.score >= 0.75 && result.quote === null) {
     result.score = 0.5;
@@ -451,6 +470,51 @@ HARD RULES (non-negotiable):
      This is stricter than R4 (performed-but-wrong) because the step's acceptance
      criterion explicitly names the required source.
 
+ R7. Cross-step evidence aliasing (Plan-then-Execute pattern).
+     Gold steps are typically result-oriented ("Retrieve X", "Verify Y"). The trace
+     may split the same logical action across multiple steps:
+        Trace step i   = [reason]: "I need X"   (planning)
+        Trace step i+k = [search]/[fetch]/[observe]: actually retrieves X   (execution)
+     When evaluating a gold step, scan the ENTIRE trace for evidence — not only the
+     trace step at the same index. If you find a planning-step plus a later
+     execution-step that together satisfy the gold step, score them as a UNIT.
+
+     HARD CAP: Cross-step evidence is capped at 0.5 (PARTIAL).
+     R7 NEVER raises a score above 0.5 by itself. Reaching 0.75 STRONG or 1.0
+     VERBATIM still requires a verbatim quote from a SINGLE contiguous span in
+     ONE trace step (R1 + R1a remain non-negotiable). R7 only rescues 0.0 → 0.5
+     when the plan-then-execute pattern is genuinely present.
+
+     R7 NEVER overrides R6. If the execution step used the wrong source
+     (blog instead of required primary), R6 still zeroes the score.
+
+     Example A (Healthcare — CPR/AHA pattern):
+       Gold step: "Retrieve AHA 2020 Guidelines Part 3: C-A-B sequence" (critical)
+       Trace step 1 [reason]: "I need the official 2020 AHA guidelines, specifically
+         checking Part 3 for C-A-B sequence."
+       Trace step 2 [search] (web_search): "AHA 2020 CPR guidelines Part 3"
+       Trace step 4 [observe]: "Part 3, Section 1: Begin with Compressions (C),
+         then Airway (A), then Breathing (B). Rate 100–120/min, depth 5–6 cm."
+       → Score the gold step at 0.5 PARTIAL. Plan-then-execute is satisfied,
+         but quote spans two trace steps so 0.75 is not available.
+
+     Example B (Finance — IRA contribution pattern):
+       Gold step: "Verify 2024 IRA contribution limit from IRS source" (critical)
+       Trace step 1 [reason]: "Need the 2024 IRS limit — I'll check irs.gov."
+       Trace step 3 [fetch] (web_fetch): irs.gov/retirement-plans/...
+       Trace step 4 [observe]: "For 2024, the contribution limit is $7,000
+         ($8,000 if age 50 or older)."
+       → Score the gold step at 0.5 PARTIAL. If the [observe] line is itself a
+         contiguous quotable span addressing the gold criterion AND you quote it
+         verbatim, you may score that step at 0.75 STRONG. R7 only governs the
+         0.0 → 0.5 lift; the 0.5 → 0.75 bridge still requires R1 verbatim quote.
+
+     Counter-example (R6 trumps R7):
+       Gold step: "Retrieve AHA guidelines from heart.org"
+       Trace step 1 [reason]: "I need AHA guidelines."
+       Trace step 3 [fetch]: random-cpr-blog.example.com
+       → Score 0.0. R6 wrong-source applies regardless of plan-then-execute.
+
 Return ONLY valid JSON matching this schema per step. No prose.
 
 {
@@ -466,6 +530,12 @@ Return ONLY valid JSON matching this schema per step. No prose.
 }
 
 When evaluating MULTIPLE steps, return a JSON array of these objects.`;
+
+// Test-only export so prompt-content lock-tests can pin the R7 section
+// (and adjacent rules) without exposing the constant to runtime callers.
+// Do NOT use this in production code paths — callers should use the
+// EvalMode-resolved prompt selection in `evaluateItem`.
+export const GRADED_SUPPORT_SYSTEM_PROMPT_FOR_TEST = GRADED_SUPPORT_SYSTEM_PROMPT;
 
 // ─── Faithfulness Evaluator Prompt ─────────────────────────────────────────────
 
