@@ -401,10 +401,12 @@ test('UNICODE — non-breaking space (U+00A0 vs ASCII space, regression guard, e
 });
 
 test('UNICODE — em-dash (U+2014 vs ASCII hyphen-minus, expected RED)', () => {
+  // The dash style is the *only* difference — spacing matches. Anything else
+  // would slide into paraphrase tolerance, which is out of scope.
   const trace = 'Phase 1 - foundation, Phase 2 - integration, Phase 3 - validation.';
   const ev = makeEval({
     step_id: 'step_unicode_emdash',
-    quote: 'Phase 1\u2014foundation', // em-dash instead of hyphen
+    quote: 'Phase 1 \u2014 foundation', // em-dash with the same spacing
   });
   const violations = verifyProvenance(ev, trace);
   assert.ok(
