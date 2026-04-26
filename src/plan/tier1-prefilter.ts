@@ -8,6 +8,7 @@
  *   - LLMBinaryBackend: Uses a cheap LLM (DeepSeek, etc.) with focused binary prompt
  *   - MiniCheckBackend: HTTP call to local MiniCheck-FT5 service (when available)
  *   - HFInferenceBackend: HuggingFace Inference API (no local GPU needed)
+ *   - OllamaBackend: Local Ollama daemon (zero API cost, runs on Apple Silicon / consumer GPU)
  *
  * Research basis: Perplexity Mission 4 (2026-04-25)
  *   - MiniCheck-FT5: 75.0% BAcc ≈ GPT-4 (75.3%) at 166× cheaper
@@ -30,13 +31,15 @@ export interface Tier1Result {
 }
 
 export interface Tier1Config {
-  backend: 'llm' | 'minicheck' | 'hf-inference';
+  backend: 'llm' | 'minicheck' | 'hf-inference' | 'ollama';
   model?: string;                // LLM backend: model alias (default: 'deepseek')
   tLow?: number;                 // below → confidently unsupported (default: 0.20)
   tHigh?: number;                // above → confidently supported (default: 0.80)
   minicheckUrl?: string;         // MiniCheck backend: HTTP endpoint
   hfModel?: string;              // HF backend: model ID
   hfToken?: string;              // HF backend: API token
+  ollamaUrl?: string;            // Ollama backend: HTTP endpoint (default: http://localhost:11434)
+  ollamaModel?: string;          // Ollama backend: model tag (default: qwen2.5:7b)
   enabled?: boolean;             // false → skip Tier 1 entirely (default: true)
 }
 
@@ -231,6 +234,92 @@ export class HFInferenceBackend implements Tier1Backend {
   }
 }
 
+// ─── Ollama Local Backend ────────────────────────────────────────────────────
+//
+// Calls a locally running Ollama daemon (https://ollama.com) via the
+// /api/generate endpoint with JSON mode. Reuses BINARY_SUPPORT_PROMPT for
+// parity with LLMBinaryBackend, so confidence semantics line up across
+// backends. Designed for Apple Silicon (M-series) — qwen2.5:7b Q4 is the
+// default, fits comfortably in 16 GB unified memory.
+
+interface OllamaGenerateResponse {
+  response: string;
+  done?: boolean;
+  error?: string;
+}
+
+export class OllamaBackend implements Tier1Backend {
+  name = 'ollama';
+  private baseUrl: string;
+  private model: string;
+
+  constructor(
+    baseUrl: string = 'http://localhost:11434',
+    model: string = 'qwen2.5:7b',
+  ) {
+    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.model = model;
+    this.name = `ollama:${model}`;
+  }
+
+  async scoreStep(stepDescription: string, traceExcerpt: string): Promise<{ supported: boolean; confidence: number }> {
+    const prompt = BINARY_SUPPORT_PROMPT
+      .replace('{document}', traceExcerpt.slice(0, 4000))
+      .replace('{claim}', stepDescription);
+
+    try {
+      const res = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          prompt,
+          stream: false,
+          format: 'json',
+          options: {
+            temperature: 0,
+            num_predict: 64,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        // Ambiguous → Tier 2 takes over
+        return { supported: false, confidence: 0.5 };
+      }
+
+      const data = await res.json() as OllamaGenerateResponse;
+      if (data.error || typeof data.response !== 'string') {
+        return { supported: false, confidence: 0.5 };
+      }
+
+      // Ollama in JSON-mode returns the JSON object as a string in `response`.
+      const match = data.response.match(/\{[\s\S]*?\}/);
+      if (!match) return { supported: false, confidence: 0.5 };
+
+      const parsed = JSON.parse(match[0]) as { supported?: boolean; confidence?: number };
+      return {
+        supported: parsed.supported === true,
+        confidence: Math.max(0, Math.min(1, parsed.confidence ?? 0.5)),
+      };
+    } catch {
+      // Network error / daemon offline / malformed JSON → route to Tier 2
+      return { supported: false, confidence: 0.5 };
+    }
+  }
+
+  async scoreBatch(pairs: Array<{ stepId: string; step: string; trace: string }>): Promise<Array<{ stepId: string; supported: boolean; confidence: number }>> {
+    // Sequential — local single-model daemon, parallelism wouldn't help and
+    // could OOM the GPU on consumer hardware.
+    const results: Array<{ stepId: string; supported: boolean; confidence: number }> = [];
+    for (const pair of pairs) {
+      const result = await this.scoreStep(pair.step, pair.trace);
+      results.push({ stepId: pair.stepId, ...result });
+    }
+    return results;
+  }
+}
+
 // ─── Tier-1 Router ────────────────────────────────────────────────────────────
 
 export function createBackend(config: Tier1Config): Tier1Backend {
@@ -241,8 +330,13 @@ export function createBackend(config: Tier1Config): Tier1Backend {
       return new MiniCheckBackend(config.minicheckUrl ?? 'http://localhost:8501');
     case 'hf-inference':
       return new HFInferenceBackend(config.hfModel, config.hfToken);
+    case 'ollama':
+      return new OllamaBackend(
+        config.ollamaUrl ?? 'http://localhost:11434',
+        config.ollamaModel ?? 'qwen2.5:7b',
+      );
     default:
-      throw new Error(`Unknown Tier-1 backend: ${config.backend}`);
+      throw new Error(`Unknown Tier-1 backend: ${(config as { backend: string }).backend}`);
   }
 }
 

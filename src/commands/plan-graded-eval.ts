@@ -57,6 +57,8 @@ export async function runGradedEval(args: string[]): Promise<void> {
   let tier1Model = 'deepseek';
   let tier1TLow = 0.20;
   let tier1THigh = 0.80;
+  let ollamaUrl = 'http://localhost:11434';
+  let ollamaModel = 'qwen2.5:7b';
   let outputFormat: 'public' | 'internal' = 'public';
   let evalMode: EvalMode = 'support';
 
@@ -68,6 +70,8 @@ export async function runGradedEval(args: string[]): Promise<void> {
     else if (args[i] === '--tier1-model' && args[i + 1]) tier1Model = args[++i];
     else if (args[i] === '--t-low' && args[i + 1]) tier1TLow = parseFloat(args[++i]);
     else if (args[i] === '--t-high' && args[i + 1]) tier1THigh = parseFloat(args[++i]);
+    else if (args[i] === '--ollama-url' && args[i + 1]) ollamaUrl = args[++i];
+    else if (args[i] === '--ollama-model' && args[i + 1]) ollamaModel = args[++i];
     else if (args[i] === '--format' && args[i + 1]) outputFormat = args[++i] as 'public' | 'internal';
     else if (args[i] === '--mode' && args[i + 1]) evalMode = args[++i] as EvalMode;
   }
@@ -78,7 +82,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
   }
 
   if (!inputPath) {
-    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--mode support|faithfulness] [--tier1 llm|minicheck|hf-inference] [--tier1-model deepseek] [--t-low 0.20] [--t-high 0.80]');
+    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--mode support|faithfulness] [--tier1 llm|minicheck|hf-inference|ollama] [--tier1-model deepseek] [--ollama-url http://localhost:11434] [--ollama-model qwen2.5:7b] [--t-low 0.20] [--t-high 0.80]');
     process.exit(1);
   }
 
@@ -88,10 +92,12 @@ export async function runGradedEval(args: string[]): Promise<void> {
 
   // Build Tier-1 config
   const tier1Config: Tier1Config | undefined = tier1Backend ? {
-    backend: tier1Backend as 'llm' | 'minicheck' | 'hf-inference',
+    backend: tier1Backend as 'llm' | 'minicheck' | 'hf-inference' | 'ollama',
     model: tier1Model,
     tLow: tier1TLow,
     tHigh: tier1THigh,
+    ollamaUrl,
+    ollamaModel,
     enabled: true,
   } : undefined;
 
@@ -102,7 +108,11 @@ export async function runGradedEval(args: string[]): Promise<void> {
   if (evalMode === 'faithfulness') {
     console.log(`Tier 1: disabled (faithfulness mode — all steps → Tier 2)`);
   } else if (tier1Config) {
-    console.log(`Tier 1: ${tier1Backend} (model=${tier1Model}, tLow=${tier1TLow}, tHigh=${tier1THigh})`);
+    if (tier1Backend === 'ollama') {
+      console.log(`Tier 1: ollama (url=${ollamaUrl}, model=${ollamaModel}, tLow=${tier1TLow}, tHigh=${tier1THigh})`);
+    } else {
+      console.log(`Tier 1: ${tier1Backend} (model=${tier1Model}, tLow=${tier1TLow}, tHigh=${tier1THigh})`);
+    }
   } else {
     console.log(`Tier 1: disabled (all steps → Tier 2)`);
   }
