@@ -38,8 +38,16 @@ const MODELS: Record<string, ProviderConfig> = {
   // xAI
   'grok': { baseUrl: 'https://api.x.ai/v1', apiKeyEnv: 'XAI_API_KEY', model: 'grok-4-1-fast', type: 'openai' },
 
+  // Google Gemini (direct API — OpenAI-compatible endpoint)
+  // Gemini (direct Google API — OpenAI-compatible endpoint)
+  'gemini': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-3.1-flash-lite-preview', type: 'openai' },
+  'gemini-flash': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-3.1-flash-lite-preview', type: 'openai' },
+  'gemini-2.5': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-2.5-flash', type: 'openai' },
+
   // DeepSeek
-  'deepseek': { baseUrl: 'https://api.deepseek.com/v1', apiKeyEnv: 'DEEPSEEK_API_KEY', model: 'deepseek-chat', type: 'openai' },
+  // DeepSeek (direct API)
+  'deepseek': { baseUrl: 'https://api.deepseek.com/v1', apiKeyEnv: 'DEEPSEEK_API_KEY', model: 'deepseek-v4-flash', type: 'openai' },
+  'deepseek-pro': { baseUrl: 'https://api.deepseek.com/v1', apiKeyEnv: 'DEEPSEEK_API_KEY', model: 'deepseek-v4-pro', type: 'openai' },
   'deepseek-r1': { baseUrl: 'https://api.deepseek.com/v1', apiKeyEnv: 'DEEPSEEK_API_KEY', model: 'deepseek-reasoner', type: 'openai' },
 
   // Moonshot (Kimi)
@@ -68,6 +76,8 @@ function resolveModel(nameOrAlias: string): ProviderConfig {
           return { baseUrl: 'https://api.moonshot.ai/v1', apiKeyEnv: 'MOONSHOT_API_KEY', model, type: 'openai' };
         }
         return { baseUrl: 'https://api.openai.com/v1', apiKeyEnv: 'OPENAI_API_KEY', model, type: 'openai' };
+      case 'google':
+        return { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model, type: 'openai' };
       default:
         // Unknown provider — try OpenAI-compatible
         return { baseUrl: `https://api.${provider}.com/v1`, apiKeyEnv: `${provider.toUpperCase()}_API_KEY`, model, type: 'openai' };

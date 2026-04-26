@@ -795,7 +795,7 @@ export async function evaluateItem(
   const allViolations: string[] = [];
   const processedEvals: StepEvaluation[] = mergedEvals.map(ev => {
     // Skip provenance for Tier-1 results (no quotes to check)
-    if (ev.reasoning.startsWith('[TIER1')) return ev;
+    if (ev.reasoning?.startsWith('[TIER1')) return ev;
 
     const violations = verifyProvenance(ev, item.trace_steps);
     allViolations.push(...violations.map(v => `${ev.step_id}: ${v}`));
