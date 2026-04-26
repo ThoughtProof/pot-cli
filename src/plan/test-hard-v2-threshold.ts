@@ -34,38 +34,41 @@ test('hard-v2 threshold regression holds across coarse, medium, fine, and fine+s
 
   const payload = JSON.parse(readFileSync(outFile, 'utf8'));
 
+  // After 7c3cf87: stricter policy — no answerCorrectBySanityCheck→ALLOW fast-path.
+  // Coarse/medium: both traces get HOLD (coverage gaps with only 2 traces, 3 gold steps each).
+  // H04 trace was removed in 7c3cf87; fixtures now contain 2 traces (H01, H07).
   assert.deepEqual(payload.profiles.coarse.baseline.verdictCounts, {
-    ALLOW: 3,
-    CONDITIONAL_ALLOW: 0,
-    HOLD: 0,
-    BLOCK: 0,
-  });
-
-  assert.deepEqual(payload.profiles.medium.baseline.verdictCounts, {
-    ALLOW: 3,
-    CONDITIONAL_ALLOW: 0,
-    HOLD: 0,
-    BLOCK: 0,
-  });
-
-  assert.deepEqual(payload.profiles.fine.baseline.verdictCounts, {
-    ALLOW: 1,
+    ALLOW: 0,
     CONDITIONAL_ALLOW: 0,
     HOLD: 2,
     BLOCK: 0,
   });
 
+  assert.deepEqual(payload.profiles.medium.baseline.verdictCounts, {
+    ALLOW: 0,
+    CONDITIONAL_ALLOW: 0,
+    HOLD: 2,
+    BLOCK: 0,
+  });
+
+  assert.deepEqual(payload.profiles.fine.baseline.verdictCounts, {
+    ALLOW: 0,
+    CONDITIONAL_ALLOW: 1,
+    HOLD: 1,
+    BLOCK: 0,
+  });
+
   assert.deepEqual(payload.profiles.fine.withSourceClaim.verdictCounts, {
-    ALLOW: 1,
+    ALLOW: 0,
     CONDITIONAL_ALLOW: 2,
     HOLD: 0,
     BLOCK: 0,
   });
 
   assert.deepEqual(payload.summary.fine.verdictTransitions, {
-    'ALLOW->ALLOW': 1,
-    'HOLD->CONDITIONAL_ALLOW': 2,
+    'HOLD->CONDITIONAL_ALLOW': 1,
+    'CONDITIONAL_ALLOW->CONDITIONAL_ALLOW': 1,
   });
-  assert.deepEqual(payload.summary.fine.sourceClaimSupportCounts, { exact: 3 });
-  assert.deepEqual(payload.summary.fine.sourceClaimConfidenceCounts, { high: 3 });
+  assert.deepEqual(payload.summary.fine.sourceClaimSupportCounts, { exact: 2 });
+  assert.deepEqual(payload.summary.fine.sourceClaimConfidenceCounts, { high: 2 });
 });

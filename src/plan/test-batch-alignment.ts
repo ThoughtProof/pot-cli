@@ -1103,11 +1103,14 @@ test('evaluatePlanPolicy returns CONDITIONAL_ALLOW for execution-only plan gaps'
   const mergedRiskFlags = deriveMergedRiskFlags(record, merged);
   const result = evaluatePlanPolicy(record, merged, mergedRiskFlags);
 
-  assert.equal(result.verdict, 'CONDITIONAL_ALLOW');
+  // After 38f55ff: retrieval observability gap detection now routes this to HOLD
+  assert.equal(result.verdict, 'HOLD');
   assert.ok(result.findings.some((f) => f.type === 'plan_gap'));
 });
 
-test('evaluatePlanPolicy returns ALLOW for fully covered verified plans', () => {
+test('evaluatePlanPolicy returns CONDITIONAL_ALLOW for fully covered verified plans', () => {
+  // After 7c3cf87: answerCorrectBySanityCheck→ALLOW fast-path was removed.
+  // Fully covered verified plans now return CONDITIONAL_ALLOW.
   const record = makeSyntheticRecordWithExec(
     'policy-allow',
     ['retrieve wikipedia article about dinosaurs'],
@@ -1123,8 +1126,7 @@ test('evaluatePlanPolicy returns ALLOW for fully covered verified plans', () => 
   const mergedRiskFlags = deriveMergedRiskFlags(record, merged);
   const result = evaluatePlanPolicy(record, merged, mergedRiskFlags);
 
-  assert.equal(result.verdict, 'ALLOW');
-  assert.equal(result.findings.length, 0);
+  assert.equal(result.verdict, 'CONDITIONAL_ALLOW');
 });
 
 test('evaluatePlanPolicy returns ALLOW when segment support fully rescues a compressed verified plan', () => {
@@ -1303,7 +1305,8 @@ test('buildPlanPolicyBatchExport returns stable JSON-friendly schema', () => {
   const batch = buildPlanPolicyBatchExport([allowResult, holdResult]);
   assert.equal(batch.schemaVersion, 'plan-policy-report/v2');
   assert.equal(batch.count, 2);
-  assert.equal(batch.verdictCounts.ALLOW, 1);
+  // After 7c3cf87: fully covered verified plans return CONDITIONAL_ALLOW, not ALLOW
+  assert.equal(batch.verdictCounts.CONDITIONAL_ALLOW, 1);
   assert.equal(batch.verdictCounts.HOLD, 1);
   assert.equal(batch.results.length, 2);
 });

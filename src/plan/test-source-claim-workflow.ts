@@ -21,16 +21,13 @@ test('planBuildSourceClaimMapCommand derives exact/high source-claim support fro
     out: outFile,
   });
 
+  // After 7c3cf87: hard-H04 trace was removed from fixtures.
+  // Only hard-H01 and hard-H07 remain.
   const payload = JSON.parse(readFileSync(outFile, 'utf8'));
   assert.equal(payload['hard-H01'].support, 'exact');
   assert.equal(payload['hard-H01'].confidence, 'high');
   assert.equal(payload['hard-H01'].exactStringQuestion, false);
   assert.match(payload['hard-H01'].explanation, /found verbatim in source/i);
-
-  assert.equal(payload['hard-H04'].support, 'exact');
-  assert.equal(payload['hard-H04'].confidence, 'high');
-  assert.equal(payload['hard-H04'].exactStringQuestion, false);
-  assert.match(payload['hard-H04'].explanation, /found verbatim in source/i);
 
   assert.equal(payload['hard-H07'].support, 'exact');
   assert.equal(payload['hard-H07'].confidence, 'high');

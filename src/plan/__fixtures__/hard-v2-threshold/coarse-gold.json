@@ -1,21 +1,15 @@
 {
   "hard-H01": {
-    "ground_truth": "64",
+    "ground_truth": "64 octets",
     "annotator_steps": [
       "Open RFC 5321.",
       "Locate the section specifying the maximum total length of a user name or other local-part.",
       "Return 64 octets."
     ],
-    "annotator_tools": ["Search engine", "Web browser"]
-  },
-  "hard-H04": {
-    "ground_truth": "19",
-    "annotator_steps": [
-      "Open PEP 20.",
-      "Read the abstract sentence stating how many aphorisms have been written down.",
-      "Return 19."
-    ],
-    "annotator_tools": ["Search engine", "Web browser"]
+    "annotator_tools": [
+      "Search engine",
+      "Web browser"
+    ]
   },
   "hard-H07": {
     "ground_truth": "August 2, 1776",
@@ -24,6 +18,9 @@
       "Locate the entry for August 2, 1776.",
       "Return August 2, 1776."
     ],
-    "annotator_tools": ["Search engine", "Web browser"]
+    "annotator_tools": [
+      "Search engine",
+      "Web browser"
+    ]
   }
 }
