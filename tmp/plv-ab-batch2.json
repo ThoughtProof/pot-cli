@@ -1,0 +1,81 @@
+[
+  {
+    "id": "V2-C03",
+    "question": "According to the official CDC guidance, is doxycycline recommended for routine treatment of acute bronchitis in otherwise healthy adults?",
+    "answer": "No. Doxycycline is not recommended for routine treatment of acute bronchitis in otherwise healthy adults.",
+    "trace_steps": "  Step 1 [reason]: I should check the CDC guidance on acute bronchitis and routine antibiotics.\n  Step 2 [search] (web_search): CDC acute bronchitis routine antibiotics guidance otherwise healthy adults\n  Step 3 [observe]: Search results indicate CDC outpatient guidance discourages routine antibiotic treatment for uncomplicated acute bronchitis in otherwise healthy adults.\n  Step 4 [reason]: Doxycycline is an antibiotic, so this is probably enough to answer.\n  Step 5 [search] (web_fetch): https://www.cdc.gov/antibiotic-use/hcp/clinical-care/adult-outpatient.html\n  Step 6 [observe]: The CDC outpatient page says routine treatment of uncomplicated acute bronchitis with antibiotics is not recommended, regardless of cough duration.\n  Step 7 [answer]: No. Doxycycline is not recommended for routine treatment of acute bronchitis in otherwise healthy adults.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the clinical question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve relevant guidance.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Establish the primary recommendation from the guidance.",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Verify secondary conditions and exceptions.",
+        "criticality": "supporting"
+      }
+    ]
+  },
+  {
+    "id": "V2-C04",
+    "question": "According to the official NIH Office of Dietary Supplements guidance, does magnesium supplementation prevent cardiovascular disease in the general population?",
+    "answer": "Yes. According to the NIH Office of Dietary Supplements, magnesium supplementation helps prevent cardiovascular disease in the general population.",
+    "trace_steps": "  Step 1 [reason]: I should check the official NIH Office of Dietary Supplements guidance on magnesium and cardiovascular health.\n  Step 2 [search] (web_search): NIH ODS magnesium cardiovascular disease supplementation fact sheet\n  Step 3 [observe]: Search results indicate the NIH ODS magnesium fact sheet discusses magnesium's role in health and cardiovascular-related outcomes.\n  Step 4 [search] (web_fetch): https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/\n  Step 5 [observe]: The NIH ODS page discusses magnesium as important for normal function and includes discussion of cardiovascular disease research and related outcomes.\n  Step 6 [reason]: Since magnesium is important for health and the page discusses cardiovascular outcomes, it supports the conclusion that supplementation helps prevent cardiovascular disease.\n  Step 7 [answer]: Yes. According to the NIH Office of Dietary Supplements, magnesium supplementation helps prevent cardiovascular disease in the general population.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question about magnesium supplementation.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve NIH ODS magnesium fact sheet.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the specific claim scope from the source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Verify that the final claim does not over-generalize beyond what the source supports.",
+        "criticality": "critical"
+      }
+    ]
+  },
+  {
+    "id": "V0-14",
+    "question": "Given a described direct-marketing processing activity, decide whether GDPR Article 6(1)(f) legitimate interests is a defensible lawful basis.",
+    "answer": "No, GDPR Article 6(1)(f) legitimate interests is not a defensible lawful basis for this direct-marketing processing activity. Direct marketing to individuals requires either consent under Article 6(1)(a) or, in B2B contexts, may rely on legitimate interests with strict conditions. For consumer direct marketing, the ePrivacy Directive and GDPR recitals indicate consent is typically required, especially for electronic communications. The legitimate interests basis faces significant challenges due to the reasonable expectations of data subjects and the availability of less intrusive alternatives (opt-in consent). The balancing test under Article 6(1)(f) would likely fail because individuals' rights and freedoms override the controller's commercial interests in unsolicited marketing.",
+    "trace_steps": "  Step 1 [observe] (internal): identified the task requires analyzing whether legitimate interests (Article 6(1)(f)) can lawfully justify a direct-marketing activity under GDPR\n  Step 2 [search] (web_search): searched for GDPR guidance on legitimate interests for direct marketing and found Recital 47 explicitly mentions direct marketing as a possible legitimate interest but subject to balancing\n  Step 3 [reason] (internal): analyzed the three-part test for Article 6(1)(f): legitimate interest exists (commercial marketing), necessity is questionable (consent is available alternative), and balancing test typically favors data subject rights in B2C marketing contexts\n  Step 4 [reason] (internal): concluded that while legitimate interests may work for B2B soft opt-in or existing customer relationships, it is generally not defensible for cold direct marketing to consumers due to failing the balancing test and ePrivacy requirements\n  Step 5 [answer] (null): determined that Article 6(1)(f) is not a defensible lawful basis for typical direct-marketing activities targeting consumers",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the factual question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve relevant authoritative source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the correct answer from the source.",
+        "criticality": "critical"
+      }
+    ]
+  }
+]

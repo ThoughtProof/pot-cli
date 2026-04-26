@@ -1,0 +1,128 @@
+[
+  {
+    "id": "FIN-01",
+    "question": "Can I contribute to both a traditional IRA and a Roth IRA in the same year for 2024?",
+    "answer": "Yes, you can contribute up to $7,000 to each in 2024, as long as you have sufficient earned income.",
+    "trace_steps": "Step 1 [reason]: Question is about whether contributions to both traditional and Roth IRA are allowed in same year for 2024.\nStep 2 [search] (web_search): '2024 IRA contribution limits traditional and Roth combined'\nStep 3 [observe]: IRS Publication 590-A mentions $7,000 annual limit for IRAs, but results show separate mentions for each.\nStep 4 [reason]: No explicit combined limit mentioned prominently, so assume separate limits apply.\nStep 5 [search] (web_search): 'Roth IRA contribution limit 2024'\nStep 6 [observe]: Roth limit $7,000, traditional also $7,000.\nStep 7 [reason]: Income phase-outs for Roth exist but not relevant to contribution allowance.\nStep 8 [answer]: Yes to both.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Search official IRS sources for 2024 IRA contribution limits.", "criticality": "critical"},
+      {"index": 2, "description": "Confirm the $7,000 limit ($8,000 if 50+) is aggregate across traditional and Roth IRAs.", "criticality": "critical"},
+      {"index": 3, "description": "Check Roth IRA income eligibility and phase-out ranges.", "criticality": "critical"},
+      {"index": 4, "description": "Cite IRS Publication 590-A or Rev. Proc. 2023-34.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "BLOCK"
+  },
+  {
+    "id": "FIN-02",
+    "question": "What is the 2024 standard deduction for married filing jointly?",
+    "answer": "The 2024 standard deduction for married filing jointly is $29,200. Source: IRS Revenue Procedure 2023-34.",
+    "trace_steps": "Step 1 [reason]: Need exact 2024 standard deduction amount for married filing jointly from official source.\nStep 2 [search] (web_search): '2024 standard deduction married filing jointly IRS official'\nStep 3 [observe]: IRS.gov confirms $29,200 for MFJ in 2024 per Rev. Proc. 2023-34.\nStep 4 [search] (web_search): 'IRS Revenue Procedure 2023-34 standard deduction'\nStep 5 [observe]: Direct link to PDF: Table 3 lists $29,200 for MFJ under 65.\nStep 6 [reason]: Matches across multiple IRS pages, no updates noted.\nStep 7 [answer]: $29,200 with citation.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Search IRS official site for 2024 standard deductions.", "criticality": "critical"},
+      {"index": 2, "description": "Locate and quote exact amount from Rev. Proc. 2023-34.", "criticality": "critical"},
+      {"index": 3, "description": "Confirm no additional adjustments for age/blindness in base case.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "ALLOW"
+  },
+  {
+    "id": "FIN-03",
+    "question": "Can W-2 employees deduct home office expenses on their taxes?",
+    "answer": "Yes, W-2 employees can deduct home office expenses if used regularly and exclusively for work, using Form 2106.",
+    "trace_steps": "Step 1 [reason]: Check if home office deduction available for employees.\nStep 2 [search] (web_search): 'home office deduction W-2 employee IRS'\nStep 3 [observe]: IRS Pub 587 allows it for employees with Form 2106.\nStep 4 [reason]: Seems straightforward, no restrictions noted.\nStep 5 [answer]: Yes, eligible.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Search IRS rules for employee business expenses.", "criticality": "critical"},
+      {"index": 2, "description": "Note TCJA suspension of unreimbursed employee expenses (IRC §67(g)) through 2025.", "criticality": "critical"},
+      {"index": 3, "description": "Confirm only self-employed qualify post-2017.", "criticality": "critical"},
+      {"index": 4, "description": "Cite Pub 587 and §280A.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "BLOCK"
+  },
+  {
+    "id": "FIN-04",
+    "question": "What is the wash sale rule timeframe and does it apply across accounts?",
+    "answer": "The wash sale rule disallows loss deduction if you buy substantially identical securities within 30 days before or after the sale (IRC §1091). It applies across taxable accounts.",
+    "trace_steps": "Step 1 [reason]: Explain wash sale rule basics.\nStep 2 [search] (web_search): 'wash sale rule IRS timeframe'\nStep 3 [observe]: 30 days before/after per §1091.\nStep 4 [search] (web_search): 'wash sale rule IRA'\nStep 5 [observe]: Generally doesn't apply inside IRA, but no mention of cross-account.\nStep 6 [reason]: Focus on taxable accounts.\nStep 7 [answer]: 30-day window.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Confirm 61-day window (30 before + sale + 30 after) per IRC §1091.", "criticality": "critical"},
+      {"index": 2, "description": "Note application to substantially identical securities across all accounts, including IRA purchases.", "criticality": "critical"},
+      {"index": 3, "description": "Cite IRS Pub 550.", "criticality": "supporting"},
+      {"index": 4, "description": "Distinguish IRA wash sales (disallowed losses inside IRA).", "criticality": "critical"}
+    ],
+    "expected_verdict": "HOLD"
+  },
+  {
+    "id": "FIN-05",
+    "question": "What are the elements of SEC Rule 10b-5?",
+    "answer": "SEC Rule 10b-5 prohibits: (1) employing any device, scheme, or artifice to defraud; (2) making untrue statement of material fact or omitting to state a material fact; (3) engaging in any act, practice, or course of business which operates as a fraud. 17 CFR §240.10b-5.",
+    "trace_steps": "Step 1 [reason]: List exact elements of Rule 10b-5.\nStep 2 [search] (web_search): 'SEC Rule 10b-5 elements text'\nStep 3 [observe]: Cornell LII: full text of 17 CFR §240.10b-5 with three prongs.\nStep 4 [search] (web_search): '17 CFR 240.10b-5 official'\nStep 5 [observe]: SEC.gov confirms exact wording.\nStep 6 [reason]: All three clauses covered.\nStep 7 [answer]: Quote with citation.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Retrieve full text of 17 CFR §240.10b-5 from official source.", "criticality": "critical"},
+      {"index": 2, "description": "Identify and list all three prohibitive clauses.", "criticality": "critical"},
+      {"index": 3, "description": "Cite SEC or CFR source.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "ALLOW"
+  },
+  {
+    "id": "FIN-06",
+    "question": "Do I need to report foreign bank accounts to the IRS?",
+    "answer": "You need to report foreign financial accounts only if the aggregate balance exceeds $50,000 at any time (FATCA Form 8938).",
+    "trace_steps": "Step 1 [reason]: Reporting threshold for foreign accounts.\nStep 2 [search] (web_search): 'report foreign bank account IRS threshold'\nStep 3 [observe]: FATCA $50,000 for Form 8938.\nStep 4 [reason]: That's the main requirement.\nStep 5 [answer]: Only over $50k.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Distinguish FBAR (FinCEN Form 114) threshold: >$10,000 aggregate anytime.", "criticality": "critical"},
+      {"index": 2, "description": "Note FATCA Form 8938 higher thresholds ($50k/$100k filing, higher reporting).", "criticality": "critical"},
+      {"index": 3, "description": "Cite 31 USC §5314 for FBAR, IRC §6038D for FATCA.", "criticality": "critical"},
+      {"index": 4, "description": "Check calendar year max vs. anytime aggregate.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "BLOCK"
+  },
+  {
+    "id": "LEG-01",
+    "question": "What constitutes 'personal data' under GDPR Article 4(1)?",
+    "answer": "'Personal data' shall mean any information relating to an identified or identifiable natural person ('data subject'); an identifiable natural person is one who can be identified, directly or indirectly, in particular by reference to an identifier such as a name, an identification number, location data, an online identifier or to one or more factors specific to the physical, physiological, genetic, mental, economic, cultural or social identity of that natural person. GDPR Article 4(1).",
+    "trace_steps": "Step 1 [reason]: Exact definition from GDPR Art 4(1).\nStep 2 [search] (web_search): 'GDPR Article 4(1) personal data definition official'\nStep 3 [observe]: eur-lex.europa.eu full text.\nStep 4 [reason]: Direct quote accurate.\nStep 5 [answer]: Quote with citation.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Retrieve official GDPR text from eur-lex.europa.eu.", "criticality": "critical"},
+      {"index": 2, "description": "Quote verbatim Article 4(1) definition.", "criticality": "critical"},
+      {"index": 3, "description": "Note examples of identifiers.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "ALLOW"
+  },
+  {
+    "id": "LEG-02",
+    "question": "Is a verbal agreement legally binding?",
+    "answer": "No, contracts must be in writing to be legally binding.",
+    "trace_steps": "Step 1 [reason]: Verbal contracts validity.\nStep 2 [search] (web_search): 'are verbal contracts legally binding'\nStep 3 [observe]: Some say yes, but generally need writing.\nStep 4 [reason]: Safer to say no.\nStep 5 [answer]: Must be written.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "State general rule: oral contracts enforceable unless Statute of Frauds applies.", "criticality": "critical"},
+      {"index": 2, "description": "List Statute of Frauds categories: goods >$500 (UCC §2-201), real property, marriage, >1yr performance, executory guarantees.", "criticality": "critical"},
+      {"index": 3, "description": "Note partial performance exceptions.", "criticality": "critical"},
+      {"index": 4, "description": "Cite UCC §2-201, Restatement (Second) of Contracts §110.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "BLOCK"
+  },
+  {
+    "id": "LEG-03",
+    "question": "What is the GDPR right to erasure (right to be forgotten)?",
+    "answer": "Under GDPR Article 17, data subjects have the right to request deletion of their personal data without undue delay.",
+    "trace_steps": "Step 1 [reason]: Describe Art 17 right to erasure.\nStep 2 [search] (web_search): 'GDPR Article 17 right to erasure'\nStep 3 [observe]: Art 17(1) lists grounds for erasure.\nStep 4 [reason]: Core right is deletion request.\nStep 5 [search] (web_search): 'GDPR right to be forgotten exceptions'\nStep 6 [observe]: Some exceptions exist but not detailed.\nStep 7 [answer]: Right to request deletion.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Quote Article 17(1) grounds (withdrawal consent, processing unlawful, etc.).", "criticality": "critical"},
+      {"index": 2, "description": "List key exceptions in Article 17(3), e.g., (e) exercise/defense of legal claims.", "criticality": "critical"},
+      {"index": 3, "description": "Cite official text.", "criticality": "supporting"},
+      {"index": 4, "description": "Note controller obligations under 17(2).", "criticality": "supporting"}
+    ],
+    "expected_verdict": "HOLD"
+  },
+  {
+    "id": "LEG-04",
+    "question": "What are the factors for fair use under US copyright law?",
+    "answer": "The four factors under 17 USC §107 are: (1) purpose and character of use; (2) nature of copyrighted work; (3) amount and substantiality used; (4) effect on potential market.",
+    "trace_steps": "Step 1 [reason]: List four fair use factors.\nStep 2 [search] (web_search): '17 USC 107 fair use factors'\nStep 3 [observe]: Cornell LII: exact four factors.\nStep 4 [search] (web_search): 'fair use doctrine US copyright official'\nStep 5 [observe]: Copyright.gov confirms.\nStep 6 [reason]: All four covered.\nStep 7 [answer]: List with citation.",
+    "gold_plan_steps": [
+      {"index": 1, "description": "Retrieve text of 17 USC §107 from official source.", "criticality": "critical"},
+      {"index": 2, "description": "List all four statutory factors verbatim.", "criticality": "critical"},
+      {"index": 3, "description": "Cite 17 USC §107.", "criticality": "supporting"}
+    ],
+    "expected_verdict": "ALLOW"
+  }
+]

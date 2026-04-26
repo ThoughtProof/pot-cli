@@ -1,0 +1,410 @@
+{
+  "evaluator_model": "grok",
+  "schema_version": "plv-graded-support-v1.0",
+  "evaluated_at": "2026-04-25T09:57:30.884Z",
+  "items": {
+    "V1-R01": {
+      "id": "V1-R01",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.25,
+          "tier": "weak",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace shows a tool call (web_fetch) to open the relevant source (RFC 9110 status-code section), but no output or fetched content is visible. This is fetch-without-extraction.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No mention or evidence of verifying that the retrieval covers the decisive claim in the trace.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "HOLD",
+      "verdict_reasoning": "failScore=1.5 (1 unsupported/skipped + 1 partial). IDs: [step_3, step_2]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 2634.0166670000003,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "V1-R02": {
+      "id": "V1-R02",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.25,
+          "tier": "weak",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace mentions Step 2 as a tool call to open official Python or PEP documentation, indicating intent to retrieve the source, but no verifiable output or fetched content is present.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace contains no mention of verification or checking if evidence covers the specific definition.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "HOLD",
+      "verdict_reasoning": "failScore=1.5 (1 unsupported/skipped + 1 partial). IDs: [step_3, step_2]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 2655.744208000002,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "GAIA-06": {
+      "id": "GAIA-06",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.200 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace shows web search returned chemical supplier pages but agent fetched Wikipedia instead; explicitly states 'I did not click through to the actual Sigma-Aldrich or Fisher Scientific SDS PDF' and admits only consulting Wikipedia summary.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No evidence of accessing or extracting from any SDS, let alone Section 11; value observed only from Wikipedia toxicity section, not verbatim from required SDS source.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.100 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2 (2 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 0.3375,
+        "totalLatencyMs": 3681.737958000005,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "GAIA-08": {
+      "id": "GAIA-08",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "Step 2 [search] (web_search): \"NIST SP 800-53 Rev 5 AC-2 Account Management control\"",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Direct evidence of search query matching the required search for NIST SP 800-53 Rev. 5 AC-2 control",
+          "reasoning": "Trace shows web_search tool call with query nearly identical to acceptance criterion, followed by observation of results confirming performance.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace mentions csrc.nist.gov in search results but fetches and observes third-party csf.tools summary instead of primary NIST publication, per R6 wrong-source rule.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No verbatim extraction of AC-2 control statement or sub-items a-l; trace explicitly states paraphrasing from summary without accessing primary source for verbatim text.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2 (2 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 0.275,
+        "totalLatencyMs": 3440.863041999997,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "GAIA-12": {
+      "id": "GAIA-12",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0.25,
+          "tier": "weak",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "General web search performed on generator safety, with observation of 'safety pages' and 'safety sites caution about CO', but no specific search for CPSC, CDC, or fire service mentioned.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Fetched a DIY blog instead of CPSC or CDC safety alert; violates specific source requirement.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No evidence of identifying or applying the categorical NEVER rule; trace explicitly notes missing it.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Agent recommended garage use with open door, opposite of outside-only recommendation; no evidence of performing this step.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_5",
+          "score": 0.5,
+          "tier": "partial",
+          "quote": "safety sites caution about CO",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Mentions CO caution in observations and answer references preventing buildup",
+          "reasoning": "CO hazard mentioned in observations and agent answer, but not clearly warned against garage use.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=3 (3 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3, step_4]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 5,
+        "tier1Resolved": 5,
+        "tier2Required": 0,
+        "avgConfidence": 0.95,
+        "totalLatencyMs": 4807.607707999996,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    }
+  }
+}

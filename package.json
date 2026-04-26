@@ -1,11 +1,20 @@
 {
   "name": "pot-cli",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Multi-model AI verification with adversarial critique. No AI can verify itself — so they verify each other.",
   "main": "dist/index.js",
   "bin": {
     "pot-cli": "dist/index.js",
     "pot": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./plan": "./dist/plan/graded-support-evaluator.js",
+    "./verdict": "./dist/verdict-mapper.js",
+    "./tier1": "./dist/plan/tier1-prefilter.js",
+    "./model-router": "./dist/utils/model-router.js",
+    "./config": "./dist/config.js",
+    "./types": "./dist/types.js"
   },
   "scripts": {
     "build": "tsc && npm run build:fixtures",

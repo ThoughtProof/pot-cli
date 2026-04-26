@@ -1,0 +1,91 @@
+{
+  "evaluator_model": "grok",
+  "schema_version": "plv-graded-support-v1.0",
+  "evaluated_at": "2026-04-25T09:55:35.788Z",
+  "items": {
+    "GAIA-10": {
+      "id": "GAIA-10",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace shows web search and fetch of a blog post (blog.example.com), not the actual RFC 6749 from specified sites like datatracker.ietf.org or rfc-editor.org. Wrong source used, violating R6.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No evidence of extracting or quoting Section 1.3 from RFC 6749; trace only observes and extracts from blog post listing grant types.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace explicitly notes attribution to blog post, not RFC 6749 Section 1.3 (Step 7); no evidence of reporting with required RFC citation.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2 (2 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 0.475,
+        "totalLatencyMs": 3790.0627080000004,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    }
+  }
+}

@@ -1,0 +1,244 @@
+{
+  "evaluator_model": "grok",
+  "schema_version": "plv-graded-support-v1.0",
+  "evaluated_at": "2026-04-25T09:05:53.872Z",
+  "items": {
+    "V2-C03": {
+      "id": "V2-C03",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0.5,
+          "tier": "partial",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Step 1 [reason] demonstrates awareness and paraphrasing of the clinical question but lacks explicit identification or verbatim output stating 'Identify the clinical question.'",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "Step 2 [search] (web_search): CDC acute bronchitis routine antibiotics guidance otherwise healthy adults",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Tool call performs retrieval of relevant CDC guidance.",
+          "reasoning": "Trace shows a search tool call directly retrieving relevant guidance on CDC acute bronchitis antibiotics.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Search results indicate CDC outpatient guidance discourages routine antibiotic treatment for uncomplicated acute bronchitis in otherwise healthy adults.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Observation directly establishes the primary recommendation against routine antibiotics.",
+          "reasoning": "Step 3 [observe] verbatim quotes the primary CDC recommendation from guidance, fully satisfying the criterion.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0.25,
+          "tier": "weak",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Step 4 [reason] assumes sufficiency without explicit verification of secondary conditions or exceptions; no relevant output present.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        }
+      ],
+      "verdict": "ALLOW",
+      "verdict_reasoning": "All critical steps adequately supported.",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 0.9624999999999999,
+        "totalLatencyMs": 3827.1839999999997,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "V2-C04": {
+      "id": "V2-C04",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.5,
+          "tier": "partial",
+          "quote": "Step 2 [search] (web_search): NIH ODS magnesium cardiovascular disease supplementation fact sheet\nStep 3 [observe]: Search results indicate the NIH ODS magnesium fact sheet discusses magnesium's role in health and cardiovascular-related outcomes.\nStep 4 [search] (web_fetch): https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Tool calls and observations show search and fetch targeting the NIH ODS magnesium fact sheet.",
+          "reasoning": "Trace shows web_search query for the fact sheet, observation of search results referencing it, and web_fetch of its URL, but no full content extraction or explicit 'retrieved' confirmation. This partially satisfies retrieval evidence.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No mention or evidence of extracting the specific claim scope from the source in the trace.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "No evidence of verifying that the claim does not over-generalize; Step 6 assumes support without checking boundaries.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2.5 (2 unsupported/skipped × 1.0 + 1 partial × 0.5). IDs: [step_3, step_4, step_2]",
+      "provenance_violations": [
+        "step_2: PROV_INFO_07: quote matched after normalization"
+      ],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 0.05,
+        "totalLatencyMs": 3475.9147919999996,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "V0-14": {
+      "id": "V0-14",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "searched for GDPR guidance on legitimate interests for direct marketing and found Recital 47 explicitly mentions direct marketing as a possible legitimate interest but subject to balancing",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Trace shows web_search performed with output identifying Recital 47 as the retrieved authoritative GDPR source.",
+          "reasoning": "The trace explicitly records Step 2 as a search that retrieved Recital 47, a relevant authoritative GDPR source on legitimate interests for direct marketing. This verbatim matches the acceptance criterion of retrieving a relevant authoritative source.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0.25,
+          "tier": "weak",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Step 3 is mentioned with output describing analysis of the three-part test, but shows no evidence of extracting any specific answer or text from the source. Output is reasoning, unrelated to explicit extraction.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        }
+      ],
+      "verdict": "HOLD",
+      "verdict_reasoning": "failScore=0.5 (0 unsupported/skipped + 1 partial). IDs: [step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 2753.4517909999995,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    }
+  }
+}

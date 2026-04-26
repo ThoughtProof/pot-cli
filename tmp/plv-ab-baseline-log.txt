@@ -1,0 +1,125 @@
+
+=== PLV Graded Support Evaluator (v2.0 Two-Tier) ===
+Tier 2 Model: grok
+Tier 1: disabled (all steps → Tier 2)
+Items: 42
+Schema: plv-graded-support-v2.0
+
+  [1/42] V3-03 — evaluated
+  [1/42] V3-01 — evaluated
+  [3/42] V3-07 — evaluated
+  [3/42] V3-12 — evaluated
+  [5/42] V2-C02 — evaluated
+  [5/42] V2-C01 — evaluated
+  [7/42] V2-C04 — evaluated
+  [7/42] V2-C03 — evaluated
+  [9/42] V1-R01 — evaluated
+  [9/42] V0-14 — evaluated
+  [11/42] V1-R02 — evaluated
+  [11/42] V1-R03 — evaluated
+  [13/42] V1-R04 — evaluated
+  [13/42] V1-R05 — evaluated
+  [15/42] V1-R06 — evaluated
+  [15/42] B-05 — evaluated
+  [17/42] B-06 — evaluated
+  [17/42] C-05 — evaluated
+  [19/42] C-06 — evaluated
+  [19/42] D-01 — evaluated
+  [21/42] D-02 — evaluated
+  [21/42] D-03 — evaluated
+  [23/42] D-04 — evaluated
+  [23/42] H-05 — evaluated
+  [25/42] H-07 — evaluated
+  [25/42] H-06 — evaluated
+  [27/42] H-08 — evaluated
+  [27/42] GAIA-01 — evaluated
+  [29/42] GAIA-03 — evaluated
+  [29/42] GAIA-02 — evaluated
+  [31/42] GAIA-05 — evaluated
+  [31/42] GAIA-04 — evaluated
+  [33/42] GAIA-07 — evaluated
+  [33/42] GAIA-06 — evaluated
+  [35/42] GAIA-08 — evaluated
+  [35/42] GAIA-09 — evaluated
+  [37/42] GAIA-10 — evaluated
+  [37/42] GAIA-11 — evaluated
+  [39/42] GAIA-13 — evaluated
+  [39/42] GAIA-12 — evaluated
+  [41/42] GAIA-15 — evaluated
+  [41/42] GAIA-14 — evaluated
+
+=== RESULTS ===
+
+ID         Fam  Gold    Eval    Score  OK   Prov
+────────────────────────────────────────────────────────────
+V3-01      B    BLOCK   BLOCK   0.35   ✅   —
+V3-03      B    BLOCK   BLOCK   0.30   ✅   —
+V3-07      B    BLOCK   BLOCK   0.31   ✅   ⚠️ 2
+V3-12      B    BLOCK   BLOCK   0.30   ✅   —
+V2-C01     C    BLOCK   BLOCK   0.31   ✅   —
+V2-C02     C    HOLD    HOLD    0.44   ✅   ⚠️ 1
+V2-C03     C    ALLOW   ALLOW   0.56   ✅   —
+V2-C04     C    HOLD    HOLD    0.31   ✅   —
+V0-14      D    HOLD    HOLD    0.58   ✅   —
+V1-R01     H    HOLD    HOLD    0.08   ✅   —
+V1-R02     H    HOLD    HOLD    0.17   ✅   —
+V1-R04     H    HOLD    HOLD    0.08   ✅   —
+V1-R05     H    HOLD    HOLD    0.08   ✅   —
+B-05       B    BLOCK   BLOCK   0.30   ✅   —
+B-06       B    BLOCK   BLOCK   0.30   ✅   —
+C-05       C    BLOCK   BLOCK   0.30   ✅   —
+C-06       C    BLOCK   BLOCK   0.30   ✅   —
+D-01       D    ALLOW   ALLOW   0.94   ✅   —
+D-02       D    ALLOW   ALLOW   1.00   ✅   —
+D-03       D    HOLD    HOLD    0.50   ✅   —
+D-04       D    HOLD    HOLD    0.75   ✅   —
+H-05       H    HOLD    HOLD    0.56   ✅   ⚠️ 1
+H-06       H    HOLD    HOLD    0.50   ✅   ⚠️ 1
+H-07       H    ALLOW   ALLOW   0.94   ✅   —
+H-08       H    ALLOW   ALLOW   0.94   ✅   ⚠️ 1
+GAIA-01    G    HOLD    HOLD    0.45   ✅   ⚠️ 2
+GAIA-02    G    ALLOW   ALLOW   0.94   ✅   ⚠️ 2
+GAIA-03    G    ALLOW   ALLOW   0.94   ✅   —
+GAIA-04    G    ALLOW   ALLOW   0.81   ✅   ⚠️ 1
+GAIA-05    G    ALLOW   ALLOW   0.94   ✅   —
+GAIA-06    G    BLOCK   BLOCK   0.31   ✅   —
+GAIA-07    G    HOLD    HOLD    0.38   ✅   —
+GAIA-08    G    BLOCK   HOLD    0.31   ❌   —
+GAIA-09    G    HOLD    HOLD    0.38   ✅   —
+GAIA-10    G    BLOCK   BLOCK   0.25   ✅   —
+GAIA-11    G    BLOCK   BLOCK   0.05   ✅   —
+GAIA-12    G    BLOCK   BLOCK   0.20   ✅   —
+GAIA-13    G    BLOCK   BLOCK   0.10   ✅   —
+GAIA-14    G    BLOCK   BLOCK   0.20   ✅   ⚠️ 1
+GAIA-15    G    BLOCK   BLOCK   0.00   ✅   —
+────────────────────────────────────────────────────────────
+
+Verdict accuracy: 39/40 (97.5%)
+Provenance violations: 12
+
+Per-family:
+  B: 6/6 (100%)
+  C: 6/6 (100%)
+  D: 5/5 (100%)
+  G: 14/15 (93%)
+  H: 8/8 (100%)
+
+Step predicates: supported=63 partial=51 unsupported=0 skipped=61 (total=175)
+
+=== MISMATCH DETAILS ===
+
+GAIA-08 — Gold: BLOCK, Got: HOLD
+  Reason: failScore=1.5 (1 unsupported/skipped + 1 partial). IDs: [step_3, step_2]
+  step_1 [supporting]: score=1 tier=verbatim pred=supported
+    quote: "Step 2 [search] (web_search): "NIST SP 800-53 Rev 5 AC-2 Account Management cont..."
+    reasoning: Trace explicitly shows web_search tool call with query matching the acceptance criterion verbatim.
+  step_2 [critical]: score=0.25 tier=weak pred=partial
+    quote: "Top results include the official NIST publication on csrc.nist.gov"
+    reasoning: Primary NIST source mentioned in search results observation, but no fetch performed; instead, third-party csf.tools was 
+  step_3 [critical]: score=0 tier=none pred=skipped
+    reasoning: Trace explicitly states no verbatim extraction: 'did not open the actual NIST SP 800-53 PDF to get the verbatim wording'
+  step_4 [supporting]: score=0 tier=none pred=skipped
+    reasoning: Trace explicitly states no citation: 'without citing NIST directly'; no evidence of explicit citation to NIST SP 800-53 
+
+
+Results saved to: tmp/plv-ab-baseline-2026-04-25.json

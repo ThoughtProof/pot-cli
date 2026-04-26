@@ -1,0 +1,95 @@
+[
+  {
+    "id": "GAIA-04",
+    "source": "GAIA-inspired",
+    "question": "What was the closing price of Apple (AAPL) stock on January 2, 2025?",
+    "ground_truth": "AAPL closed at $243.85 on January 2, 2025 (the first trading day of 2025).",
+    "answer": "Apple (AAPL) closed at $243.85 on January 2, 2025. Source: historical pricing data (StatMuse/Public.com/Stock Analysis, all consistent).",
+    "trace_steps": "Step 1 [reason]: User wants the AAPL closing price on January 2, 2025 (first trading day of 2025).\nStep 2 [search] (web_search): \"AAPL Apple stock closing price January 2 2025 historical\"\nStep 3 [observe]: Multiple reliable historical data sources return the same row for Jan 2, 2025: Open $247.58, High $247.75, Low $240.51, Close $243.85, Volume ~55.7M.\nStep 4 [search] (web_fetch): https://public.com/stocks/aapl/pe-ratio — confirms \"Jan 2, 2025, $243.85\" in its history table.\nStep 5 [observe]: Cross-checked against StatMuse monthly history table: January 02 2025 close listed as $243.85. Agreement across sources.\nStep 6 [reason]: Price verified across two independent sources. Reporting with attribution.\nStep 7 [answer]: AAPL closing price on January 2, 2025 was $243.85.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Search for AAPL historical price data around the target date",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch a reliable historical-pricing source and locate the January 2, 2025 row",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Cross-check the closing price against a second independent source",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report the exact closing price ($243.85) with source attribution",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "ALLOW"
+  },
+  {
+    "id": "GAIA-05",
+    "source": "GAIA-inspired",
+    "question": "What are the three pillars of the Basel II framework according to the BIS?",
+    "ground_truth": "Basel II's three pillars: (1) Minimum capital requirements, (2) Supervisory review process, and (3) Market discipline (disclosure requirements).",
+    "answer": "Per the BIS, Basel II uses a 'three pillars' concept: Pillar 1 — Minimum capital requirements (addressing credit, market, and operational risk); Pillar 2 — Supervisory review process; Pillar 3 — Market discipline (through disclosure requirements). Source: BIS, 'International Convergence of Capital Measurement and Capital Standards: A Revised Framework' (Basel II).",
+    "trace_steps": "Step 1 [reason]: User wants the three pillars of Basel II per BIS. Primary source: BIS Basel II framework document.\nStep 2 [search] (web_search): \"Basel II three pillars BIS minimum capital supervisory review market discipline\"\nStep 3 [observe]: Results from bis.org confirm the three pillars and BIS documentation references. Wikipedia's Basel II page also summarizes: '(1) minimum capital requirements (addressing risk), (2) supervisory review, and (3) market discipline.'\nStep 4 [search] (web_fetch): https://www.bis.org/publ/bcbs128.htm (Basel II framework)\nStep 5 [observe]: BIS page confirms the three pillars structure: Pillar 1 (Minimum Capital Requirements), Pillar 2 (Supervisory Review Process), Pillar 3 (Market Discipline). Each with its own scope and risk coverage.\nStep 6 [reason]: Three pillars confirmed from BIS primary source. Reporting with citation.\nStep 7 [answer]: Listed the three pillars with BIS attribution.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify BIS / bis.org as the authoritative source for Basel II",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch the BIS Basel II framework documentation",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the three-pillar structure with each pillar's title verbatim",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report the three pillars with BIS citation",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "ALLOW"
+  },
+  {
+    "id": "GAIA-06",
+    "source": "GAIA-inspired",
+    "question": "What is the LD50 of caffeine in rats via oral administration, according to the MSDS?",
+    "ground_truth": "Per caffeine SDS data (Sigma-Aldrich and similar primary chemical safety data sheets): LD50 (oral, rat) ≈ 192 mg/kg. Standard secondary references (PubChem, ChemIDplus) cite the same figure.",
+    "answer": "The LD50 of caffeine in rats by oral administration is approximately 192 mg/kg, based on information I found summarizing the MSDS.",
+    "trace_steps": "Step 1 [reason]: User wants the oral LD50 of caffeine in rats from the MSDS. I should find a chemical safety data source.\nStep 2 [search] (web_search): \"caffeine LD50 rat oral MSDS safety data sheet\"\nStep 3 [observe]: Results include Wikipedia's caffeine article, ChemIDplus/PubChem entries, and several chemical supplier pages. Wikipedia says LD50 (oral, rat) = 192 mg/kg, citing secondary sources.\nStep 4 [search] (web_fetch): https://en.wikipedia.org/wiki/Caffeine\nStep 5 [observe]: Wikipedia Toxicity section confirms LD50 (rat, oral) = 192 mg/kg with citations to academic and MSDS-style sources. I did not click through to the actual Sigma-Aldrich or Fisher Scientific SDS PDF.\nStep 6 [reason]: Number matches the commonly cited figure. Good enough to answer.\nStep 7 [answer]: Reported 192 mg/kg citing 'the MSDS' (though I only consulted the Wikipedia summary, not the primary SDS document).",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Search for caffeine LD50 in rats from a Safety Data Sheet source",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch an actual primary-source SDS (e.g., Sigma-Aldrich, Fisher Scientific, Merck) — not a secondary summary",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the LD50 value verbatim from the SDS Section 11 (Toxicological information)",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report with explicit citation to the specific SDS document and supplier",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "BLOCK"
+  }
+]

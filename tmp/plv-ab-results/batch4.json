@@ -1,0 +1,208 @@
+{
+  "evaluator_model": "grok",
+  "schema_version": "plv-graded-support-v1.0",
+  "evaluated_at": "2026-04-25T09:07:03.226Z",
+  "items": {
+    "V1-R04": {
+      "id": "V1-R04",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "Trace excerpt only documents Step 1 and Step 2 as searches; no evidence of Step 3 retrieving primary source or any verifiable output matching the criterion.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "HOLD",
+      "verdict_reasoning": "failScore=1 (1 unsupported/skipped + 0 partial). IDs: [step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 2557.519167,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "V1-R05": {
+      "id": "V1-R05",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "The trace excerpt only mentions Step 1 (web_search), with no evidence of retrieving the official source or the required verifiable output.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "The trace excerpt only mentions Step 1 (web_search), with no evidence of extracting the correct answer from the source or the required verifiable output.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2 (2 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 2657.297292,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "V1-R06": {
+      "id": "V1-R06",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.000 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "The trace excerpt only shows Step 1 (a web search tool call) with no mention or evidence of retrieving a secondary source. No verifiable output or performance of this step is present.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "The trace excerpt only shows Step 1 (a web search tool call) with no mention or evidence of extracting the correct answer from a source. No verifiable output or performance of this step is present.",
+          "abstain_if_uncertain": false,
+          "predicate": "skipped"
+        }
+      ],
+      "verdict": "BLOCK",
+      "verdict_reasoning": "failScore=2 (2 unsupported/skipped × 1.0 + 0 partial × 0.5). IDs: [step_2, step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 3,
+        "tier1Resolved": 3,
+        "tier2Required": 0,
+        "avgConfidence": 0,
+        "totalLatencyMs": 3273.4111250000024,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    }
+  }
+}

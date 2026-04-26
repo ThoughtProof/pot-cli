@@ -1,0 +1,94 @@
+[
+  {
+    "id": "D-03",
+    "question": "What is the recommended childhood vaccination schedule in the United States?",
+    "answer": "The CDC's 2023 Recommended Child and Adolescent Immunization Schedule covers vaccines from birth through age 18, including HepB (birth, 1-2 mo, 6-18 mo), DTaP (2, 4, 6, 15-18 mo, 4-6 yr), MMR (12-15 mo, 4-6 yr), varicella, polio (IPV), Hib, PCV13, rotavirus, influenza (annual), and HPV (starting age 9-11). Refer to CDC for the full schedule.",
+    "trace_steps": "Step 1 [reason]: User asks for the recommended US childhood vaccination schedule. The authoritative source is CDC.\nStep 2 [search] (web_search): \"CDC recommended child adolescent immunization schedule\"\nStep 3 [observe]: CDC has a current schedule page and downloadable PDFs by year.\nStep 4 [search] (web_fetch): https://www.cdc.gov/vaccines/hcp/imz-schedules/downloads/past/2024-child.pdf\nStep 5 [observe]: This is the 2024 archive PDF, but I clicked on what I thought was the current page. Schedule lists routine vaccines and ages. Extracted core list: HepB, DTaP, MMR, varicella, polio (IPV), Hib, PCV, rotavirus, influenza, HPV.\nStep 6 [reason]: I have the standard schedule. I'll attribute to CDC 2023 schedule (the version I'm most familiar with).\nStep 7 [answer]: Reported the schedule citing CDC 2023 (instead of the current 2026 version).",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify CDC as the authoritative source for the US immunization schedule",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch the CURRENT year's CDC Recommended Child and Adolescent Immunization Schedule (not an archived version)",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the core list of vaccines with recommended ages from the current schedule",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report with correct version/year attribution and a link to the current CDC schedule",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "HOLD"
+  },
+  {
+    "id": "D-04",
+    "question": "What is the maximum employee contribution limit for a 401(k) in 2026?",
+    "answer": "The 2026 employee elective deferral limit for a 401(k) is $24,500, up from $23,500 in 2025. This is set under IRC Section 402(g) and announced annually by the IRS in Notice 2025-67.",
+    "trace_steps": "Step 1 [reason]: User wants the 2026 401(k) elective deferral limit. The authoritative source is IRS Notice 2025-67 / IRS Retirement Topics page.\nStep 2 [search] (web_search): \"IRS 2026 401(k) elective deferral limit Notice 2025-67\"\nStep 3 [observe]: IRS Retirement Topics page lists the 2026 basic limit at $24,500. IRS Notice 2025-67 PDF confirms the increase from $23,500 to $24,500 under section 402(g)(1).\nStep 4 [search] (web_fetch): https://www.irs.gov/retirement-plans/plan-participant-employee/retirement-topics-contributions\nStep 5 [observe]: Verbatim from IRS page: \"The basic limit on elective deferrals is $24,500 in 2026, $23,500 in 2025, $23,000 in 2024 and $22,500 in 2023, or 100% of the employee's compensation, whichever is less.\"\nStep 6 [reason]: I have the verified 2026 figure. Reporting with citation.\nStep 7 [answer]: Reported $24,500 for 2026 with IRS attribution.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify IRS as the authoritative source for the annual contribution limit",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch the IRS Notice or Retirement Topics page for the requested year",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the verbatim 2026 elective deferral limit ($24,500)",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Mention the age-50+ catch-up contribution ($8,000 for 2026, total $32,500) since this is a routine companion fact in any complete answer",
+        "criticality": "critical"
+      },
+      {
+        "index": 5,
+        "description": "Report with IRS citation",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "HOLD"
+  },
+  {
+    "id": "H-05",
+    "question": "What does RFC 7231 say about the 301 status code?",
+    "answer": "RFC 7231 says the 301 status code means the target resource has been permanently moved and clients should use the new URI going forward. It's a permanent redirect.",
+    "trace_steps": "Step 1 [reason]: User wants the RFC 7231 definition of HTTP 301. I'll fetch the relevant section.\nStep 2 [search] (web_search): \"RFC 7231 301 Moved Permanently section 6.4.2\"\nStep 3 [observe]: Confirmed that 301 is defined in Section 6.4.2 of RFC 7231.\nStep 4 [search] (web_fetch): https://datatracker.ietf.org/doc/html/rfc7231\nStep 5 [observe]: Page loaded; I scrolled to Section 6.4.2 \"301 Moved Permanently.\" Got the gist: target resource has a new permanent URI; clients should use the new URI for future requests.\nStep 6 [reason]: I have the meaning. I will paraphrase rather than quote.\nStep 7 [answer]: Paraphrased: 301 = permanent redirect; clients should use the new URI going forward.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify RFC 7231 Section 6.4.2 as the authoritative location of the 301 definition",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch the RFC text",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the verbatim definition: \"The 301 (Moved Permanently) status code indicates that the target resource has been assigned a new permanent URI and any future references to this resource ought to use one of the enclosed URIs.\"",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report verbatim text with explicit RFC citation rather than paraphrase",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "HOLD"
+  }
+]

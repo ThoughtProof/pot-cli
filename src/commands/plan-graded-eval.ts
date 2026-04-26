@@ -8,7 +8,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs';
-import { evaluateBatch, type EvalInput, type EvalRunResult, type ItemResult } from '../plan/graded-support-evaluator.js';
+import { evaluateBatch, type EvalInput, type EvalRunResult, type ItemResult, type EvalMode } from '../plan/graded-support-evaluator.js';
 import type { Tier1Config } from '../plan/tier1-prefilter.js';
 import { toPublicVerdict, assertInternalFormat, type InternalVerdict } from '../verdict-mapper.js';
 
@@ -46,6 +46,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
   let tier1TLow = 0.20;
   let tier1THigh = 0.80;
   let outputFormat: 'public' | 'internal' = 'public';
+  let evalMode: EvalMode = 'support';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--input' && args[i + 1]) inputPath = args[++i];
@@ -56,6 +57,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
     else if (args[i] === '--t-low' && args[i + 1]) tier1TLow = parseFloat(args[++i]);
     else if (args[i] === '--t-high' && args[i + 1]) tier1THigh = parseFloat(args[++i]);
     else if (args[i] === '--format' && args[i + 1]) outputFormat = args[++i] as 'public' | 'internal';
+    else if (args[i] === '--mode' && args[i + 1]) evalMode = args[++i] as EvalMode;
   }
 
   // Guard: --format internal requires THOUGHTPROOF_INTERNAL=1
@@ -64,7 +66,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
   }
 
   if (!inputPath) {
-    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--tier1 llm|minicheck|hf-inference] [--tier1-model deepseek] [--t-low 0.20] [--t-high 0.80]');
+    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--mode support|faithfulness] [--tier1 llm|minicheck|hf-inference] [--tier1-model deepseek] [--t-low 0.20] [--t-high 0.80]');
     process.exit(1);
   }
 
@@ -81,9 +83,13 @@ export async function runGradedEval(args: string[]): Promise<void> {
     enabled: true,
   } : undefined;
 
-  console.log(`\n=== PLV Graded Support Evaluator (v2.0 Two-Tier) ===`);
+  const modeLabel = evalMode === 'faithfulness' ? 'Faithfulness' : 'Support';
+  console.log(`\n=== PLV Graded ${modeLabel} Evaluator (v2.0 Two-Tier) ===`);
+  console.log(`Mode: ${evalMode}`);
   console.log(`Tier 2 Model: ${model}`);
-  if (tier1Config) {
+  if (evalMode === 'faithfulness') {
+    console.log(`Tier 1: disabled (faithfulness mode — all steps → Tier 2)`);
+  } else if (tier1Config) {
     console.log(`Tier 1: ${tier1Backend} (model=${tier1Model}, tLow=${tier1TLow}, tHigh=${tier1THigh})`);
   } else {
     console.log(`Tier 1: disabled (all steps → Tier 2)`);
@@ -97,6 +103,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
     concurrency: 1,  // Sequential to avoid OOM on Mac mini with two-tier API calls
     maxTokens: 4096,
     tier1: tier1Config,
+    mode: evalMode,
     onProgress: (done, total, id) => {
       console.log(`  [${done}/${total}] ${id} — evaluated`);
     },
@@ -180,24 +187,18 @@ export async function runGradedEval(args: string[]): Promise<void> {
 
   // Step-level stats
   let totalSteps = 0;
-  let supportedSteps = 0;
-  let partialSteps = 0;
-  let unsupportedSteps = 0;
-  let skippedSteps = 0;
+  const predCounts: Record<string, number> = {};
 
   for (const item of Object.values(result.items)) {
     for (const step of item.step_evaluations) {
       totalSteps++;
-      switch (step.predicate) {
-        case 'supported': supportedSteps++; break;
-        case 'partial': partialSteps++; break;
-        case 'unsupported': unsupportedSteps++; break;
-        case 'skipped': skippedSteps++; break;
-      }
+      const p = step.predicate;
+      predCounts[p] = (predCounts[p] ?? 0) + 1;
     }
   }
 
-  console.log(`\nStep predicates: supported=${supportedSteps} partial=${partialSteps} unsupported=${unsupportedSteps} skipped=${skippedSteps} (total=${totalSteps})`);
+  const predSummary = Object.entries(predCounts).map(([k, v]) => `${k}=${v}`).join(' ');
+  console.log(`\nStep predicates: ${predSummary} (total=${totalSteps})`);
 
   // Detailed step breakdown for mismatches
   const mismatches = Object.entries(result.items).filter(([id, r]) => GOLD_VERDICTS[id] && r.verdict !== GOLD_VERDICTS[id]);

@@ -1,0 +1,71 @@
+[
+  {
+    "id": "V1-R01",
+    "question": "According to RFC 9110, what does HTTP status code 425 Too Early mean?",
+    "answer": "The server is unwilling to risk processing a request that might be replayed.",
+    "trace_steps": "  Step 1 [search] (web_search): Search for RFC 9110 status code 425 Too Early meaning\n  Step 2 [browse] (web_fetch): Open RFC 9110 status-code section",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve a relevant source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Verify retrieval covers the decisive claim.",
+        "criticality": "critical"
+      }
+    ]
+  },
+  {
+    "id": "V1-R02",
+    "question": "According to the official Python enhancement process, what does PEP stand for?",
+    "answer": "Python Enhancement Proposal",
+    "trace_steps": "  Step 1 [search] (web_search): Search for what PEP stands for in official Python documentation\n  Step 2 [browse] (web_fetch): Open official Python or PEP documentation",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the definitional question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve the official definition source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Verify that trace evidence covers the specific definition extracted.",
+        "criticality": "critical"
+      }
+    ]
+  },
+  {
+    "id": "V1-R03",
+    "question": "What year was the article first published?",
+    "answer": "1949.",
+    "trace_steps": "  Step 1 [search] (web_search): Search for the article publication year",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve a secondary web source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Verify that the decisive retrieval step was completed.",
+        "criticality": "critical"
+      }
+    ]
+  }
+]

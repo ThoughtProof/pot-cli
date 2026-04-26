@@ -1,0 +1,278 @@
+{
+  "evaluator_model": "grok",
+  "schema_version": "plv-graded-support-v1.0",
+  "evaluated_at": "2026-04-25T09:12:16.442Z",
+  "items": {
+    "GAIA-01": {
+      "id": "GAIA-01",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0,
+          "tier": "none",
+          "quote": null,
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": null,
+          "reasoning": "[TIER1 llm-binary:deepseek] confidence=0.100 — confidently unsupported, skipped Tier 2",
+          "abstain_if_uncertain": false,
+          "predicate": "unsupported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "Fetched a citation entry listing the paper's authors verbatim.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 4
+          },
+          "quote_to_criterion_mapping": "Fetched citation listing authors verbatim, confirming extraction",
+          "reasoning": "Trace Step 4 fetches a citation entry with authors verbatim, and Step 5 confirms the list, directly evidencing extraction from paper's citation/metadata.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 0.5,
+          "tier": "partial",
+          "quote": "Confirmed Shneiderman co-authored 'An empirical comparison of pie vs. linear menus' (Callahan, Hopkins, Weiser, Shneiderman — CHI '88, pp. 95-100), which is the clear prior pie-menu paper by one of the co-authors.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 7
+          },
+          "quote_to_criterion_mapping": "Checks prior pub for Shneiderman (CHI '88 example), but not each author",
+          "reasoning": "Trace performs search and confirms prior publication for Shneiderman matching the CHI '88 example, but no evidence of checking Callahan, Hopkins, or Weisser individually.",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        },
+        {
+          "step_id": "step_4",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Shneiderman is the author with prior pie-menu work.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 8
+          },
+          "quote_to_criterion_mapping": "Direct identification of Shneiderman with prior work",
+          "reasoning": "Step 8 explicitly states Shneiderman as the author with prior pie-menu work, fully matching the criterion including context of 1988 paper from prior observation.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_5",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Callahan, Hopkins, Weisser, Shneiderman; Shneiderman has the 1988 prior pie-menu paper.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 9
+          },
+          "quote_to_criterion_mapping": "Reports authors list and Shneiderman's prior paper with 1988 citation",
+          "reasoning": "Step 9 directly reports the authors and identifies Shneiderman with the 1988 prior pie-menu paper citation, fully satisfying the criterion.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        }
+      ],
+      "verdict": "HOLD",
+      "verdict_reasoning": "failScore=0.5 (0 unsupported/skipped + 1 partial). IDs: [step_3]",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 5,
+        "tier1Resolved": 5,
+        "tier2Required": 0,
+        "avgConfidence": 0.82,
+        "totalLatencyMs": 4284.604916,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "GAIA-02": {
+      "id": "GAIA-02",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "The authoritative primary source is un.org.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Direct verbatim identification of un.org as authoritative primary source.",
+          "reasoning": "Trace Step 1 explicitly states 'The authoritative primary source is un.org.', fully matching the acceptance criterion with no gap.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Step 4 [search] (web_fetch): https://www.un.org/en/about-us/universal-declaration-of-human-rights\nStep 5 [observe]: Located Article 25.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Shows web_fetch of UDHR page URL and observation locating Article 25.",
+          "reasoning": "Trace explicitly shows fetch via web_fetch tool on the UDHR page and observation confirming location of Article 25, fully satisfying criterion.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Step 5 [observe]: Located Article 25. Paragraph (1) verbatim: \"Everyone has the right to a standard of living adequate for the health and well-being of himself and of his family, including food, clothing, housing and medical care and necessary social services, and the right to security in the event of unemployment, sickness, disability, widowhood, old age or other lack of livelihood in circumstances beyond his control.\"",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Explicit verbatim extraction of paragraph (1) labeled as such.",
+          "reasoning": "Trace Step 5 directly provides the verbatim text of Paragraph (1) without paraphrase, fully matching the criterion.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0.25,
+          "tier": "verbatim",
+          "quote": "Step 7 [answer]: Reported Article 25(1) verbatim with UN attribution.\nAGENT ANSWER: Article 25(1) UDHR: \"Everyone has the right to a standard of living adequate for the health and well-being of himself and of his family, including food, clothing, housing and medical care and necessary social services, and the right to security in the event of unemployment, sickness, disability, widowhood, old age or other lack of livelihood in circumstances beyond his control.\" Source: United Nations, Universal Declaration of Human Rights, 1948, un.org.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": null
+          },
+          "quote_to_criterion_mapping": "Final answer reports text in quotation marks with UN UDHR citation.",
+          "reasoning": "Trace Step 7 and AGENT ANSWER show reporting in quotation marks with explicit UN UDHR source citation, fully satisfying criterion. [PROVENANCE DOWNGRADE: quote invalid or missing]",
+          "abstain_if_uncertain": false,
+          "predicate": "partial"
+        }
+      ],
+      "verdict": "ALLOW",
+      "verdict_reasoning": "All critical steps adequately supported.",
+      "provenance_violations": [
+        "step_4: PROV_FAIL_02: quote not found as substring in trace"
+      ],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 1,
+        "totalLatencyMs": 3886.6624169999996,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    },
+    "GAIA-03": {
+      "id": "GAIA-03",
+      "step_evaluations": [
+        {
+          "step_id": "step_1",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "The primary source is who.int.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 1
+          },
+          "quote_to_criterion_mapping": "Directly identifies who.int as primary/authoritative source in context of WHO regions and Member States.",
+          "reasoning": "Trace Step 1 explicitly states who.int as the primary source for the query on WHO regions and counts, addressing the criterion with minor synonym gap ('primary' vs 'authoritative').",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_2",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "[search] (web_fetch): https://www.who.int/about/who-we-are/regional-offices",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 4
+          },
+          "quote_to_criterion_mapping": "Shows fetch of the exact WHO Regional Offices page URL.",
+          "reasoning": "Trace Step 4 performs web_fetch on the WHO Regional Offices page, followed by observation of content, verifying the step was executed.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_3",
+          "score": 1,
+          "tier": "verbatim",
+          "quote": "Page lists all six regional offices with their country counts: African Region (AFRO, HQ Brazzaville) — 47 countries; Region of the Americas (AMRO/PAHO, HQ Washington DC) — 35; South-East Asia Region (SEARO, HQ New Delhi) — 11; European Region (EURO, HQ Copenhagen) — 53; Eastern Mediterranean Region (EMRO, HQ Cairo) — 22; Western Pacific Region (WPRO, HQ Manila) — 27.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 5
+          },
+          "quote_to_criterion_mapping": "Verbatim extraction of all six regions with exact Member State counts from the page.",
+          "reasoning": "Trace Step 5 observes and lists each of the six regions with precise counts, fully satisfying the criterion without gaps.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        },
+        {
+          "step_id": "step_4",
+          "score": 0.75,
+          "tier": "strong",
+          "quote": "Reported the six regions, counts, and total with WHO citation.",
+          "quote_location": {
+            "line_start": null,
+            "line_end": null,
+            "char_offset_start": null,
+            "char_offset_end": null,
+            "turn": 7
+          },
+          "quote_to_criterion_mapping": "Confirms reporting full breakdown (regions, counts, total) with WHO citation/attribution.",
+          "reasoning": "Trace Step 7 explicitly states the full breakdown was reported with WHO citation, matching the agent answer's attribution to who.int.",
+          "abstain_if_uncertain": false,
+          "predicate": "supported"
+        }
+      ],
+      "verdict": "ALLOW",
+      "verdict_reasoning": "All critical steps adequately supported.",
+      "provenance_violations": [],
+      "tier1_stats": {
+        "total": 4,
+        "tier1Resolved": 4,
+        "tier2Required": 0,
+        "avgConfidence": 1,
+        "totalLatencyMs": 3887.854542000001,
+        "backendUsed": "llm-binary:deepseek"
+      }
+    }
+  }
+}

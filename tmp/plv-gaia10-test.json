@@ -1,0 +1,33 @@
+[
+  {
+    "id": "GAIA-10",
+    "source": "GAIA-inspired",
+    "question": "According to RFC 6749, what are the four authorization grant types in OAuth 2.0?",
+    "ground_truth": "Per RFC 6749 Section 1.3: 'This specification defines four grant types — authorization code, implicit, resource owner password credentials, and client credentials — as well as an extensibility mechanism for defining additional types.'",
+    "answer": "OAuth 2.0 defines four authorization grant types: (1) Authorization Code, (2) Implicit, (3) Resource Owner Password Credentials, and (4) Client Credentials. The authorization code flow is typically the recommended one for most web applications — see this guide for details: https://blog.example.com/oauth-grant-types-explained.",
+    "trace_steps": "Step 1 [reason]: User wants the four OAuth 2.0 grant types per RFC 6749.\nStep 2 [search] (web_search): \"OAuth 2.0 four grant types RFC 6749\"\nStep 3 [observe]: Many blog posts come up. A well-written blog post at blog.example.com lists the four grant types with clear explanations.\nStep 4 [search] (web_fetch): Fetched the blog post.\nStep 5 [observe]: Blog post lists: authorization code, implicit, resource owner password credentials, client credentials. Correct.\nStep 6 [reason]: I have all four names. I'll reference the blog post since it had clearer explanations than the RFC.\nStep 7 [answer]: Listed the four grant types correctly but attributed to a blog post, not RFC 6749 Section 1.3.",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Search for RFC 6749 OAuth 2.0 grant types",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Fetch the actual RFC 6749 text (e.g., datatracker.ietf.org or rfc-editor.org) rather than a secondary source",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract Section 1.3 and quote each of the four grant types with the RFC's own description text",
+        "criticality": "critical"
+      },
+      {
+        "index": 4,
+        "description": "Report with explicit RFC 6749 Section 1.3 citation rather than a blog post",
+        "criticality": "supporting"
+      }
+    ],
+    "expected_verdict": "BLOCK"
+  }
+]

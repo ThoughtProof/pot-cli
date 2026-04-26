@@ -1,0 +1,71 @@
+[
+  {
+    "id": "V1-R04",
+    "question": "According to CDC guidance, should opioid therapy be discontinued abruptly when there are no indications of a life-threatening issue?",
+    "answer": "No. CDC guidance says opioid therapy should not be discontinued abruptly when there are no indications of a life-threatening issue.",
+    "trace_steps": "  Step 1 [search] (web_search): Search for CDC recommendation on abruptly discontinuing opioid therapy\n  Step 2 [search] (web_search): Search for the CDC guidance page containing the recommendation",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve secondary summary source.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 3,
+        "description": "Retrieve the primary source to close the provenance chain.",
+        "criticality": "critical"
+      }
+    ]
+  },
+  {
+    "id": "V1-R05",
+    "question": "According to the official historical source, on what date was the Declaration of Independence signed?",
+    "answer": "July 4, 1776.",
+    "trace_steps": "  Step 1 [search] (web_search): Search for Declaration of Independence signing date",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve the official source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the correct answer from the source.",
+        "criticality": "critical"
+      }
+    ]
+  },
+  {
+    "id": "V1-R06",
+    "question": "Who published the paper Attention Is All You Need?",
+    "answer": "Google published the paper Attention Is All You Need.",
+    "trace_steps": "  Step 1 [search] (web_search): Search for who published Attention Is All You Need",
+    "gold_plan_steps": [
+      {
+        "index": 1,
+        "description": "Identify the question.",
+        "criticality": "supporting"
+      },
+      {
+        "index": 2,
+        "description": "Retrieve a secondary source.",
+        "criticality": "critical"
+      },
+      {
+        "index": 3,
+        "description": "Extract the correct answer from the source.",
+        "criticality": "critical"
+      }
+    ]
+  }
+]
