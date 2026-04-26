@@ -1,6 +1,0 @@
-{"id":"V0-01","family":"B","status":"validated_anchor","expectedSurface":"narrow_softening_bridge","currentRead":"validated motivating case","wave":"bridge"}
-{"id":"V0-02","family":"B","status":"validated_anchor","expectedSurface":"narrow_softening_bridge","currentRead":"validated motivating case","wave":"bridge"}
-{"id":"V0-05","family":"C","status":"operational","currentVerdict":"ALLOW","currentRead":"dependency-chain historical case operational on new spine","wave":"wave1"}
-{"id":"V0-09","family":"D","status":"operational","currentVerdict":"ALLOW","currentRead":"retrieval-sensitive historical/legal case operational on new spine","wave":"wave1"}
-{"id":"V0-13","family":"H","status":"operational","currentVerdict":"HOLD","currentRead":"defensibility case with observability gap","wave":"wave2"}
-{"id":"V0-14","family":"H","status":"operational","currentVerdict":"BLOCK","currentRead":"defensibility case with over-strong scenario assumption","wave":"wave2"}

@@ -12,3 +12,4 @@ truthfulqa-benchmark.sh
 manual-audits-*/
 security-audit-*.md
 security-audit-*.json
+tmp/
