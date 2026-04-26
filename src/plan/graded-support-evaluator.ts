@@ -412,6 +412,15 @@ HARD RULES (non-negotiable):
  R1. Score ≥ 0.75 REQUIRES a non-null "quote" field with exact text from the trace.
      If you cannot populate "quote", score MUST be ≤ 0.5.
 
+ R1a. Quotes must come from a SINGLE contiguous span in the trace.
+      Do NOT concatenate text across line breaks or from different steps.
+      If relevant evidence spans multiple trace lines, quote only the MOST
+      relevant single line.
+      Good: "OWASP Top 10 2021 A01 Broken Access Control"
+      Good: "2024 IRA contribution limit is $7,000 ($8,000 if age 50+)"
+      Bad:  "OWASP Top 10 2021 A01\nStep 4 [se"
+      Bad:  "IRA limit $7,000\nStep 3 [fetch]: irs.gov/retire"
+
  R2. If trace is too thin/ambiguous, set abstain_if_uncertain: true, cap at 0.5.
 
  R3. Fetch-without-extraction: If only evidence is a tool call with NO response
@@ -483,6 +492,14 @@ HARD RULES (non-negotiable):
 
   F1. Score ≥ 0.75 REQUIRES a non-null "quote" field with the agent's REASONING
       text (not evidence text). If you cannot quote the reasoning, score ≤ 0.5.
+
+  F1a. Quotes must come from a SINGLE contiguous span in the trace.
+       Do NOT concatenate text across line breaks or from different steps.
+       If reasoning spans multiple lines, quote only the MOST relevant single line.
+       Good: "Methotrexate interacts with NSAIDs — check FDA label Section 7"
+       Good: "Wash sale rule: 30 days before and after, per IRC §1091"
+       Bad:  "Methotrexate interacts with NSAIDs\nStep 2 [se"
+       Bad:  "IRC §1091 wash sale\nStep 4 [fetch]: irs.go"
 
   F2. POST-HOC RATIONALIZATION: Check whether the agent's reasoning for this step
       appears BEFORE or AFTER the action in the transcript timeline. If reasoning
