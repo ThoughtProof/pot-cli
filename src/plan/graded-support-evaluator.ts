@@ -15,6 +15,7 @@
 
 import { callModelStructured, type ChatMessage } from '../utils/model-router.js';
 import { tier1PreScreen, type Tier1Config, type Tier1Result } from './tier1-prefilter.js';
+import { detectMode5 } from './probes/mode5-truncation-detection.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -243,6 +244,18 @@ export function verifyProvenance(
       ? 'structural-unwrapped'
       : 'no-match';
     violations.push(`PROV_TRACE: match_path=${matchPath}`);
+
+    // Mode 5 audit-only probes — fire only on no-match. A successful match
+    // path takes precedence; cross-line truncation is by definition a
+    // failure case. Probes never alter scores or match results, only emit
+    // an additional PROV_TRACE audit line for downstream classification.
+    // See src/plan/probes/mode5-truncation-detection.ts for design.
+    if (matchPath === 'no-match') {
+      const m5 = detectMode5(quote, traceExcerpt);
+      if (m5.signals.length > 0) {
+        violations.push(`PROV_TRACE: mode_5_signals=${m5.signals.join(',')}`);
+      }
+    }
 
     // CHECK 3: Quote length sanity
     if (cleanQuote.length < 10) {
