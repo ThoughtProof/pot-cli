@@ -82,6 +82,55 @@ export interface EvalRunResult {
   items: Record<string, ItemResult>;
 }
 
+// ─── Unicode Normalization for Quote Matching ─────────────────────────────────
+
+/**
+ * Fold the most common LLM-emitted Unicode variants to ASCII so a quote that
+ * is content-identical to the trace but lexically different in punctuation
+ * codepoints still matches.
+ *
+ * This is INTENTIONALLY narrow:
+ *   • Smart single quotes  U+2018 U+2019 U+201A U+201B  → ASCII '
+ *   • Smart double quotes  U+201C U+201D U+201E U+201F  → ASCII "
+ *   • En/em dashes         U+2013 U+2014                → ASCII -
+ *   • Ellipsis char        U+2026                       → "..."
+ *   • Zero-width chars     U+200B U+200C U+200D U+FEFF  → removed
+ *   • NFKC normalization for ligatures, full-width, etc.
+ *
+ * It does NOT touch letters, numbers, casing, or word order — that would be
+ * paraphrase tolerance, which is explicitly out of scope (see PR test for
+ * CODE-05 step_3 paraphrase rejection).
+ */
+export function normalizeUnicodeForMatch(s: string): string {
+  return s
+    .normalize('NFKC')
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\u2026/g, '...')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '');
+}
+
+/**
+ * Strip ONE layer of matching outer quote characters if present, regardless of
+ * style. Handles the LLM "meta-quote" pattern where the model returns the
+ * quoted span wrapped in its own quotation marks.
+ *
+ * Conservative: only strips if both ends are quote chars (any kind), and only
+ * one layer. Returns the input unchanged if no wrapping is detected.
+ */
+export function stripWrappingQuotes(s: string): string {
+  const trimmed = s.trim();
+  if (trimmed.length < 2) return s;
+  const first = trimmed[0];
+  const last = trimmed[trimmed.length - 1];
+  const quoteChars = new Set(['"', "'", '\u2018', '\u2019', '\u201C', '\u201D']);
+  if (quoteChars.has(first) && quoteChars.has(last)) {
+    return trimmed.substring(1, trimmed.length - 1);
+  }
+  return s;
+}
+
 // ─── Truncation-Tolerant Quote Matching ───────────────────────────────────────
 
 /**
@@ -136,12 +185,64 @@ export function verifyProvenance(
     const normQuote = cleanQuote.replace(/^[ \t]+/gm, '');
     const isNormalizedMatch = !isSubstring && normTrace.includes(normQuote);
     const isFuzzyMatch = !isSubstring && !isNormalizedMatch && checkTruncatedQuote(cleanQuote, traceExcerpt);
-    if (!isSubstring && !isNormalizedMatch && !isFuzzyMatch) {
+
+    // Mode 1 fix — Unicode-folded substring match. Catches smart quotes, em-dash,
+    // ellipsis char, zero-width chars, ligatures. Pure punctuation-level fold;
+    // does NOT alter words or word order.
+    //
+    // ENV TOGGLE: Set PLV_DISABLE_NEW_MATCH_PATHS=1 to disable the Mode-1 and
+    // Mode-3 fixes at runtime. Used by the provenance-sweep --full mode to
+    // produce a vorher/nachher verdict-level confusion matrix without
+    // checking out a different commit.
+    const disableNewPaths = process.env.PLV_DISABLE_NEW_MATCH_PATHS === '1';
+    const uniQuote = normalizeUnicodeForMatch(cleanQuote);
+    const uniTrace = normalizeUnicodeForMatch(traceExcerpt);
+    const isUnicodeNormalizedMatch =
+      !disableNewPaths &&
+      !isSubstring && !isNormalizedMatch && !isFuzzyMatch && uniTrace.includes(uniQuote);
+
+    // Mode 3 fix — strip ONE layer of outer wrapping quotes from the model's
+    // emitted span and retry against the Unicode-folded trace. Catches the LLM
+    // meta-quote pattern (e.g. emitted as `"foo bar"` while trace has `foo bar`).
+    const strippedQuote = stripWrappingQuotes(cleanQuote);
+    const uniStrippedQuote = normalizeUnicodeForMatch(strippedQuote);
+    const isStructuralMatch =
+      !disableNewPaths &&
+      !isSubstring &&
+      !isNormalizedMatch &&
+      !isFuzzyMatch &&
+      !isUnicodeNormalizedMatch &&
+      strippedQuote !== cleanQuote &&
+      uniTrace.includes(uniStrippedQuote);
+
+    if (
+      !isSubstring &&
+      !isNormalizedMatch &&
+      !isFuzzyMatch &&
+      !isUnicodeNormalizedMatch &&
+      !isStructuralMatch
+    ) {
       violations.push(`PROV_FAIL_02: quote not found as substring in trace`);
-    } else if (isNormalizedMatch || isFuzzyMatch) {
+    } else if (isNormalizedMatch || isFuzzyMatch || isUnicodeNormalizedMatch || isStructuralMatch) {
       // Soft warning — quote matched after normalization
       violations.push(`PROV_INFO_07: quote matched after normalization`);
     }
+
+    // Audit-trail: record which match path succeeded (or failed) so downstream
+    // logs surface the failure mode without rerunning the matcher. Pure metadata —
+    // does not influence scoring.
+    const matchPath = isSubstring
+      ? 'exact'
+      : isNormalizedMatch
+      ? 'whitespace-normalized'
+      : isFuzzyMatch
+      ? 'fuzzy-truncated'
+      : isUnicodeNormalizedMatch
+      ? 'unicode-normalized'
+      : isStructuralMatch
+      ? 'structural-unwrapped'
+      : 'no-match';
+    violations.push(`PROV_TRACE: match_path=${matchPath}`);
 
     // CHECK 3: Quote length sanity
     if (cleanQuote.length < 10) {
