@@ -366,6 +366,14 @@ Best for high-stakes decisions where being wrong is expensive. Overkill for "Wha
 - **Not magic.** All models can be wrong about the same thing (unknown unknowns).
 - **61 blocks is promising data, not proof.** More testing needed.
 - **TypeScript/Node.js.** Python port welcome (PRs appreciated).
+- **PLV: Paraphrased quotes (Mode 2) are rejected by design.** The plan-level
+  verifier requires verbatim provenance — if an LLM paraphrases instead of
+  quoting (e.g., D-05-pattern), the step is held / blocked. This is
+  intentional: loosening it would weaken wrong-source detection (D-06) via
+  the kill-shot side-effect on the hard-fail pipeline. See
+  [`docs/design/mode2-paraphrase-design-skizze-2026-04-26.md`](docs/design/mode2-paraphrase-design-skizze-2026-04-26.md)
+  for the full trade-off analysis and the documented prerequisites for
+  any future re-evaluation.
 
 ## License
 
