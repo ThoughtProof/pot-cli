@@ -2,6 +2,55 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.3] - 2026-04-26
+
+### 🔧 PLV: Provenance Matcher — Mode 1 + Mode 3 Fix
+
+Addresses two distinct quote-matching failure modes in the plan-level
+verifier without loosening any existing rejection rules. Net-0 verdict
+shift on 82-case A/B run, with 3 genuine fixes (CODE-05, GAIA-16, H-08)
+balanced by 3 LLM-drift cases (CODE-02, ENV-02, H-06) confirmed via
+audit-trail to be provider non-determinism, not matcher behavior.
+
+#### Added
+- `normalizeUnicodeForMatch()` in `graded-support-evaluator.ts` — NFKC
+  normalization plus ASCII-fold for smart quotes, en/em-dashes,
+  ellipsis character, and zero-width characters. Does NOT touch letters,
+  digits, casing, or word order.
+- `stripWrappingQuotes()` in `graded-support-evaluator.ts` — conservative
+  unwrap of one outer layer of paired quote characters.
+- Two new match paths in `verifyProvenance()`, both gated behind
+  `PLV_DISABLE_NEW_MATCH_PATHS=1` env toggle for A/B comparison:
+  - `unicode-normalized` (Mode 1: tokenization)
+  - `structural-unwrapped` (Mode 3: structural meta-quote)
+- `src/scripts/provenance-sweep.ts` — synthetic-probe sweep over 40
+  cases × 8 quote variants. `--full` mode runs verdict-level A/B via
+  `evaluateBatch` with the env toggle.
+- `src/scripts/sweep-toggle-smoketest.ts` — 4 probes verifying the
+  toggle mechanism (4/4 pass).
+- `src/plan/test-provenance-diagnostics.ts` (TDD bed from #4) — 8 RED
+  tests now GREEN. Total: 181/181 passing.
+- `docs/design/mode2-paraphrase-design-skizze-2026-04-26.md` —
+  trade-off analysis for why Mode 2 (paraphrase) and Mode 4
+  (wrong-source) are rejected by design. Documents the kill-shot
+  side-effect on D-06 wrong-source detection that any paraphrase
+  tolerance would trigger.
+
+#### Changed
+- README `## Limitations` now points to the Mode 2 design doc.
+- `src/plan/test-provenance-diagnostics.ts` — em-dash test spacing
+  aligned with trace spacing (avoids accidental paraphrase-tolerance
+  via whitespace).
+
+#### Hard Rules — explicitly preserved
+- D-06 wrong-source (R6 floor) lock holds.
+- CODE-05 step_3 paraphrase rejection lock holds.
+- Mode 2 (paraphrase) and Mode 4 (wrong-source) match paths unchanged.
+- Sample SHA256 `92ec87e4...` (40 cases: 19 BLOCK / 6 HOLD / 15 ALLOW)
+  after gold corrections D-08, MED-03, FIN-04 → BLOCK.
+
+Merged via PRs #5 (`a3ff0be`) and #6 (`d390167`).
+
 ## [0.8.1] - 2026-04-25
 
 ### Added
