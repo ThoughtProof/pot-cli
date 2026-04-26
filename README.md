@@ -311,6 +311,7 @@ Report saved: security-audit-strands-agents-tools-2026-02-26.md
 | `pot-cli list` | List all blocks |
 | `pot-cli show <number>` | Display a specific block |
 | `pot-cli config` | Show current configuration |
+| `pot-cli plan-graded-eval` | PLV graded support evaluator (two-tier; see [Tier-1 Ollama setup](docs/tier1-ollama-setup.md)) |
 
 **Options (`ask`):**
 - `--verbose` — Show progress details
