@@ -189,9 +189,16 @@ export function verifyProvenance(
     // Mode 1 fix — Unicode-folded substring match. Catches smart quotes, em-dash,
     // ellipsis char, zero-width chars, ligatures. Pure punctuation-level fold;
     // does NOT alter words or word order.
+    //
+    // ENV TOGGLE: Set PLV_DISABLE_NEW_MATCH_PATHS=1 to disable the Mode-1 and
+    // Mode-3 fixes at runtime. Used by the provenance-sweep --full mode to
+    // produce a vorher/nachher verdict-level confusion matrix without
+    // checking out a different commit.
+    const disableNewPaths = process.env.PLV_DISABLE_NEW_MATCH_PATHS === '1';
     const uniQuote = normalizeUnicodeForMatch(cleanQuote);
     const uniTrace = normalizeUnicodeForMatch(traceExcerpt);
     const isUnicodeNormalizedMatch =
+      !disableNewPaths &&
       !isSubstring && !isNormalizedMatch && !isFuzzyMatch && uniTrace.includes(uniQuote);
 
     // Mode 3 fix — strip ONE layer of outer wrapping quotes from the model's
@@ -200,6 +207,7 @@ export function verifyProvenance(
     const strippedQuote = stripWrappingQuotes(cleanQuote);
     const uniStrippedQuote = normalizeUnicodeForMatch(strippedQuote);
     const isStructuralMatch =
+      !disableNewPaths &&
       !isSubstring &&
       !isNormalizedMatch &&
       !isFuzzyMatch &&

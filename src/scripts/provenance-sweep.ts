@@ -23,19 +23,27 @@
  *      monkey-patches the matcher to disable the new paths and re-runs
  *      to compare. Produces a real verdict-level confusion matrix.
  *
- * Usage:
- *   npx tsx scripts/provenance-sweep.ts                          # mode A
- *   XAI_API_KEY=... npx tsx scripts/provenance-sweep.ts --full   # mode B
+ * Usage (after npm run build):
+ *   node dist/scripts/provenance-sweep.js                          # mode A (matcher-only)
+ *   XAI_API_KEY=... node dist/scripts/provenance-sweep.js --full   # mode B (verdict-level)
+ *
+ * Mode B uses the PLV_DISABLE_NEW_MATCH_PATHS env toggle in verifyProvenance
+ * to run the same evaluateBatch twice (vorher disabled, nachher enabled).
+ * Determinism: evaluateBatch already sets temperature=0 in Tier 2.
+ *
+ * Sample-Lock SHA256 (plv-new-40-cases-2026-04-26.json):
+ *   ee6e43483ef18494e25a9d2fe2a8febba97b46feca06c6c872a30bf017e26814
  *
  * Output:
- *   /home/user/workspace/plv_provenance_sweep_report.md
+ *   plv_provenance_sweep_report.md           (mode A)
+ *   plv_provenance_sweep_full_report.md      (mode B)
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { verifyProvenance, type StepEvaluation } from '../plan/graded-support-evaluator.js';
+import { verifyProvenance, evaluateBatch, type StepEvaluation, type EvalInput } from '../plan/graded-support-evaluator.js';
 
 // ─── Local replica of the BEFORE matcher (3 paths) ────────────────────────────
 // Mirrors the matcher BEFORE the Mode-1/Mode-3 fixes were added. Replicates the
@@ -329,7 +337,187 @@ function formatReport(results: ProbeResult[], cases: Case[]): string {
   return lines.join('\n');
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Full Eval Mode ───────────────────────────────────────────────────────────
+
+type Verdict = 'BLOCK' | 'HOLD' | 'ALLOW';
+
+interface VerdictRow {
+  caseId: string;
+  expected: Verdict;
+  vorher: Verdict;
+  nachher: Verdict;
+  vorherViolations: string[];
+  nachherViolations: string[];
+}
+
+async function runOnce(cases: Case[], label: string): Promise<Map<string, { verdict: Verdict; violations: string[] }>> {
+  const items: EvalInput[] = cases.map(c => ({
+    id: c.id,
+    question: c.question,
+    answer: c.answer,
+    trace_steps: c.trace_steps,
+    gold_plan_steps: c.gold_plan_steps as EvalInput['gold_plan_steps'],
+  }));
+
+  const model = process.env.PLV_FULL_MODEL ?? 'grok';
+  console.log(`[${label}] running evaluateBatch (${items.length} items, model=${model}, T=0)...`);
+  const t0 = Date.now();
+  const result = await evaluateBatch(items, model, {
+    concurrency: 3,
+    onProgress: (done: number, total: number, id: string) => {
+      console.log(`  [${label}] ${done}/${total} done (${id})`);
+    },
+  });
+  console.log(`[${label}] finished in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
+
+  const out = new Map<string, { verdict: Verdict; violations: string[] }>();
+  for (const c of cases) {
+    const r = result.items[c.id];
+    if (!r) continue;
+    out.set(c.id, { verdict: r.verdict, violations: r.provenance_violations });
+  }
+  return out;
+}
+
+function formatVerdictReport(rows: VerdictRow[]): string {
+  const lines: string[] = [];
+  lines.push('# Provenance Matcher Sweep — Verdict-Level Vorher/Nachher (--full)');
+  lines.push('');
+  lines.push(`**Eingabe**: ${rows.length} Cases aus plv-new-40-cases-2026-04-26.json`);
+  lines.push(`**Sample-SHA256**: ee6e43483ef18494e25a9d2fe2a8febba97b46feca06c6c872a30bf017e26814`);
+  lines.push(`**Modus**: Full Eval (echte LLM-Aufrufe über evaluateBatch, T=0)`);
+  lines.push(`**Modell**: ${process.env.PLV_FULL_MODEL ?? 'grok'}`);
+  lines.push(`**Erzeugt**: ${new Date().toISOString()}`);
+  lines.push('');
+
+  const verdicts: Verdict[] = ['BLOCK', 'HOLD', 'ALLOW'];
+  const buildMatrix = (key: 'vorher' | 'nachher') => {
+    const m: Record<Verdict, Record<Verdict, number>> = {
+      BLOCK: { BLOCK: 0, HOLD: 0, ALLOW: 0 },
+      HOLD:  { BLOCK: 0, HOLD: 0, ALLOW: 0 },
+      ALLOW: { BLOCK: 0, HOLD: 0, ALLOW: 0 },
+    };
+    for (const r of rows) m[r.expected][r[key]]++;
+    return m;
+  };
+  const matVorher = buildMatrix('vorher');
+  const matNachher = buildMatrix('nachher');
+
+  const renderMatrix = (m: Record<Verdict, Record<Verdict, number>>, label: string) => {
+    lines.push(`### ${label}`);
+    lines.push('');
+    lines.push('| expected \\ actual | BLOCK | HOLD | ALLOW | row total |');
+    lines.push('|---|---|---|---|---|');
+    for (const e of verdicts) {
+      const row = m[e];
+      const total = row.BLOCK + row.HOLD + row.ALLOW;
+      lines.push(`| **${e}** | ${row.BLOCK} | ${row.HOLD} | ${row.ALLOW} | ${total} |`);
+    }
+    const correct = verdicts.reduce((sum, v) => sum + m[v][v], 0);
+    lines.push('');
+    lines.push(`**Diagonale (korrekt)**: ${correct}/${rows.length} (${((correct / rows.length) * 100).toFixed(1)}%)`);
+    lines.push('');
+  };
+  lines.push('## Confusion-Matrix Vorher (PLV_DISABLE_NEW_MATCH_PATHS=1)');
+  lines.push('');
+  renderMatrix(matVorher, 'Vorher');
+  lines.push('## Confusion-Matrix Nachher (Production-Default)');
+  lines.push('');
+  renderMatrix(matNachher, 'Nachher');
+
+  lines.push('## Pro-Case-Verdict-Diff');
+  lines.push('');
+  lines.push('| Case | Erwartet | Vorher | Nachher | Bewegung | Bewertung |');
+  lines.push('|---|---|---|---|---|---|');
+  let beneficial = 0;
+  let regressions = 0;
+  let unchanged = 0;
+  for (const r of rows) {
+    let move = '=';
+    let bewertung = '';
+    if (r.vorher !== r.nachher) {
+      move = `${r.vorher} → ${r.nachher}`;
+      const wasWrongBefore = r.vorher !== r.expected;
+      const isRightAfter = r.nachher === r.expected;
+      if (wasWrongBefore && isRightAfter) {
+        beneficial++;
+        bewertung = '✅ fix landed';
+      } else if (!wasWrongBefore && !isRightAfter) {
+        regressions++;
+        bewertung = '❌ REGRESSION';
+      } else {
+        bewertung = '⚠️ bewegt sich, aber nicht zum richtigen Verdict';
+      }
+    } else {
+      unchanged++;
+      bewertung = r.vorher === r.expected ? '✅ stabil-korrekt' : '⚪ stabil-falsch (kein Effekt durch Patch)';
+    }
+    lines.push(`| ${r.caseId} | ${r.expected} | ${r.vorher} | ${r.nachher} | ${move} | ${bewertung} |`);
+  }
+  lines.push('');
+  lines.push('## Summary');
+  lines.push('');
+  lines.push(`- **Beneficial movements** (falsch → richtig): ${beneficial}`);
+  lines.push(`- **Regressions** (richtig → falsch): ${regressions} ${regressions === 0 ? '✅' : '❌'}`);
+  lines.push(`- **Unchanged**: ${unchanged}`);
+  lines.push('');
+  lines.push('Acceptance: `regressions == 0`. Beneficial sollte > 0 sein, sonst hatte der Fix keinen Verdict-Effekt.');
+
+  const targets = ['C-08', 'CODE-05', 'D-05', 'D-06'];
+  lines.push('');
+  lines.push('## Ziel-Cases (Aufmerksamkeitspunkt)');
+  lines.push('');
+  lines.push('| Case | Erwartet | Vorher | Nachher | Bewegung |');
+  lines.push('|---|---|---|---|---|');
+  for (const id of targets) {
+    const r = rows.find(x => x.caseId === id);
+    if (!r) continue;
+    const move = r.vorher === r.nachher ? '=' : `${r.vorher} → ${r.nachher}`;
+    lines.push(`| ${id} | ${r.expected} | ${r.vorher} | ${r.nachher} | ${move} |`);
+  }
+  lines.push('');
+  lines.push('Hinweis: D-06 ist der Wrong-Source-Case und muss BLOCK/HOLD bleiben — das ist Feature, nicht Bug.');
+
+  return lines.join('\n');
+}
+
+async function runFullMode(cases: Case[]): Promise<void> {
+  if (!process.env.XAI_API_KEY && !process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
+    console.error('FULL mode requires a provider key. Set XAI_API_KEY (default), ANTHROPIC_API_KEY, or OPENAI_API_KEY.');
+    process.exit(2);
+  }
+
+  process.env.PLV_DISABLE_NEW_MATCH_PATHS = '1';
+  const before = await runOnce(cases, 'VORHER');
+
+  delete process.env.PLV_DISABLE_NEW_MATCH_PATHS;
+  const after = await runOnce(cases, 'NACHHER');
+
+  const rows: VerdictRow[] = cases
+    .map(c => {
+      const v = before.get(c.id);
+      const n = after.get(c.id);
+      if (!v || !n) return null;
+      return {
+        caseId: c.id,
+        expected: c.expected_verdict,
+        vorher: v.verdict,
+        nachher: n.verdict,
+        vorherViolations: v.violations,
+        nachherViolations: n.violations,
+      };
+    })
+    .filter((r): r is VerdictRow => r !== null);
+
+  const fullOutPath = '/home/user/workspace/plv_provenance_sweep_full_report.md';
+  const report = formatVerdictReport(rows);
+  writeFileSync(fullOutPath, report, 'utf8');
+  console.log(`\nWrote verdict-level report to ${fullOutPath}`);
+  console.log('');
+  console.log(report.split('\n').slice(0, 60).join('\n'));
+}
+
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dir, '..');
@@ -340,15 +528,13 @@ const cases: Case[] = JSON.parse(readFileSync(casesPath, 'utf8'));
 console.log(`Loaded ${cases.length} cases.`);
 
 const fullMode = process.argv.includes('--full');
-if (fullMode) {
-  console.error('Full eval mode not yet implemented in this script. Run matcher-only mode by omitting --full.');
-  process.exit(2);
+if (!fullMode) {
+  const results = runMatcherOnlyMode(cases);
+  const report = formatReport(results, cases);
+  writeFileSync(outPath, report, 'utf8');
+  console.log(`Wrote ${results.length} probe results to ${outPath}`);
+  console.log('');
+  console.log(report.split('\n').slice(0, 30).join('\n'));
+} else {
+  await runFullMode(cases);
 }
-
-const results = runMatcherOnlyMode(cases);
-const report = formatReport(results, cases);
-
-writeFileSync(outPath, report, 'utf8');
-console.log(`Wrote ${results.length} probe results to ${outPath}`);
-console.log('');
-console.log(report.split('\n').slice(0, 30).join('\n'));
