@@ -260,7 +260,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
       items: {} as Record<string, any>,
     };
     for (const [id, item] of Object.entries(result.items)) {
-      const mapped = toPublicVerdict(item.verdict as InternalVerdict);
+      const mapped = toPublicVerdict(item.verdict as InternalVerdict, item.conditions);
       publicResult.items[id] = {
         ...item,
         verdict: mapped.verdict,
