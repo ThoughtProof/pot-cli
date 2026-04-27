@@ -1,6 +1,8 @@
-# ADR-0003 (DRAFT v2.2): Threshold-Shift with Coordinated Score-Floor Adjustments
+# ADR-0003 (ACCEPTED v2.2): Threshold-Shift with Coordinated Score-Floor Adjustments
 
-**Status**: DRAFT v2.2 — Ratifiziert 2026-04-27 (Paul, nach Phase-2-Bestaetigungs-Iteration). Pending Hermes-Bestaetigungs-Run, dann Merge.
+**Status**: ACCEPTED v2.2 — Ratifiziert 2026-04-27 (Paul, nach Phase-2-Bestaetigungs-Iteration und Hermes-Bestaetigungs-Run). Gemerged via PR #19 (commit 8af04ae) am 2026-04-27 17:24 UTC.
+
+**Confirmation Run**: Hermes Phase-2-Bestaetigungs-Run auf v2.2 (`SUPPORTED_THRESHOLD = 0.5625`) am 2026-04-27 — 3 audited gold=ALLOW Cases (CODE-05 SameSite/RFC 6265bis, MED-05 Amoxicillin/IDSA 2012, GAIA-02 UDHR Article 25/un.org) alle als legitime Korrekturen bestaetigt; 0 gold=HOLD Regressionen; Accuracy 82.1% → 83.6% (+1.5pp); 272/272 Plan-Tests gruen.
 **Date**: 2026-04-27
 **Deciders**: Raul, Paul, Hermes
 **Editor**: Computer
