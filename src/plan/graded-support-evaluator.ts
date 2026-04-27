@@ -39,6 +39,42 @@ export const DEFAULT_EVAL_SEED = 42;
 export const SUPPORTED_THRESHOLD = 0.5625;
 export const PARTIAL_THRESHOLD = 0.25;
 
+// ─── Margin Band (ADR-0005, PR-F) ────────────────────────────────────────────
+
+/**
+ * Margin Band halfwidth around SUPPORTED_THRESHOLD.
+ *
+ * Hermes' v2.2 Variance-Verification (2026-04-27, Issue #21) found that 8 of
+ * the observed verdict-flips between two seed-pinned runs were caused by
+ * `supported`-predicate scores oscillating across SUPPORTED_THRESHOLD due to
+ * Grok-API non-determinism (the API treats `seed=42` as a hint, not a hard
+ * constraint). All 8 flips were adjacent (ALLOW↔UNCERTAIN or UNCERTAIN↔BLOCK).
+ *
+ * Paul's launch-blocker decision (2026-04-27 evening, post-variance-report):
+ * For a verification product, run-to-run flips at the threshold are an
+ * audit-reproducibility problem (Skye re-eval, OriginDAO on-chain attestation,
+ * Healthcare/Finance audit trails). Margin Band reclassifies `supported`
+ * predicates whose score lies in [SUPPORTED_THRESHOLD - MARGIN_BAND_HALFWIDTH,
+ * SUPPORTED_THRESHOLD + MARGIN_BAND_HALFWIDTH) as criticalPartial (for
+ * critical steps) or non-critical weakness (for non-critical steps), pushing
+ * borderline cases conservatively toward UNCERTAIN. Estimated oscillator-rate
+ * reduction: 19.8% → ~5%.
+ *
+ * Default 0.05 is symmetric around 0.5625 and pre-validates that the three
+ * v2.2 audited reference cases (CODE-05/MED-05/GAIA-02, all scores ≥0.75)
+ * remain ALLOW (margin band zone is [0.5125, 0.6125), all three are above).
+ * Hermes' halfwidth-validation (Issue #23) confirms the value against the
+ * 8 observed flip-cases. Halfwidth is a single constant; raising it is a
+ * one-line patch if Hermes' data shows scores further from the threshold.
+ *
+ * "Decompose, don't loosen": Margin Band makes the system *more* conservative
+ * on borderline cases, never more permissive. Hard-rule D-06 (wrong-source
+ * detection) and Hard-rule P1 (BLOCK→ALLOW absolute 0) are unaffected.
+ *
+ * @see docs/adr/0005-margin-band-and-confidence-metadata-DRAFT.md
+ */
+export const MARGIN_BAND_HALFWIDTH = 0.05;
+
 // ─── Score Floor Constants (ADR-0003 v2.2, three coordinated floors) ─────────
 
 /**
@@ -128,6 +164,13 @@ export interface ItemResult {
   verdict: EvaluatorVerdict;
   verdict_reasoning: string;
   conditions?: string[];
+  /**
+   * PR-F (ADR-0005): true iff at least one critical or non-critical step had
+   * a `supported`/`faithful` predicate whose score lay within
+   * MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD. Surfaced as
+   * `metadata.confidence: 'borderline'` in the public API.
+   */
+  margin_band_triggered?: boolean;
   provenance_violations: string[];
   tier1_stats?: {
     total: number;
@@ -445,13 +488,34 @@ export function applyScoreFloors(
 
 // ─── Verdict Derivation ───────────────────────────────────────────────────────
 
+/**
+ * Returns true iff a step evaluation falls inside the Margin Band — i.e. it
+ * was classified as `supported` (or its faithfulness equivalent `faithful`)
+ * but its score is within MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD.
+ *
+ * Such evaluations are NOT loosened to ALLOW; they are treated conservatively
+ * as criticalPartial / non-critical weakness in deriveVerdict, and surfaced
+ * as `confidence: 'borderline'` in the public API metadata via toPublicVerdict.
+ *
+ * Hard rules (D-06 wrong-source, P1 BLOCK→ALLOW) are evaluated upstream and
+ * are unaffected by this band.
+ */
+export function isInMarginBand(evalItem: StepEvaluation): boolean {
+  const isSupportedPredicate =
+    evalItem.predicate === 'supported' || evalItem.predicate === 'faithful';
+  if (!isSupportedPredicate) return false;
+  const distance = Math.abs(evalItem.score - SUPPORTED_THRESHOLD);
+  return distance < MARGIN_BAND_HALFWIDTH;
+}
+
 export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
-): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[] } {
+): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[]; marginBandTriggered: boolean } {
   const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
   const criticalPartial: string[] = [];      // soft fail (score 0.5)
   const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions
+  const marginBandSteps: string[] = [];      // PR-F: borderline supported predicates
 
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
@@ -463,6 +527,13 @@ export function deriveVerdict(
       criticalPartial.push(evalItem.step_id);
     } else if (evalItem.predicate === 'partially_faithful') {
       criticalPartial.push(evalItem.step_id);
+    } else if (isInMarginBand(evalItem)) {
+      // PR-F (ADR-0005): supported predicate with score in margin band counts
+      // as criticalPartial for verdict robustness. "Decompose, don't loosen"
+      // — we make the system more conservative on borderline cases, not more
+      // permissive. failScore += 0.5 (same weight as partial).
+      criticalPartial.push(evalItem.step_id);
+      marginBandSteps.push(evalItem.step_id);
     }
   }
 
@@ -475,6 +546,11 @@ export function deriveVerdict(
     // i.e. anything below the v2.2 "supported" floor (0.5625) but above absence (0).
     if (evalItem.score < SUPPORTED_THRESHOLD && evalItem.score > 0) {
       nonCriticalWeaknesses.push(`${evalItem.step_id}: ${evalItem.predicate} (score=${evalItem.score}, non-critical)`);
+    } else if (isInMarginBand(evalItem)) {
+      // PR-F: borderline supported predicate on a non-critical step is also
+      // surfaced as a weakness so the public confidence indicator is accurate.
+      nonCriticalWeaknesses.push(`${evalItem.step_id}: supported (score=${evalItem.score}, margin-band, non-critical)`);
+      marginBandSteps.push(evalItem.step_id);
     }
   }
 
@@ -482,16 +558,23 @@ export function deriveVerdict(
   // BLOCK ≥ 2.0, HOLD ≥ 0.5, ALLOW < 0.5
   const failScore = criticalUnsupported.length * 1.0 + criticalPartial.length * 0.5;
 
+  const marginBandTriggered = marginBandSteps.length > 0;
+  const marginBandSuffix = marginBandTriggered
+    ? ` [margin-band: ${marginBandSteps.join(', ')}]`
+    : '';
+
   if (failScore >= 2.0) {
     return {
       verdict: 'BLOCK',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped × 1.0 + ${criticalPartial.length} partial × 0.5). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]`,
+      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped × 1.0 + ${criticalPartial.length} partial × 0.5). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      marginBandTriggered,
     };
   }
   if (failScore >= 0.5) {
     return {
       verdict: 'HOLD',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]`,
+      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      marginBandTriggered,
     };
   }
 
@@ -499,14 +582,16 @@ export function deriveVerdict(
   if (nonCriticalWeaknesses.length > 0) {
     return {
       verdict: 'CONDITIONAL_ALLOW',
-      reasoning: `All critical steps supported. ${nonCriticalWeaknesses.length} non-critical weakness(es) detected.`,
+      reasoning: `All critical steps supported. ${nonCriticalWeaknesses.length} non-critical weakness(es) detected.${marginBandSuffix}`,
       conditions: nonCriticalWeaknesses,
+      marginBandTriggered,
     };
   }
 
   return {
     verdict: 'ALLOW',
     reasoning: 'All critical steps adequately supported.',
+    marginBandTriggered,
   };
 }
 
@@ -918,7 +1003,7 @@ export async function evaluateItem(
   });
 
   // ── Derive verdict ──
-  const { verdict, reasoning: verdictReasoning, conditions } = deriveVerdict(processedEvals, item.gold_plan_steps);
+  const { verdict, reasoning: verdictReasoning, conditions, marginBandTriggered } = deriveVerdict(processedEvals, item.gold_plan_steps);
 
   return {
     id: item.id,
@@ -926,6 +1011,7 @@ export async function evaluateItem(
     verdict,
     verdict_reasoning: verdictReasoning,
     ...(conditions && conditions.length > 0 ? { conditions } : {}),
+    ...(marginBandTriggered ? { margin_band_triggered: true } : {}),
     provenance_violations: allViolations,
     tier1_stats: tier1Stats,
   };

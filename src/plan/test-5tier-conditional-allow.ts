@@ -70,7 +70,13 @@ test('T2: CONDITIONAL_ALLOW — critical steps pass, non-critical weakness', () 
 // directly via makeEval, so it tests deriveVerdict's predicate-handling, not
 // the score → predicate mapping (locked separately in test-threshold-shift-locks).
 
-test('T3: CONDITIONAL_ALLOW — multiple non-critical weaknesses', () => {
+// PR-F (ADR-0005, 2026-04-27): score=0.5625 with predicate=supported now
+// falls inside the Margin Band [SUPPORTED_THRESHOLD - 0.05, +0.05) and counts
+// as a non-critical weakness with `margin_band_triggered=true`. So this case
+// now produces THREE weaknesses (was 2 pre-PR-F). The trade-off is intentional:
+// borderline `supported` predicates are surfaced to customers via
+// metadata.confidence='borderline' rather than silently flipping run-to-run.
+test('T3: CONDITIONAL_ALLOW — multiple non-critical weaknesses (incl. margin-band)', () => {
   const goldSteps = [
     makeStep(1, 'critical'),
     makeStep(2, 'supporting'),
@@ -79,13 +85,14 @@ test('T3: CONDITIONAL_ALLOW — multiple non-critical weaknesses', () => {
   ];
   const evals = [
     makeEval('step_1', 1.0, 'supported'),
-    makeEval('step_2', 0.40, 'partial'),   // weak (R7/quote-too-short floor)
-    makeEval('step_3', 0.25, 'partial'),   // weak
-    makeEval('step_4', 0.5625, 'supported'), // at v2.2 supported floor — no condition
+    makeEval('step_2', 0.40, 'partial'),     // weak (R7/quote-too-short floor)
+    makeEval('step_3', 0.25, 'partial'),     // weak
+    makeEval('step_4', 0.5625, 'supported'), // PR-F: in margin band → weakness
   ];
-  const { verdict, conditions } = deriveVerdict(evals, goldSteps);
+  const { verdict, conditions, marginBandTriggered } = deriveVerdict(evals, goldSteps);
   assert.equal(verdict, 'CONDITIONAL_ALLOW');
-  assert.equal(conditions!.length, 2, 'Two non-critical weaknesses');
+  assert.equal(conditions!.length, 3, 'Three non-critical weaknesses (2 partial + 1 margin-band supported)');
+  assert.equal(marginBandTriggered, true, 'step_4 supported at threshold triggered margin band');
 });
 
 // ─── T4: Critical fail trumps context weakness → HOLD, not CONDITIONAL_ALLOW ─
@@ -156,14 +163,23 @@ test('T9: verdict-mapper: HOLD → UNCERTAIN (unchanged)', () => {
 // ADR-0003 v2.2: New supported floor is SUPPORTED_THRESHOLD = 0.5625.
 // A non-critical context step at 0.5625 is at the boundary → supported → no weakness.
 
-test('T10: Context score=0.5625 (v2.2 supported floor) → no weakness → pure ALLOW', () => {
+// PR-F (ADR-0005): score=0.5625 with predicate=supported now falls inside the
+// Margin Band [SUPPORTED_THRESHOLD - 0.05, +0.05). For non-critical steps,
+// this surfaces as a weakness AND sets margin_band_triggered=true.
+// Rationale: Hermes' Variance-Run (Issue #21, 2026-04-27) showed `supported`
+// predicates at the threshold flipped run-to-run due to Grok-API non-determinism;
+// pushing them to CONDITIONAL_ALLOW is the audit-reproducibility fix Paul
+// ratified as launch-blocker.
+test('T10: Context score=0.5625 → in margin band → CONDITIONAL_ALLOW (PR-F)', () => {
   const goldSteps = [makeStep(1, 'critical'), makeStep(2, 'supporting')];
   const evals = [
     makeEval('step_1', 1.0, 'supported'),
     makeEval('step_2', 0.5625, 'supported'),
   ];
-  const { verdict } = deriveVerdict(evals, goldSteps);
-  assert.equal(verdict, 'ALLOW', 'score=0.5625 is at supported boundary → no weakness');
+  const { verdict, marginBandTriggered } = deriveVerdict(evals, goldSteps);
+  assert.equal(verdict, 'CONDITIONAL_ALLOW',
+    'PR-F: score=0.5625 is INSIDE margin band → weakness → CA');
+  assert.equal(marginBandTriggered, true, 'margin band must be flagged for borderline confidence');
 });
 
 // ─── T11: Boundary — context at 0.49 IS a weakness ─────────────────────────
@@ -199,4 +215,111 @@ test('T13: EvaluatorVerdict type includes CONDITIONAL_ALLOW', () => {
     'ALLOW', 'CONDITIONAL_ALLOW', 'HOLD', 'BLOCK',
   ];
   assert.equal(verdicts.length, 4);
+});
+
+// =========================================================================
+// PR-F (ADR-0005): Margin Band + Confidence Metadata Tests T27–T31
+// =========================================================================
+//
+// Spec: scripts/diff-scores.mjs and Hermes' Variance-Run (Issue #21) show
+// that adjacent verdict-flips concentrate around SUPPORTED_THRESHOLD due to
+// Grok-API non-determinism. Margin Band reclassifies `supported` predicates
+// with score in [SUPPORTED_THRESHOLD - MARGIN_BAND_HALFWIDTH,
+// SUPPORTED_THRESHOLD + MARGIN_BAND_HALFWIDTH) as criticalPartial (for
+// critical steps) or non-critical weakness, and sets marginBandTriggered=true.
+// toPublicVerdict surfaces this as metadata.confidence='borderline'.
+//
+// Hard rules unaffected: D-06 (wrong-source) and P1 (BLOCK→ALLOW absolute 0)
+// are evaluated upstream of deriveVerdict and outside the margin band logic.
+
+import {
+  isInMarginBand,
+  MARGIN_BAND_HALFWIDTH,
+  SUPPORTED_THRESHOLD,
+} from './graded-support-evaluator.js';
+
+// ─── T27: Margin band predicate — critical step at threshold → HOLD ([conservative)
+test('T27: Critical supported at score=0.5625 (in margin band) → HOLD with margin_band_triggered', () => {
+  const goldSteps = [makeStep(1, 'critical')];
+  const evals = [makeEval('step_1', 0.5625, 'supported')]; // exactly at threshold
+  const { verdict, marginBandTriggered, reasoning } = deriveVerdict(evals, goldSteps);
+  // PR-F: 1 critical step in margin band → criticalPartial → failScore=0.5 → HOLD
+  assert.equal(verdict, 'HOLD',
+    'Sole critical supported predicate inside margin band must conservatively HOLD');
+  assert.equal(marginBandTriggered, true);
+  assert.ok(reasoning.includes('margin-band'), 'Reasoning must surface margin band trigger');
+});
+
+// ─── T28: Margin band lower edge — score=0.5125 (just inside) → triggers
+test('T28: Critical supported at score=0.5125 (lower edge of margin band) → HOLD', () => {
+  const goldSteps = [makeStep(1, 'critical')];
+  const evals = [makeEval('step_1', 0.5125, 'supported')];
+  // distance = |0.5125 - 0.5625| = 0.05; isInMarginBand uses < (strict)
+  // → 0.05 is NOT < 0.05 → NOT in band. Sanity-check that boundary is exclusive on both sides.
+  assert.equal(isInMarginBand(evals[0]), false,
+    'Distance == MARGIN_BAND_HALFWIDTH must be excluded (strict <)');
+  // For coverage, also test 0.5126 (just inside): in band.
+  const justInside = makeEval('step_1', 0.5126, 'supported');
+  assert.equal(isInMarginBand(justInside), true);
+  const { verdict: v2, marginBandTriggered: m2 } = deriveVerdict([justInside], goldSteps);
+  assert.equal(v2, 'HOLD');
+  assert.equal(m2, true);
+});
+
+// ─── T29: Reference cases (CODE-05/MED-05/GAIA-02) all unaffected: score ≥0.75
+test('T29: Anti-regression — score ≥0.75 (audited reference cases) NEVER triggers margin band', () => {
+  for (const score of [0.75, 0.80, 0.95, 1.0]) {
+    const evals = [makeEval('step_1', score, 'supported')];
+    assert.equal(isInMarginBand(evals[0]), false,
+      `score=${score} must be safely above margin band (zone is [0.5125, 0.6125))`);
+    const goldSteps = [makeStep(1, 'critical')];
+    const { verdict, marginBandTriggered } = deriveVerdict(evals, goldSteps);
+    assert.equal(verdict, 'ALLOW', `score=${score} must remain ALLOW`);
+    assert.equal(marginBandTriggered, false, `score=${score} must NOT trigger margin band`);
+  }
+});
+
+// ─── T30: predicate=partial is NOT in margin band even with high score
+test('T30: Margin band gates ONLY supported/faithful predicates, not partial/unsupported', () => {
+  // Even if a partial predicate has a score in the margin band zone, it is
+  // NOT classified as margin band — partial is already a weakness on its own merits.
+  const partialInZone = makeEval('step_1', 0.5625, 'partial');
+  assert.equal(isInMarginBand(partialInZone), false,
+    'predicate=partial is excluded from margin band gating');
+  const unsupportedInZone = makeEval('step_2', 0.5625, 'unsupported');
+  assert.equal(isInMarginBand(unsupportedInZone), false,
+    'predicate=unsupported is excluded from margin band gating');
+  // faithful (faithfulness mode equivalent of supported) IS gated:
+  const faithfulInZone = makeEval('step_3', 0.5625, 'faithful');
+  assert.equal(isInMarginBand(faithfulInZone), true,
+    'predicate=faithful (faithfulness mode) IS gated by margin band');
+});
+
+// ─── T31: Public mapping — marginBandTriggered → metadata.confidence='borderline'
+test('T31: toPublicVerdict({marginBandTriggered: true}) sets metadata.confidence=borderline', () => {
+  // ALLOW (engine) + margin band hit → ALLOW (public) + confidence=borderline
+  const allowBorderline = toPublicVerdict('ALLOW', undefined, { marginBandTriggered: true });
+  assert.equal(allowBorderline.verdict, 'ALLOW');
+  assert.equal(allowBorderline.metadata.confidence, 'borderline');
+
+  // HOLD (engine) + margin band hit → UNCERTAIN (public) + confidence=borderline
+  const holdBorderline = toPublicVerdict('HOLD', undefined, { marginBandTriggered: true });
+  assert.equal(holdBorderline.verdict, 'UNCERTAIN');
+  assert.equal(holdBorderline.metadata.confidence, 'borderline');
+  assert.equal(holdBorderline.metadata.review_needed, true);
+
+  // No flag → confidence=high (default)
+  const allowHigh = toPublicVerdict('ALLOW');
+  assert.equal(allowHigh.metadata.confidence, 'high', 'Default confidence must be high');
+
+  // Confidence is ALWAYS present (Paul Entscheidung 2A)
+  for (const v of ['ALLOW', 'HOLD', 'BLOCK', 'CONDITIONAL_ALLOW', 'DISSENT'] as const) {
+    const r = toPublicVerdict(v);
+    assert.ok(r.metadata.confidence === 'high' || r.metadata.confidence === 'borderline',
+      `${v}: confidence must be set to either 'high' or 'borderline'`);
+  }
+
+  // Sanity: MARGIN_BAND_HALFWIDTH constant is exported and equals 0.05 (default)
+  assert.equal(MARGIN_BAND_HALFWIDTH, 0.05, 'Default halfwidth pinned to 0.05');
+  assert.equal(SUPPORTED_THRESHOLD, 0.5625, 'Threshold pinned to 0.5625 (ADR-0003 v2.2)');
 });
