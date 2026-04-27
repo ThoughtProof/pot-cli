@@ -105,11 +105,14 @@ describe('verifyProvenance', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('applyScoreFloors', () => {
-  test('R1: score >= 0.75 without quote → capped at 0.5', () => {
+  test('R1: score >= 0.75 without quote → capped at 0.25 (post-ADR-0003)', () => {
+    // ADR-0003 v2.2: R1_NO_QUOTE_FLOOR shifted from 0.5 → 0.25. A high score
+    // without provenance now collapses to PARTIAL_THRESHOLD (0.25), still
+    // mapping to `partial` predicate.
     const eval1 = makeEval({ score: 0.85, quote: null, tier: 'strong' });
     const trace = 'some trace';
     const result = applyScoreFloors(eval1, trace);
-    expect(result.score).toBe(0.5);
+    expect(result.score).toBe(0.25);
     expect(result.predicate).toBe('partial');
     expect(result.reasoning).toContain('FLOOR');
   });
@@ -171,19 +174,42 @@ describe('deriveVerdict', () => {
     makeGoldStep({ index: 5, criticality: 'supporting' }),
   ];
 
-  test('ALLOW: all critical steps supported', () => {
+  test('CONDITIONAL_ALLOW: all critical supported, non-critical partial weaknesses (PR-F)', () => {
+    // PR-F (ADR-0005): non-critical steps with predicate `partial` (score 0.5,
+    // in (0, 0.5625)) count as nonCriticalWeaknesses → CONDITIONAL_ALLOW with
+    // conditions attached. Critical-only path remains untouched.
     const evals: StepEvaluation[] = [
-      makeEval({ step_id: 'step_1', predicate: 'partial' }),
+      makeEval({ step_id: 'step_1', predicate: 'partial' }),       // supporting → weakness
       makeEval({ step_id: 'step_2', predicate: 'supported' }),
       makeEval({ step_id: 'step_3', predicate: 'supported' }),
       makeEval({ step_id: 'step_4', predicate: 'supported' }),
-      makeEval({ step_id: 'step_5', predicate: 'partial' }),
+      makeEval({ step_id: 'step_5', predicate: 'partial' }),       // supporting → weakness
+    ];
+    const { verdict, conditions } = deriveVerdict(evals, goldSteps);
+    expect(verdict).toBe('CONDITIONAL_ALLOW');
+    expect(conditions).toBeDefined();
+    expect(conditions!.length).toBeGreaterThan(0);
+  });
+
+  test('ALLOW: all critical supported, no non-critical weaknesses', () => {
+    // Pure ALLOW path: every step has score ≥ SUPPORTED_THRESHOLD (0.5625),
+    // so no nonCriticalWeakness is emitted and no CONDITIONAL_ALLOW promotion.
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_2', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_3', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_4', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_5', predicate: 'supported', score: 0.85 }),
     ];
     const { verdict } = deriveVerdict(evals, goldSteps);
     expect(verdict).toBe('ALLOW');
   });
 
-  test('HOLD: 1 critical partial (failScore = 0.5)', () => {
+  test('CONDITIONAL_ALLOW: 1 critical partial (failScore = 0.5, PR-F)', () => {
+    // PR-F (failScore-Gate-Decoupling, ADR-0005): failScore=0.5 is in [0.5, 1.0)
+    // → CONDITIONAL_ALLOW + low_confidence (was HOLD pre-PR-F). Hermes' variance
+    // data showed this band oscillates predictably; CA preserves audit safety
+    // while exposing the marginal critical step as a fragility condition.
     const evals: StepEvaluation[] = [
       makeEval({ step_id: 'step_1', predicate: 'supported' }),
       makeEval({ step_id: 'step_2', predicate: 'supported' }),
@@ -192,7 +218,7 @@ describe('deriveVerdict', () => {
       makeEval({ step_id: 'step_5', predicate: 'supported' }),
     ];
     const { verdict } = deriveVerdict(evals, goldSteps);
-    expect(verdict).toBe('HOLD');
+    expect(verdict).toBe('CONDITIONAL_ALLOW');
   });
 
   test('HOLD: 1 critical skipped (failScore = 1.0)', () => {
@@ -243,13 +269,33 @@ describe('deriveVerdict', () => {
     expect(verdict).toBe('HOLD');
   });
 
-  test('supporting steps do not affect verdict', () => {
+  test('supporting steps do not affect critical-gate verdict (PR-F: surface as conditions)', () => {
+    // Pre-PR-F invariant: non-critical steps cannot trigger HOLD/BLOCK.
+    // Post-PR-F: non-critical weaknesses surface as CONDITIONAL_ALLOW conditions
+    // (no critical-gate impact, no verdict downgrade past ALLOW-equivalent).
+    // The skipped non-critical steps here (default makeEval score=0.5, predicate
+    // `skipped`) → score 0.5 is in (0, 0.5625) → counted as nonCriticalWeakness
+    // → CONDITIONAL_ALLOW. Critical gate is untouched; this is the design intent.
     const evals: StepEvaluation[] = [
-      makeEval({ step_id: 'step_1', predicate: 'skipped' }),  // supporting — ignored
+      makeEval({ step_id: 'step_1', predicate: 'skipped' }),  // supporting — surfaces as condition
       makeEval({ step_id: 'step_2', predicate: 'supported' }),
       makeEval({ step_id: 'step_3', predicate: 'supported' }),
       makeEval({ step_id: 'step_4', predicate: 'supported' }),
-      makeEval({ step_id: 'step_5', predicate: 'skipped' }),  // supporting — ignored
+      makeEval({ step_id: 'step_5', predicate: 'skipped' }),  // supporting — surfaces as condition
+    ];
+    const { verdict } = deriveVerdict(evals, goldSteps);
+    expect(verdict).toBe('CONDITIONAL_ALLOW');
+  });
+
+  test('supporting steps with score 0 do not affect verdict (true ALLOW)', () => {
+    // True non-critical no-op: score=0 falls outside the (0, 0.5625) weakness
+    // window, so no conditions are emitted and the gate returns plain ALLOW.
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'skipped', score: 0 }),
+      makeEval({ step_id: 'step_2', predicate: 'supported' }),
+      makeEval({ step_id: 'step_3', predicate: 'supported' }),
+      makeEval({ step_id: 'step_4', predicate: 'supported' }),
+      makeEval({ step_id: 'step_5', predicate: 'skipped', score: 0 }),
     ];
     const { verdict } = deriveVerdict(evals, goldSteps);
     expect(verdict).toBe('ALLOW');
@@ -280,7 +326,10 @@ describe('deriveVerdict', () => {
     expect(verdict).toBe('BLOCK');
   });
 
-  test('exact threshold: failScore = 0.5 → HOLD', () => {
+  test('exact threshold: failScore = 0.5 → CONDITIONAL_ALLOW (PR-F gate-decoupling)', () => {
+    // PR-F boundary lock (ADR-0005): failScore=0.5 sits at the lower edge of
+    // [0.5, 1.0) and now routes to CONDITIONAL_ALLOW + low_confidence. The
+    // failScore≥1.0 → HOLD boundary is locked separately (T33).
     const evals: StepEvaluation[] = [
       makeEval({ step_id: 'step_1', predicate: 'supported' }),
       makeEval({ step_id: 'step_2', predicate: 'supported' }),
@@ -289,6 +338,6 @@ describe('deriveVerdict', () => {
       makeEval({ step_id: 'step_5', predicate: 'supported' }),
     ];
     const { verdict } = deriveVerdict(evals, goldSteps);
-    expect(verdict).toBe('HOLD');
+    expect(verdict).toBe('CONDITIONAL_ALLOW');
   });
 });
