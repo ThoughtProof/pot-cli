@@ -1,16 +1,40 @@
-# ADR-0003 (DRAFT v2.1): Threshold-Shift with Coordinated Score-Floor Adjustments
+# ADR-0003 (DRAFT v2.2): Threshold-Shift with Coordinated Score-Floor Adjustments
 
-**Status**: DRAFT v2.1 — Direction ratifiziert 2026-04-27 (Raul + Paul). Final Status pending Phase 2 P1+P4 Validierung.
+**Status**: DRAFT v2.2 — Ratifiziert 2026-04-27 (Paul, nach Phase-2-Bestaetigungs-Iteration). Pending Hermes-Bestaetigungs-Run, dann Merge.
 **Date**: 2026-04-27
 **Deciders**: Raul, Paul, Hermes
 **Editor**: Computer
 **Replaces**: ADR-0002 (Step-Level Triple-Majority, REJECTED 2026-04-27)
-**Supersedes**: 0003-threshold-shift-DRAFT-v1-archived.md
+**Supersedes**: 0003-threshold-shift-DRAFT-v1-archived.md, v2.1-Phase-1
 **Relates to**: ADR-0001 (Verdict Model)
 
 ---
 
 ## Changelog
+
+### v2.1 → v2.2 (2026-04-27, Phase-2 Threshold-Sweep + Hard-Rule-Auslegung 3)
+
+Phase-2 CM-Run mit v2.1 (`SUPPORTED_THRESHOLD = 0.50`) hat 7 HOLD→ALLOW Transitionen produziert — davon 4 mit Gold-Label `HOLD` (echte Regressionen) und 3 mit Gold-Label `ALLOW` (Korrekturen, kein Hard-Rule-Bruch). Hermes’ deterministischer Threshold-Sweep auf den existierenden After-Run-Scores ergab ein Plateau bei 0.5625 – 0.75 mit 86.6% Accuracy und **0** gold=HOLD Regressionen, vs 80.6% / 4 gold=HOLD bei 0.50.
+
+**Aenderungen v2.2 vs v2.1**:
+
+1. `SUPPORTED_THRESHOLD = 0.50` → **`0.5625`**. Der DS+Gemini-Score-Cluster bei 0.50 (bimodaler Modus, 17 bzw. 13 Steps) bleibt damit deterministisch im `partial`-Band, statt knapp auf der falschen Seite des Floors zu liegen. Untere Predicate-Grenze (`PARTIAL_THRESHOLD = 0.25`) und alle drei Code-Floors (R1=0.25, R7=0.40, Quote-too-short=0.40) bleiben unveraendert — die Differenzierung der Partial-Schichten wird nicht beruehrt.
+2. **Hard-Rule P1 (Auslegung 3, Paul ratifiziert)**: Die HOLD-Bezeichnung in der Hard-Rule-Liste bezieht sich kuenftig auf Faelle mit `gold_verdict ∈ {HOLD, BLOCK}`. UNCERTAIN→ALLOW Transitionen mit `gold_verdict = ALLOW` sind **Korrekturen**, keine Regressionen — das Gate haelt. BLOCK→ALLOW bleibt absolut auf 0, kein Gold-Label-Override. Begruendung: Phase-2 audit der drei verbleibenden Cases (CODE-05, MED-05, GAIA-02) hat alle drei als legitime Korrekturen mit verbatim-Quote-Evidenz (RFC 6265bis, IDSA 2012, UDHR Article 25 verbatim von un.org) bestaetigt.
+3. Lock-Tests: T17 (`0.49 → partial`) bleibt; T18 wandert von `0.50 → supported` auf `0.5625 → supported`. Zwei neue Tests T25 (`0.5624 → partial`, Float-Rounding-Lock) und T26 (`0.50 → partial`, Anti-Regression: 0.50-Cluster muss explizit non-supported bleiben). Constants-Pin asserts jetzt `SUPPORTED_THRESHOLD === 0.5625`.
+4. **R7- und Quote-too-short-Floors bleiben bei 0.40**. Sie sitzen weiterhin sauber unter dem Supported-Floor (0.40 < 0.5625), die Drei-Schichten-Differenzierung (0.25 / 0.40 / oberes-partial) bleibt erhalten. Die obere Partial-Grenze waechst von 0.49 auf 0.5624.
+
+**Phase-2 CM Threshold-Sweep (Hermes, deterministisch auf v2.1 After-Run-Scores)**:
+
+| Threshold | UNCERTAIN→ALLOW (gesamt) | gold=HOLD (Regression) | gold=ALLOW (Korrektur) | Accuracy |
+|---:|---:|---:|---:|---:|
+| 0.5000 | 7 | 4 | 3 | 80.6% |
+| **0.5625** | **3** | **0** ✅ | **3** | **86.6%** ✅ |
+| 0.6250 | 3 | 0 | 3 | 86.6% |
+| 0.7500 | 3 | 0 | 3 | 86.6% |
+
+Das Plateau 0.5625–0.75 ist empirisch identisch — 0.5625 ist die untere Plateau-Kante, maximal weit von der 0.75-Klippe entfernt, was den oszillationsdaempfenden Effekt der v2-Vorstoss-Logik vollstaendig erhaelt. Die drei Korrektur-Cases sind klar gold-ALLOW, alle mit verbatim-Quote, alle Audits bestanden.
+
+**Ratifikation**: Paul, 2026-04-27: „Alle 3 Audits bestanden … ADR-0003 v2.2 mit SUPPORTED_THRESHOLD=0.5625 ist ratifiziert. Computer kann mergen sobald der Bestaetigungs-Run sauber ist.“
 
 ### v2 → v2.1 (2026-04-27, Pauls Ratifikation + Boundary-Flag)
 
@@ -66,12 +90,12 @@ Alt:
 - `partial`: 0.25 ≤ score < 0.75
 - `unsupported`: score < 0.25
 
-Neu:
-- `supported`: score ≥ 0.50
-- `partial`: 0.25 ≤ score < 0.50
+Neu (v2.2):
+- `supported`: score ≥ **0.5625**
+- `partial`: 0.25 ≤ score < 0.5625
 - `unsupported`: score < 0.25
 
-Eliminiert die 0.75-Klippe per Konstruktion. DS+Gemini Mode bei 0.75 (32 bzw. 31 Steps) landet sauber in `supported`, statt mit der Klippe zu oszillieren.
+Eliminiert die 0.75-Klippe per Konstruktion. DS+Gemini Mode bei 0.75 (32 bzw. 31 Steps) landet sauber in `supported`, statt mit der Klippe zu oszillieren. Der DS+Gemini-Cluster bei 0.50 (17 bzw. 13 Steps) bleibt eindeutig im `partial`-Band — das war in v2.1 (Floor 0.50) der Treiber der vier gold=HOLD-Regressionen im Phase-2 CM-Run.
 
 ### 2. Koordinierte Score-Floor-Anpassungen (drei Floors, eine Logik)
 
@@ -117,6 +141,15 @@ Diese Schichtung ist die load-bearing Koordination. Predicate-Shift ohne Floor-A
 
 **T23 + T24 Begründung (Pauls Review)**: R1-Floor cappt auf exakt 0.25, was direkt auf der `partial`/`unsupported`-Grenze sitzt (`partial ≥ 0.25`, `unsupported < 0.25`). T22 prüft den Floor-Output, aber nicht die Bandgrenze selbst. T23 lockt explizit `score === 0.25 → partial` (inklusiv), T24 lockt `score < 0.25 → unsupported` (exklusiv). Damit kann ein zukünftiger Float-Rundungsfehler oder eine versehentliche `>` statt `>=` Änderung im Predicate-Mapping nicht stillschweigend `unsupported` aus R1-no-quote-Cases machen.
 
+#### Neue Lock-Tests v2.2 (T25 + T26)
+
+| Test | Input | Expected | Lockt |
+|---|---|---|---|
+| **T25** | score=0.5624 (raw input) | `partial` | Predicate-Band v2.2 obere Partial-Grenze inklusiv (Float-Rounding-Lock unter 0.5625) |
+| **T26** | score=0.50 (raw input) | `partial` | v2.2 Anti-Regression: 0.50-Cluster (DS+Gemini) muss non-supported bleiben |
+
+**T26 Begründung**: Der DS+Gemini-Score-Cluster bei 0.50 war die Quelle der 4 gold=HOLD Regressionen im Phase-2 CM-Run unter v2.1. v2.2 platziert den Floor explizit oberhalb dieses Clusters. T26 pinnt diese Designintention: falls 0.50 jemals wieder als `supported` mappt (ob durch Konstanten-Drift oder Floor-Erweiterung), faellt der Test laut. Dies ist die direkte Lock-Manifestation von Pauls Hard-Rule-Auslegung 3.
+
 #### Bestehende R7-Test-Suite (`test-r7-cross-step-aliasing.ts`)
 
 7+ Tests erwarten `score === 0.5` (L2a, L2b, L2c, L3b, L3c, L4 Order, L4 Case-insensitive). Alle müssen auf `0.40` umgezogen werden. **Kein Funktionsverlust**: die Tests prüfen *dass R7 cappt*, nicht *worauf*. Mechanische Konstanten-Anpassung.
@@ -135,14 +168,14 @@ Unter v2: R6 trigger-range bleibt `≤ 0.5`, R7-Cap-Output ist 0.40 (innerhalb R
 
 ## Preconditions
 
-**P1: Hard-Rule preservation on 82-case library** (NICHT VERHANDELBAR)
+**P1 (REVISED v2.2, Auslegung 3): Hard-Rule preservation on 82-case library** (NICHT VERHANDELBAR)
 
-Confusion-Matrix-Run mit den neuen Bands und Floors muss zeigen:
-- 0 BLOCK→ALLOW regressions
-- 0 HOLD→ALLOW regressions
-- 0 ALLOW→BLOCK regressions
+Confusion-Matrix-Run mit v2.2-Bands muss zeigen:
+- **0 BLOCK→ALLOW Transitionen** (absolut, kein Gold-Label-Override). D-06 (wrong-source) bleibt unveraendert.
+- **0 UNCERTAIN→ALLOW Transitionen mit `gold_verdict ∈ {HOLD, BLOCK}`** (echte Regression). UNCERTAIN→ALLOW mit `gold_verdict = ALLOW` ist eine Korrektur, kein Verstoss — das Gate haelt.
+- 0 ALLOW→BLOCK Transitionen.
 
-Falls eine dieser Regressionen auftritt: ADR-0003 wird verworfen. Insbesondere D-06 (wrong-source detection) darf nicht weicher werden.
+Die Auslegung-3-Praezisierung der HOLD-Bezeichnung wurde von Paul ratifiziert nach Audit der drei Phase-2 v2.2-Korrekturen (CODE-05, MED-05, GAIA-02). Sie konkretisiert **„Decompose, don’t loosen“**: das Hard-Rule-Verbot wird nicht aufgeweicht, sondern in zwei semantisch saubere Teilregeln aufgeteilt (BLOCK→ALLOW immer 0, UNCERTAIN→ALLOW gold-label-bewertet).
 
 **P2: Variance reduction**
 
@@ -290,10 +323,13 @@ Falls P1 fails: hard reject. Falls P2 fails: revert + ADR-0004 (Continuous failS
 
 ---
 
-**Status**: DRAFT v2 pending P1+P2 Validierung
+**Status**: DRAFT v2.2 ratifiziert, pending Hermes-Bestaetigungs-Run + Merge
 **Next steps**:
-1. Raul + Paul ratifizieren v2-Direction (insbesondere Drei-Floor-Koordination + R7=0.40)
-2. PR-G (Hermes, Seed-Pinning) — gemerged
-3. Implementation-PR Phase 1 (Computer)
-4. Phase 2 CM-Validierung (Hermes)
-5. Ratifikation oder Verwerfen basierend auf P1+P2-Resultaten
+1. ✅ Raul + Paul ratifizieren v2-Direction (Drei-Floor-Koordination + R7=0.40)
+2. ✅ PR-G (Hermes, Seed-Pinning) gemerged
+3. ✅ Implementation-PR Phase 1 (Computer) — v2.1 als #19
+4. ✅ Phase 2 CM-Validierung (Hermes) — 7 HOLD→ALLOW unter v2.1, Threshold-Sweep zeigt 0.5625 als Sweet Spot
+5. ✅ Pauls Ratifikation v2.2 nach Gold-Label-Audit (CODE-05, MED-05, GAIA-02)
+6. ✅ v2.2 Code-Aenderung (Computer) — SUPPORTED_THRESHOLD=0.5625, Lock-Tests T18/T25/T26, 272/272 gruen
+7. ⏳ Hermes-Bestaetigungs-Run auf v2.2 (82-Case-Library mit den neuen Bands)
+8. ⏳ Merge PR #19 nach sauberem Bestaetigungs-Run

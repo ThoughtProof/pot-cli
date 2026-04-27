@@ -1,23 +1,31 @@
 /**
- * ADR-0003 v2.1 — Threshold-Shift Lock-Tests (T17–T24).
+ * ADR-0003 v2.2 — Threshold-Shift Lock-Tests (T17–T26).
  *
- * Locks the new predicate band shift (supported ≥ 0.50, partial 0.25–0.49,
- * unsupported < 0.25) and the three coordinated floors (R1=0.25, R7=0.40,
- * Quote-too-short=0.40) against accidental regression.
+ * Locks the v2.2 predicate band shift (supported ≥ 0.5625, partial
+ * 0.25–0.5624, unsupported < 0.25) and the three coordinated floors
+ * (R1=0.25, R7=0.40, Quote-too-short=0.40) against accidental regression.
+ *
+ * v2.2 changelog vs v2.1: SUPPORTED_THRESHOLD shifted 0.50 → 0.5625 after
+ * Phase-2 CM Threshold-Sweep (Hermes, 2026-04-27) showed 0.5625 as the
+ * empirical sweet spot (plateau 0.5625–0.75 at 86.6% accuracy, 0 gold=HOLD
+ * regressions vs 4 at 0.50). Paul ratified Hard-Rule P1 Auslegung 3 after
+ * auditing the 3 remaining gold=ALLOW cases (CODE-05, MED-05, GAIA-02).
  *
  * Lock contract:
- *   T17. score=0.49 raw → partial (just below new supported floor)
- *   T18. score=0.50 raw → supported (at new floor, with quote)
+ *   T17. score=0.49 raw → partial (well below new v2.2 supported floor)
+ *   T18. score=0.5625 raw → supported (at new v2.2 floor, with quote)
  *   T19. score=0.74 raw → supported (well above new floor, with quote)
  *   T20. R7 cross-step input=0.75 → capped to 0.40 → partial
  *   T21. Quote-too-short input=0.75 → capped to 0.40 → partial
  *   T22. R1 no-quote input=0.75 → capped to 0.25 → partial
  *   T23. score=0.25 raw → partial (PARTIAL_THRESHOLD is inclusive — Paul boundary flag)
  *   T24. score=0.2499 raw → unsupported (Float-Rounding-Lock just below boundary)
+ *   T25. score=0.5624 raw → partial (v2.2 Float-Rounding-Lock just below new supported floor)
+ *   T26. score=0.50 raw → partial (v2.2 anti-regression: 0.50 cluster must NOT be supported)
  *
  * These tests pin numeric constants AND predicate transitions. They will fail
  * loudly if any of {SUPPORTED_THRESHOLD, PARTIAL_THRESHOLD, R1_NO_QUOTE_FLOOR,
- * R7_CROSS_STEP_FLOOR, QUOTE_TOO_SHORT_FLOOR} drifts from the v2.1 contract.
+ * R7_CROSS_STEP_FLOOR, QUOTE_TOO_SHORT_FLOOR} drifts from the v2.2 contract.
  */
 
 import { test } from 'node:test';
@@ -58,8 +66,8 @@ const TRACE_OK = '[TOOL_CALL] web_fetch(...)\n[TOOL_RESULT] full response body h
 
 // ─── Constant-pin tests (defensive) ─────────────────────────────────────────
 
-test('Constants: ADR-0003 v2.1 numeric values are locked', () => {
-  assert.equal(SUPPORTED_THRESHOLD, 0.50, 'SUPPORTED_THRESHOLD must be 0.50');
+test('Constants: ADR-0003 v2.2 numeric values are locked', () => {
+  assert.equal(SUPPORTED_THRESHOLD, 0.5625, 'SUPPORTED_THRESHOLD must be 0.5625 (v2.2)');
   assert.equal(PARTIAL_THRESHOLD, 0.25, 'PARTIAL_THRESHOLD must be 0.25');
   assert.equal(R1_NO_QUOTE_FLOOR, 0.25, 'R1_NO_QUOTE_FLOOR must be 0.25');
   assert.equal(R7_CROSS_STEP_FLOOR, 0.40, 'R7_CROSS_STEP_FLOOR must be 0.40');
@@ -68,24 +76,24 @@ test('Constants: ADR-0003 v2.1 numeric values are locked', () => {
 
 // ─── T17: Just below supported floor → partial ──────────────────────────────
 
-test('T17: score=0.49 with quote → partial (just below SUPPORTED_THRESHOLD)', () => {
+test('T17: score=0.49 with quote → partial (well below v2.2 SUPPORTED_THRESHOLD)', () => {
   const out = applyScoreFloors(
     buildEval({ score: 0.49, quote: 'verbatim quote from the trace excerpt' }),
     TRACE_OK,
   );
   assert.equal(out.score, 0.49, 'score must pass through unchanged');
-  assert.equal(out.predicate, 'partial', '0.49 < 0.50 → partial band');
+  assert.equal(out.predicate, 'partial', '0.49 < 0.5625 → partial band');
 });
 
 // ─── T18: At supported floor → supported ────────────────────────────────────
 
-test('T18: score=0.50 with quote → supported (at SUPPORTED_THRESHOLD, inclusive)', () => {
+test('T18: score=0.5625 with quote → supported (at v2.2 SUPPORTED_THRESHOLD, inclusive)', () => {
   const out = applyScoreFloors(
-    buildEval({ score: 0.50, quote: 'verbatim quote from the trace excerpt' }),
+    buildEval({ score: 0.5625, quote: 'verbatim quote from the trace excerpt' }),
     TRACE_OK,
   );
-  assert.equal(out.score, 0.50, 'score must pass through unchanged');
-  assert.equal(out.predicate, 'supported', '0.50 ≥ SUPPORTED_THRESHOLD AND quote present → supported');
+  assert.equal(out.score, 0.5625, 'score must pass through unchanged');
+  assert.equal(out.predicate, 'supported', '0.5625 ≥ SUPPORTED_THRESHOLD AND quote present → supported');
 });
 
 // ─── T19: Well above supported floor → supported ────────────────────────────
@@ -168,4 +176,30 @@ test('T24: score=0.2499 raw → unsupported (Float-Rounding-Lock just below PART
   );
   assert.equal(out.score, 0.2499, 'score must pass through unchanged');
   assert.equal(out.predicate, 'unsupported', '0.2499 < PARTIAL_THRESHOLD → unsupported');
+});
+
+// ─── T25: v2.2 Float-Rounding-Lock just below new supported floor ────────────
+
+test('T25: score=0.5624 raw → partial (v2.2 Float-Rounding-Lock just below SUPPORTED_THRESHOLD)', () => {
+  const out = applyScoreFloors(
+    buildEval({ score: 0.5624, quote: 'a sufficiently long quote here' }),
+    TRACE_OK,
+  );
+  assert.equal(out.score, 0.5624, 'score must pass through unchanged');
+  assert.equal(out.predicate, 'partial', '0.5624 < 0.5625 → partial (Float-Rounding-Lock for v2.2 floor)');
+});
+
+// ─── T26: v2.2 anti-regression — 0.50 cluster must NOT be supported ──────────
+
+test('T26: score=0.50 raw → partial (v2.2 anti-regression: 0.50 DS+Gemini cluster must land in partial)', () => {
+  // The DS+Gemini score-cluster bimodal mode at 0.50 was the source of the
+  // gold=HOLD regressions in v2.1 Phase-2 CM. v2.2 deliberately places the
+  // floor above 0.50 so this cluster is non-supported. This test pins that
+  // intent: if 0.50 ever maps to supported again, this test will fail loudly.
+  const out = applyScoreFloors(
+    buildEval({ score: 0.50, quote: 'verbatim quote from the trace excerpt' }),
+    TRACE_OK,
+  );
+  assert.equal(out.score, 0.50, 'score must pass through unchanged');
+  assert.equal(out.predicate, 'partial', '0.50 < 0.5625 → partial (v2.2 contract: 0.50 cluster is partial, not supported)');
 });

@@ -1,26 +1,34 @@
 #!/usr/bin/env node
 /**
- * ADR-0003 v2.1 — Phase-1 Predicate-Simulation.
+ * ADR-0003 v2.2 — Phase-1 Predicate-Simulation.
  *
  * Purpose: against Hermes' DS-Recon score distribution (4×4 runs across 158
  * steps per model), simulate the predicate transitions induced by the band
- * shift (supported 0.75→0.50, partial 0.25–0.49) and the R7/R1/quote-short
- * floors. This is Phase-1 acceptance evidence; Phase 2 (Hermes M4) provides
- * the real confusion matrix on the 82-case library.
+ * shift (supported 0.75 → 0.5625, partial 0.25–0.5624) and the R7/R1/quote-
+ * short floors. This is Phase-1 acceptance evidence; Phase 2 (Hermes M4)
+ * provides the real confusion matrix on the 82-case library.
+ *
+ * v2.2 changelog vs v2.1: SUPPORTED_NEW shifted 0.50 → 0.5625 after the
+ * Phase-2 CM Threshold-Sweep showed 4 gold=HOLD regressions at 0.50 driven
+ * by the DS+Gemini bimodal score-cluster at 0.50. v2.2 places the floor
+ * deliberately above this cluster (plateau 0.5625–0.75 at 86.6% accuracy,
+ * 0 gold=HOLD regressions). The 0.50 bucket therefore now stays in `partial`,
+ * eliminating the v2.1 „promotion“ from partial→supported and the resulting
+ * gold=HOLD false-positives.
  *
  * Caveats (intentional):
  *   - Score buckets are post-floor LLM output — we do NOT re-apply floors
  *     here, because the buckets ARE the observed distribution after floors.
  *   - Quote presence is unknown per-bucket → we report two scenarios:
- *       A) optimistic (assume all ≥ 0.50 had quote)
- *       B) pessimistic R1 (assume 25% of ≥ 0.50 lacked quote → cap to 0.25)
+ *       A) optimistic (assume all ≥ 0.5625 had quote)
+ *       B) pessimistic R1 (assume 25% of ≥ 0.5625 lacked quote → cap to 0.25)
  *   - Predicate shifts only flip ALLOW/HOLD/BLOCK if a CRITICAL step changes
  *     class. Step-level criticality is not in the distribution table — so we
  *     report STEP-level drift, not verdict-level. Verdict drift = Phase 2.
  */
 
 const SUPPORTED_OLD = 0.75;
-const SUPPORTED_NEW = 0.50;
+const SUPPORTED_NEW = 0.5625;
 const PARTIAL_FLOOR = 0.25;
 
 // Hermes 4×4 runs, 158 steps per model column.
@@ -69,7 +77,7 @@ function fmtPct(n, total) {
   return `${((n / total) * 100).toFixed(1)}%`;
 }
 
-console.log('# ADR-0003 v2.1 — Step-Level Predicate-Drift Simulation');
+console.log('# ADR-0003 v2.2 — Step-Level Predicate-Drift Simulation');
 console.log('');
 console.log('Source: Hermes DS-Recon, 4 runs × 4 models, 158 steps per model.');
 console.log('Method: re-classify each post-floor score bucket under the new band.');
@@ -102,21 +110,31 @@ console.log(`- Total step-evaluations across 3 models: ${totalAll}`);
 console.log(`- Total promoted partial→supported: ${promotedAll} (${fmtPct(promotedAll, totalAll)})`);
 console.log(`- Total demoted: ${demotedAll}`);
 console.log('');
-console.log('## Interpretation');
+console.log('## Interpretation (v2.2)');
 console.log('');
-console.log('The shift exclusively converts the 0.50-bucket from `partial` to `supported`.');
-console.log('No downgrades occur in the simple shift. Demotions only enter via:');
-console.log('  - R1 (no-quote at score≥0.50) — capped to 0.25, predicate becomes `partial`.');
+console.log('Under v2.2 (SUPPORTED_THRESHOLD = 0.5625), only the 0.75 and 1.00 buckets');
+console.log('classify as `supported`. The 0.50 bucket — the bimodal DS+Gemini cluster');
+console.log('that drove the v2.1 gold=HOLD regressions — stays in `partial`.');
+console.log('');
+console.log('Comparison v2.1 (floor 0.50) → v2.2 (floor 0.5625):');
+console.log('  - v2.1 promoted the 0.50 bucket (60 steps across 3 models) to `supported`,');
+console.log('    creating false-positive supported-classifications on the bimodal cluster.');
+console.log('  - v2.2 leaves the 0.50 bucket in `partial`. Only the 0.75 cliff is removed.');
+console.log('No downgrades occur in v2.2 either. Demotions only enter via:');
+console.log('  - R1 (no-quote at score≥0.5625) — capped to 0.25, predicate becomes `partial`.');
 console.log('  - R7/Quote-too-short — capped to 0.40, predicate becomes `partial`.');
 console.log('Both floors are applied BEFORE the predicate band, so the buckets above');
 console.log('already reflect their effect. No additional Phase-1 demotion is expected.');
 console.log('');
-console.log('## Hard-Rule Compatibility (User)');
+console.log('## Hard-Rule Compatibility (Auslegung 3, Paul ratifiziert v2.2)');
 console.log('');
-console.log('User\'s acceptance hard-rule (from session memory): zero BLOCK→ALLOW or');
-console.log('HOLD→ALLOW regressions on the 40-case CM. This Phase-1 simulation cannot');
-console.log('verify that — it requires Hermes\' Phase-2 CM run on 82 cases with the');
-console.log('seed pin (PR-G #18). Phase 1 evidence: only `partial→supported` transitions');
-console.log('on the 0.50 bucket; never `unsupported→supported`. A BLOCK→ALLOW regression');
-console.log('would require a critical step flipping unsupported→supported, which the');
-console.log('shift cannot produce by construction (no score crosses the 0.25 boundary).');
+console.log('Hard-Rule (revised): 0 BLOCK→ALLOW absolute, 0 UNCERTAIN→ALLOW with');
+console.log('gold_verdict in {HOLD, BLOCK}. UNCERTAIN→ALLOW with gold_verdict=ALLOW is a');
+console.log('correction, not a regression — the gate holds. This Phase-1 simulation cannot');
+console.log('verify the verdict-level rule — that requires Hermes\' Phase-2 confirmation');
+console.log('CM run on 82 cases with the seed pin (PR-G #18). Phase-1 evidence: under');
+console.log('v2.2 the only step-level transition is `partial→supported` on 0.75-bucket');
+console.log('steps; the 0.50-cluster stays in `partial` (the v2.1 gold=HOLD root cause).');
+console.log('A BLOCK→ALLOW regression would require a critical step flipping');
+console.log('unsupported→supported, which the shift cannot produce by construction (no');
+console.log('score crosses the 0.25 boundary).');

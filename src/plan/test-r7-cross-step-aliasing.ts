@@ -4,7 +4,7 @@
  * R7 lifts gold-step scoring from `none` → `partial` (0.40, ADR-0003 v2.1)
  * when evidence is split across trace steps (e.g. step 1 plans, step 4
  * executes). Defensive Code-Floor caps cross-step evidence at 0.40 —
- * reaching supported (≥ 0.50) still requires a verbatim quote from a SINGLE
+ * reaching supported (≥ 0.5625) still requires a verbatim quote from a SINGLE
  * contiguous span in ONE trace step (R1 + R1a remain non-negotiable).
  *
  * Lock-test contract:
