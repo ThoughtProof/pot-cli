@@ -1,15 +1,26 @@
 /**
  * verdict-mapper.ts
  * =================
- * Maps internal 5-tier engine verdicts to the public 3-tier API contract.
+ * Maps internal engine verdicts to the public 3-tier API contract.
  *
- * Internal (engine/CLI):  ALLOW | CONDITIONAL_ALLOW | HOLD | DISSENT | BLOCK
+ * Internal vocabulary:    ALLOW | CONDITIONAL_ALLOW | HOLD | DISSENT | BLOCK
  * Public (API/SDK):       ALLOW | BLOCK | UNCERTAIN
+ *
+ * Currently emitted by the engine: ALLOW, CONDITIONAL_ALLOW, HOLD, BLOCK
+ * (`EvaluatorVerdict` in src/plan/graded-support-evaluator.ts).
+ *
+ * DISSENT is preserved in the InternalVerdict type and the mapping table for
+ * forward-compatibility. It was historically reserved for a multi-model
+ * aggregator path that ADR-0002 rejected on 2026-04-27 (correlation test
+ * showed no accuracy lift from multi-model voting). If a future ADR
+ * re-introduces an aggregator that emits DISSENT, no mapper change is needed.
  *
  * This is the ONLY module that performs this mapping. All API/SDK response
  * paths MUST call toPublicVerdict(). No bypass path.
  *
  * @since v0.8.1
+ * @see docs/adr/0001-verdict-model.md
+ * @see docs/adr/0002-step-level-triple-majority-REJECTED.md
  */
 
 // ── Internal verdict type (engine/CLI, 5-tier) ──────────────────────────

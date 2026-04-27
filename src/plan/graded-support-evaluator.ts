@@ -104,13 +104,21 @@ export interface EvalInput {
 }
 
 /**
- * Verdict emitted by the single-model evaluator (pre-aggregator).
+ * Verdict emitted by the single-model evaluator.
  *
- * Does NOT include DISSENT — that's emitted by the multi-model aggregator
- * (PR-F). The full 5-tier internal verdict (incl. DISSENT) lives in
- * src/verdict-mapper.ts as `InternalVerdict`.
+ * Does NOT include DISSENT. DISSENT was historically reserved for a
+ * multi-model aggregator path; that path was rejected by ADR-0002
+ * (Step-Level Triple-Majority) on 2026-04-27 after a correlation test
+ * showed multi-model voting yields no accuracy lift (Grok↔DS r=0.857,
+ * DS↔Gemini r=0.746). DISSENT is therefore not emitted in the current
+ * pipeline.
  *
- * See: docs/adr/0001-verdict-model.md
+ * The full 5-tier vocabulary including DISSENT is preserved in
+ * src/verdict-mapper.ts as `InternalVerdict` for forward-compatibility:
+ * if a future ADR re-introduces an aggregator that emits DISSENT,
+ * the public mapping is already defined.
+ *
+ * See: docs/adr/0001-verdict-model.md, docs/adr/0002-step-level-triple-majority-REJECTED.md
  */
 export type EvaluatorVerdict = 'ALLOW' | 'CONDITIONAL_ALLOW' | 'HOLD' | 'BLOCK';
 
