@@ -78,6 +78,17 @@ not "we don't know" (UNCERTAIN). It is "we are nearly sure, one point is
 weak." That belongs in metadata (`confidence: 'low'`), not at the verdict
 gate.
 
+**CONDITIONAL_ALLOW (not plain ALLOW) for the band:** Internally the band
+emits `CONDITIONAL_ALLOW` so the fragile step shows up in
+`metadata.conditions[]` of the public response. Public mapping is still
+`ALLOW` (per `toPublicVerdict`), so the customer's verdict is unchanged from
+a bare `ALLOW`; what they additionally see is **why** confidence is low
+(e.g. `"step_3: critical step(s) marginally unsupported (failScore=0.5)"`).
+Paul's original spec said `ALLOW + confidence:low`; Computer chose
+`CONDITIONAL_ALLOW + confidence:low` because the conditions surface adds
+customer-facing transparency at zero verdict-cost. Paul ratified this
+refinement in his PR review (2026-04-27 21:56 CEST).
+
 Audit-safety preserved:
 
 - **failScore ≥ 1.0** still gates: 2+ critical issues OR 1 unsupported critical.
@@ -191,8 +202,16 @@ requiring a deeper fix.
 - **2026-04-27 ~21:45 CEST:** Paul ratifies pivot — failScore-gate-decoupling
   as primary, Margin Band as dormant defensive layer, confidence label
   renamed `'borderline'` → `'low'`.
-- **2026-04-27 ~22:00 CEST:** PR #26 refactor commit. ADR-0005 in-place
-  rewrite (this document). 280/280 + 15/15 green.
+- **2026-04-27 ~21:50 CEST:** PR #26 refactor commit `b46bd6b` pushed.
+  ADR-0005 in-place rewrite (this document). 280/280 + 15/15 green.
+- **2026-04-27 ~21:56 CEST:** Paul reviews PR #26 post-pivot. T4-Spec-Shift
+  approved (failScore=0.5 → CONDITIONAL_ALLOW + low_confidence). Notes that
+  Computer chose CONDITIONAL_ALLOW (not plain ALLOW) for the [0.5, 1.0)
+  band, surfacing the fragile step in `metadata.conditions[]` for customer
+  transparency — a refinement beyond Paul's original spec. Paul:
+  "CONDITIONAL_ALLOW + confidence:low für failScore ∈ [0.5, 1.0) ist die
+  richtige Wahl. Computer hat meinen Vorschlag verbessert." PR #26 reviewed
+  from Paul's side; pending only Hermes' Re-Run.
 
 ## Related ADRs
 
