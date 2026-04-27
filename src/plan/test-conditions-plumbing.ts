@@ -35,10 +35,15 @@ test('T15: toPublicVerdict(CA) without conditions defaults to []', () => {
 
 // ─── T16: Non-CA verdicts have no conditions in metadata ────────────────────
 
-test('T16: ALLOW/HOLD/BLOCK have no conditions in metadata', () => {
-  for (const v of ['ALLOW', 'HOLD', 'BLOCK'] as InternalVerdict[]) {
+test('T16: ALLOW/HOLD/DISSENT/BLOCK have no conditions in metadata', () => {
+  for (const v of ['ALLOW', 'HOLD', 'DISSENT', 'BLOCK'] as InternalVerdict[]) {
     const pub = toPublicVerdict(v);
     assert.equal(pub.metadata.conditions, undefined,
       `${v} should not have conditions in metadata`);
   }
+  // ADR-0001: DISSENT→UNCERTAIN carries dissent:true, not conditions
+  const dissent = toPublicVerdict('DISSENT');
+  assert.equal(dissent.verdict, 'UNCERTAIN');
+  assert.equal(dissent.metadata.dissent, true);
+  assert.equal(dissent.metadata.conditions, undefined);
 });
