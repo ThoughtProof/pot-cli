@@ -39,39 +39,36 @@ export const DEFAULT_EVAL_SEED = 42;
 export const SUPPORTED_THRESHOLD = 0.5625;
 export const PARTIAL_THRESHOLD = 0.25;
 
-// ─── Margin Band (ADR-0005, PR-F) ────────────────────────────────────────────
+// ─── Margin Band (ADR-0005, PR-F — DORMANT DEFENSIVE LAYER) ───────────────────
 
 /**
  * Margin Band halfwidth around SUPPORTED_THRESHOLD.
  *
- * Hermes' v2.2 Variance-Verification (2026-04-27, Issue #21) found that 8 of
- * the observed verdict-flips between two seed-pinned runs were caused by
- * `supported`-predicate scores oscillating across SUPPORTED_THRESHOLD due to
- * Grok-API non-determinism (the API treats `seed=42` as a hint, not a hard
- * constraint). All 8 flips were adjacent (ALLOW↔UNCERTAIN or UNCERTAIN↔BLOCK).
+ * STATUS (2026-04-27, post Hermes' Halfwidth-Validierung): DORMANT.
  *
- * Paul's launch-blocker decision (2026-04-27 evening, post-variance-report):
- * For a verification product, run-to-run flips at the threshold are an
- * audit-reproducibility problem (Skye re-eval, OriginDAO on-chain attestation,
- * Healthcare/Finance audit trails). Margin Band reclassifies `supported`
- * predicates whose score lies in [SUPPORTED_THRESHOLD - MARGIN_BAND_HALFWIDTH,
- * SUPPORTED_THRESHOLD + MARGIN_BAND_HALFWIDTH) as criticalPartial (for
- * critical steps) or non-critical weakness (for non-critical steps), pushing
- * borderline cases conservatively toward UNCERTAIN. Estimated oscillator-rate
- * reduction: 19.8% → ~5%.
+ * Initial hypothesis: 8 observed Verdict-Flips were caused by `supported`-
+ * predicate scores oscillating across SUPPORTED_THRESHOLD. Hermes' actual data
+ * disproved this: 0/8 flips had a `supported` score in the band
+ * [SUPPORTED_THRESHOLD ± MARGIN_BAND_HALFWIDTH]. The real mechanism is one
+ * level deeper, at the failScore gate (see deriveVerdict's failScore branch
+ * and ADR-0005 Decision section).
  *
- * Default 0.05 is symmetric around 0.5625 and pre-validates that the three
- * v2.2 audited reference cases (CODE-05/MED-05/GAIA-02, all scores ≥0.75)
- * remain ALLOW (margin band zone is [0.5125, 0.6125), all three are above).
- * Hermes' halfwidth-validation (Issue #23) confirms the value against the
- * 8 observed flip-cases. Halfwidth is a single constant; raising it is a
- * one-line patch if Hermes' data shows scores further from the threshold.
+ * Margin Band remains in the codebase as a defensive future-proofing layer.
+ * It does NOT mutate the verdict — it only contributes to the `lowConfidence`
+ * signal that surfaces as `metadata.confidence: 'low'` in the public API.
+ * If a future model/version produces flips at the supportScore threshold,
+ * activating this layer is a one-line change in deriveVerdict.
  *
- * "Decompose, don't loosen": Margin Band makes the system *more* conservative
- * on borderline cases, never more permissive. Hard-rule D-06 (wrong-source
- * detection) and Hard-rule P1 (BLOCK→ALLOW absolute 0) are unaffected.
+ * Default 0.05 is symmetric around 0.5625 and ensures the three v2.2 audited
+ * reference cases (CODE-05/MED-05/GAIA-02, all scores ≥0.75) are unaffected:
+ * the band [0.5125, 0.6125) excludes them by definition (T29 locks this).
  *
- * @see docs/adr/0005-margin-band-and-confidence-metadata-DRAFT.md
+ * "Decompose, don't loosen": even when active, Margin Band makes the system
+ * *more* conservative on borderline cases, never more permissive. Hard-rule
+ * D-06 (wrong-source detection) and Hard-rule P1 (BLOCK→ALLOW absolute 0) are
+ * evaluated upstream and unaffected.
+ *
+ * @see docs/adr/0005-failscore-gate-decoupling-DRAFT.md
  */
 export const MARGIN_BAND_HALFWIDTH = 0.05;
 
@@ -165,12 +162,18 @@ export interface ItemResult {
   verdict_reasoning: string;
   conditions?: string[];
   /**
-   * PR-F (ADR-0005): true iff at least one critical or non-critical step had
-   * a `supported`/`faithful` predicate whose score lay within
-   * MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD. Surfaced as
-   * `metadata.confidence: 'borderline'` in the public API.
+   * PR-F (ADR-0005): true iff deriveVerdict signalled step-level fragility.
+   * Two contributing paths:
+   *   (a) PRIMARY: failScore in [0.5, 1.0) — exactly one critical step is
+   *       marginally unsupported (predicate `partial`/`weakly_faithful`/
+   *       `partially_faithful`). Per Hermes' variance data (2026-04-27),
+   *       this is the empirical source of all 8 observed verdict-flips.
+   *   (b) DEFENSIVE: a supported/faithful predicate's score sat within
+   *       MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD. Empirically dormant
+   *       (0/8 flips), retained as future-proofing.
+   * Surfaced as `metadata.confidence: 'low'` in the public API.
    */
-  margin_band_triggered?: boolean;
+  low_confidence?: boolean;
   provenance_violations: string[];
   tier1_stats?: {
     total: number;
@@ -489,13 +492,14 @@ export function applyScoreFloors(
 // ─── Verdict Derivation ───────────────────────────────────────────────────────
 
 /**
- * Returns true iff a step evaluation falls inside the Margin Band — i.e. it
- * was classified as `supported` (or its faithfulness equivalent `faithful`)
- * but its score is within MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD.
+ * Returns true iff a step evaluation falls inside the (dormant) Margin Band —
+ * i.e. it was classified as `supported`/`faithful` but its score is within
+ * MARGIN_BAND_HALFWIDTH of SUPPORTED_THRESHOLD.
  *
- * Such evaluations are NOT loosened to ALLOW; they are treated conservatively
- * as criticalPartial / non-critical weakness in deriveVerdict, and surfaced
- * as `confidence: 'borderline'` in the public API metadata via toPublicVerdict.
+ * Margin Band is dormant as of 2026-04-27 (Hermes' Halfwidth-Validierung
+ * showed 0/8 observed flips fall in this band). It does NOT mutate the
+ * verdict; it only contributes to the `lowConfidence` signal that surfaces
+ * as `metadata.confidence: 'low'` in the public API.
  *
  * Hard rules (D-06 wrong-source, P1 BLOCK→ALLOW) are evaluated upstream and
  * are unaffected by this band.
@@ -511,11 +515,11 @@ export function isInMarginBand(evalItem: StepEvaluation): boolean {
 export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
-): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[]; marginBandTriggered: boolean } {
+): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[]; lowConfidence: boolean } {
   const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
   const criticalPartial: string[] = [];      // soft fail (score 0.5)
   const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions
-  const marginBandSteps: string[] = [];      // PR-F: borderline supported predicates
+  const marginBandSteps: string[] = [];      // PR-F (dormant): borderline supported predicates
 
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
@@ -528,11 +532,10 @@ export function deriveVerdict(
     } else if (evalItem.predicate === 'partially_faithful') {
       criticalPartial.push(evalItem.step_id);
     } else if (isInMarginBand(evalItem)) {
-      // PR-F (ADR-0005): supported predicate with score in margin band counts
-      // as criticalPartial for verdict robustness. "Decompose, don't loosen"
-      // — we make the system more conservative on borderline cases, not more
-      // permissive. failScore += 0.5 (same weight as partial).
-      criticalPartial.push(evalItem.step_id);
+      // PR-F (ADR-0005): margin band is DORMANT. We record the hit for the
+      // lowConfidence signal but do NOT mutate criticalPartial/failScore.
+      // Hermes' Halfwidth-Validierung (2026-04-27) showed 0/8 flips originate
+      // from this path; mutation here would inject false fragility.
       marginBandSteps.push(evalItem.step_id);
     }
   }
@@ -547,15 +550,26 @@ export function deriveVerdict(
     if (evalItem.score < SUPPORTED_THRESHOLD && evalItem.score > 0) {
       nonCriticalWeaknesses.push(`${evalItem.step_id}: ${evalItem.predicate} (score=${evalItem.score}, non-critical)`);
     } else if (isInMarginBand(evalItem)) {
-      // PR-F: borderline supported predicate on a non-critical step is also
-      // surfaced as a weakness so the public confidence indicator is accurate.
-      nonCriticalWeaknesses.push(`${evalItem.step_id}: supported (score=${evalItem.score}, margin-band, non-critical)`);
+      // PR-F (dormant): non-critical margin-band hit also feeds lowConfidence.
+      // No CONDITIONAL_ALLOW promotion — the verdict path is untouched.
       marginBandSteps.push(evalItem.step_id);
     }
   }
 
   // Weighted fail score: unsupported/skipped = 1.0, partial = 0.5
-  // BLOCK ≥ 2.0, HOLD ≥ 0.5, ALLOW < 0.5
+  //
+  // failScore-Gate (ADR-0005, PRIMARY FIX, post-Hermes 2026-04-27):
+  //   ≥ 2.0 → BLOCK
+  //   ≥ 1.0 → HOLD                                  (≥2 critical issues)
+  //   ∈ [0.5, 1.0) → ALLOW + lowConfidence=true     (1 marginal critical step)
+  //   <  0.5 → ALLOW (or CONDITIONAL_ALLOW if non-critical weaknesses)
+  //
+  // Pre-PR-F: the [0.5, 1.0) band routed to HOLD/UNCERTAIN. Hermes' variance
+  // data (Issue #21) showed this was the binary cliff producing the 8 observed
+  // verdict-flips: a single critical step jittering between supported (score
+  // 0.50, predicate change → failScore 0) and partial (score 0.40 → failScore
+  // 0.5) crossed the gate. Decoupling failScore=0.5 from the gate eliminates
+  // 6/8 flips while staying audit-safe (failScore ≥ 1.0 still gates).
   const failScore = criticalUnsupported.length * 1.0 + criticalPartial.length * 0.5;
 
   const marginBandTriggered = marginBandSteps.length > 0;
@@ -567,14 +581,36 @@ export function deriveVerdict(
     return {
       verdict: 'BLOCK',
       reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped × 1.0 + ${criticalPartial.length} partial × 0.5). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
-      marginBandTriggered,
+      // Margin band is irrelevant once we BLOCK; expose it nonetheless for
+      // observability but it has no semantic effect on the public verdict.
+      lowConfidence: marginBandTriggered,
     };
   }
-  if (failScore >= 0.5) {
+  if (failScore >= 1.0) {
     return {
       verdict: 'HOLD',
       reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
-      marginBandTriggered,
+      lowConfidence: marginBandTriggered,
+    };
+  }
+
+  // PRIMARY PR-F PATH: failScore in [0.5, 1.0).
+  // Exactly one critical step is marginally unsupported. Pre-PR-F this routed
+  // to HOLD/UNCERTAIN, creating the binary cliff. We now ALLOW with
+  // lowConfidence=true, surfaced as `metadata.confidence: 'low'` in the public
+  // API. CONDITIONAL_ALLOW conditions, if any, are still attached.
+  const failScoreLowConfidence = failScore >= 0.5; // i.e. exactly 0.5 here
+  const lowConfidence = failScoreLowConfidence || marginBandTriggered;
+
+  if (failScoreLowConfidence) {
+    const fragileIds = [...criticalUnsupported, ...criticalPartial];
+    const fragilityCondition =
+      `${fragileIds.join(', ')}: critical step(s) marginally unsupported (failScore=${failScore})`;
+    return {
+      verdict: 'CONDITIONAL_ALLOW',
+      reasoning: `failScore=${failScore} (1 critical step marginally unsupported). ALLOW with low confidence per ADR-0005 failScore-gate-decoupling.${marginBandSuffix}`,
+      conditions: [fragilityCondition, ...nonCriticalWeaknesses],
+      lowConfidence,
     };
   }
 
@@ -584,14 +620,14 @@ export function deriveVerdict(
       verdict: 'CONDITIONAL_ALLOW',
       reasoning: `All critical steps supported. ${nonCriticalWeaknesses.length} non-critical weakness(es) detected.${marginBandSuffix}`,
       conditions: nonCriticalWeaknesses,
-      marginBandTriggered,
+      lowConfidence,
     };
   }
 
   return {
     verdict: 'ALLOW',
     reasoning: 'All critical steps adequately supported.',
-    marginBandTriggered,
+    lowConfidence,
   };
 }
 
@@ -1003,7 +1039,7 @@ export async function evaluateItem(
   });
 
   // ── Derive verdict ──
-  const { verdict, reasoning: verdictReasoning, conditions, marginBandTriggered } = deriveVerdict(processedEvals, item.gold_plan_steps);
+  const { verdict, reasoning: verdictReasoning, conditions, lowConfidence } = deriveVerdict(processedEvals, item.gold_plan_steps);
 
   return {
     id: item.id,
@@ -1011,7 +1047,7 @@ export async function evaluateItem(
     verdict,
     verdict_reasoning: verdictReasoning,
     ...(conditions && conditions.length > 0 ? { conditions } : {}),
-    ...(marginBandTriggered ? { margin_band_triggered: true } : {}),
+    ...(lowConfidence ? { low_confidence: true } : {}),
     provenance_violations: allViolations,
     tier1_stats: tier1Stats,
   };

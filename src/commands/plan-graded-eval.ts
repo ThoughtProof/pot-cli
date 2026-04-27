@@ -263,13 +263,13 @@ export async function runGradedEval(args: string[]): Promise<void> {
       const mapped = toPublicVerdict(
         item.verdict as InternalVerdict,
         item.conditions,
-        { marginBandTriggered: item.margin_band_triggered === true },
+        { lowConfidence: item.low_confidence === true },
       );
       publicResult.items[id] = {
         ...item,
         verdict: mapped.verdict,
         verdict_internal: undefined, // strip internal
-        margin_band_triggered: undefined, // strip engine-internal flag (lives in metadata.confidence)
+        low_confidence: undefined,   // strip engine-internal flag (lives in metadata.confidence)
         metadata: mapped.metadata,
       };
     }
