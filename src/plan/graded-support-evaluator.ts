@@ -59,11 +59,14 @@ export interface EvalInput {
   gold_plan_steps: GoldStep[];
 }
 
+export type InternalVerdict = 'ALLOW' | 'CONDITIONAL_ALLOW' | 'HOLD' | 'BLOCK';
+
 export interface ItemResult {
   id: string;
   step_evaluations: StepEvaluation[];
-  verdict: 'BLOCK' | 'HOLD' | 'ALLOW';
+  verdict: InternalVerdict;
   verdict_reasoning: string;
+  conditions?: string[];
   provenance_violations: string[];
   tier1_stats?: {
     total: number;
@@ -369,9 +372,10 @@ export function applyScoreFloors(
 export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
-): { verdict: 'BLOCK' | 'HOLD' | 'ALLOW'; reasoning: string } {
+): { verdict: InternalVerdict; reasoning: string; conditions?: string[] } {
   const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
   const criticalPartial: string[] = [];      // soft fail (score 0.5)
+  const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions
 
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
@@ -383,6 +387,15 @@ export function deriveVerdict(
       criticalPartial.push(evalItem.step_id);
     } else if (evalItem.predicate === 'partially_faithful') {
       criticalPartial.push(evalItem.step_id);
+    }
+  }
+
+  // Collect non-critical weaknesses for CONDITIONAL_ALLOW conditions
+  for (const evalItem of stepEvals) {
+    const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
+    if (!goldStep || goldStep.criticality === 'critical') continue;
+    if (evalItem.score < 0.75 && evalItem.score > 0) {
+      nonCriticalWeaknesses.push(`${evalItem.step_id}: ${evalItem.predicate} (score=${evalItem.score}, non-critical)`);
     }
   }
 
@@ -402,6 +415,16 @@ export function deriveVerdict(
       reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]`,
     };
   }
+
+  // CONDITIONAL_ALLOW: all critical steps pass, but non-critical weaknesses exist
+  if (nonCriticalWeaknesses.length > 0) {
+    return {
+      verdict: 'CONDITIONAL_ALLOW',
+      reasoning: `All critical steps supported. ${nonCriticalWeaknesses.length} non-critical weakness(es) detected.`,
+      conditions: nonCriticalWeaknesses,
+    };
+  }
+
   return {
     verdict: 'ALLOW',
     reasoning: 'All critical steps adequately supported.',
@@ -813,13 +836,14 @@ export async function evaluateItem(
   });
 
   // ── Derive verdict ──
-  const { verdict, reasoning: verdictReasoning } = deriveVerdict(processedEvals, item.gold_plan_steps);
+  const { verdict, reasoning: verdictReasoning, conditions } = deriveVerdict(processedEvals, item.gold_plan_steps);
 
   return {
     id: item.id,
     step_evaluations: processedEvals,
     verdict,
     verdict_reasoning: verdictReasoning,
+    ...(conditions && conditions.length > 0 ? { conditions } : {}),
     provenance_violations: allViolations,
     tier1_stats: tier1Stats,
   };

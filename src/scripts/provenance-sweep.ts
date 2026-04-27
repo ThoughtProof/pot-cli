@@ -341,6 +341,12 @@ function formatReport(results: ProbeResult[], cases: Case[]): string {
 
 type Verdict = 'BLOCK' | 'HOLD' | 'ALLOW';
 
+/** Collapse 5-tier internal verdict to 3-tier for confusion matrix comparison. */
+function collapseVerdict(v: string): Verdict {
+  if (v === 'CONDITIONAL_ALLOW') return 'ALLOW';
+  return v as Verdict;
+}
+
 interface VerdictRow {
   caseId: string;
   expected: Verdict;
@@ -374,7 +380,7 @@ async function runOnce(cases: Case[], label: string): Promise<Map<string, { verd
   for (const c of cases) {
     const r = result.items[c.id];
     if (!r) continue;
-    out.set(c.id, { verdict: r.verdict, violations: r.provenance_violations });
+    out.set(c.id, { verdict: collapseVerdict(r.verdict), violations: r.provenance_violations });
   }
   return out;
 }
@@ -500,9 +506,9 @@ async function runFullMode(cases: Case[]): Promise<void> {
       if (!v || !n) return null;
       return {
         caseId: c.id,
-        expected: c.expected_verdict,
-        vorher: v.verdict,
-        nachher: n.verdict,
+        expected: c.expected_verdict as Verdict,
+        vorher: collapseVerdict(v.verdict),
+        nachher: collapseVerdict(n.verdict),
         vorherViolations: v.violations,
         nachherViolations: n.violations,
       };
