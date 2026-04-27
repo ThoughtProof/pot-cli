@@ -64,12 +64,21 @@ export interface EvalInput {
   gold_plan_steps: GoldStep[];
 }
 
-export type InternalVerdict = 'ALLOW' | 'CONDITIONAL_ALLOW' | 'HOLD' | 'BLOCK';
+/**
+ * Verdict emitted by the single-model evaluator (pre-aggregator).
+ *
+ * Does NOT include DISSENT — that's emitted by the multi-model aggregator
+ * (PR-F). The full 5-tier internal verdict (incl. DISSENT) lives in
+ * src/verdict-mapper.ts as `InternalVerdict`.
+ *
+ * See: docs/adr/0001-verdict-model.md
+ */
+export type EvaluatorVerdict = 'ALLOW' | 'CONDITIONAL_ALLOW' | 'HOLD' | 'BLOCK';
 
 export interface ItemResult {
   id: string;
   step_evaluations: StepEvaluation[];
-  verdict: InternalVerdict;
+  verdict: EvaluatorVerdict;
   verdict_reasoning: string;
   conditions?: string[];
   provenance_violations: string[];
@@ -377,7 +386,7 @@ export function applyScoreFloors(
 export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
-): { verdict: InternalVerdict; reasoning: string; conditions?: string[] } {
+): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[] } {
   const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
   const criticalPartial: string[] = [];      // soft fail (score 0.5)
   const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions

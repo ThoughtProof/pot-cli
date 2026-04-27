@@ -183,11 +183,11 @@ test('T12: All-critical steps, all pass → pure ALLOW (no context to weaken)', 
   assert.equal(verdict, 'ALLOW', 'No context steps → no weaknesses → ALLOW');
 });
 
-// ─── T13: InternalVerdict type exported correctly ───────────────────────────
+// ─── T13: EvaluatorVerdict type exported correctly ───────────────────────────
 
-test('T13: InternalVerdict type includes CONDITIONAL_ALLOW', () => {
+test('T13: EvaluatorVerdict type includes CONDITIONAL_ALLOW', () => {
   // This is a compile-time test — if it compiles, CONDITIONAL_ALLOW is in the type
-  const verdicts: import('./graded-support-evaluator.js').InternalVerdict[] = [
+  const verdicts: import('./graded-support-evaluator.js').EvaluatorVerdict[] = [
     'ALLOW', 'CONDITIONAL_ALLOW', 'HOLD', 'BLOCK',
   ];
   assert.equal(verdicts.length, 4);
