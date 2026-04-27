@@ -64,7 +64,7 @@ export interface EvalInput {
  *
  * Does NOT include DISSENT — that's emitted by the multi-model aggregator
  * (PR-F). The full 5-tier internal verdict (incl. DISSENT) lives in
- * src/verdict-mapper.ts as `EvaluatorVerdict`.
+ * src/verdict-mapper.ts as `InternalVerdict`.
  *
  * See: docs/adr/0001-verdict-model.md
  */
