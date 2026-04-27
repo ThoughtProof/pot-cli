@@ -64,6 +64,9 @@ test('T2: CONDITIONAL_ALLOW — critical steps pass, non-critical weakness', () 
 });
 
 // ─── T3: CONDITIONAL_ALLOW — multiple context weaknesses ─────────────────────
+// ADR-0003 v2.1: Weakness band shifted to (0, 0.50). 0.25 is below threshold and
+// counts as weakness; 0.40 (R7/quote-too-short floor) also counts; 0.50 is the
+// new "supported" floor and does NOT count.
 
 test('T3: CONDITIONAL_ALLOW — multiple non-critical weaknesses', () => {
   const goldSteps = [
@@ -74,9 +77,9 @@ test('T3: CONDITIONAL_ALLOW — multiple non-critical weaknesses', () => {
   ];
   const evals = [
     makeEval('step_1', 1.0, 'supported'),
-    makeEval('step_2', 0.5, 'partial'),   // weak
+    makeEval('step_2', 0.40, 'partial'),   // weak (R7/quote-too-short floor)
     makeEval('step_3', 0.25, 'partial'),   // weak
-    makeEval('step_4', 0.75, 'supported'), // strong — no condition
+    makeEval('step_4', 0.50, 'supported'), // at supported floor — no condition
   ];
   const { verdict, conditions } = deriveVerdict(evals, goldSteps);
   assert.equal(verdict, 'CONDITIONAL_ALLOW');
@@ -147,25 +150,28 @@ test('T9: verdict-mapper: HOLD → UNCERTAIN (unchanged)', () => {
   assert.equal(pub.metadata.review_needed, true);
 });
 
-// ─── T10: Boundary — context at exactly 0.75 is NOT a weakness ──────────────
+// ─── T10: Boundary — context at exactly 0.50 is NOT a weakness ──────────────
+// ADR-0003 v2.1: New supported floor is SUPPORTED_THRESHOLD = 0.50.
+// A non-critical context step at 0.50 is at the boundary → supported → no weakness.
 
-test('T10: Context score=0.75 (strong) → no weakness → pure ALLOW', () => {
+test('T10: Context score=0.50 (supported floor) → no weakness → pure ALLOW', () => {
   const goldSteps = [makeStep(1, 'critical'), makeStep(2, 'supporting')];
   const evals = [
     makeEval('step_1', 1.0, 'supported'),
-    makeEval('step_2', 0.75, 'supported'),
+    makeEval('step_2', 0.50, 'supported'),
   ];
   const { verdict } = deriveVerdict(evals, goldSteps);
-  assert.equal(verdict, 'ALLOW', 'score=0.75 is at boundary → strong, not weak');
+  assert.equal(verdict, 'ALLOW', 'score=0.50 is at supported boundary → no weakness');
 });
 
-// ─── T11: Boundary — context at 0.74 IS a weakness ─────────────────────────
+// ─── T11: Boundary — context at 0.49 IS a weakness ─────────────────────────
+// ADR-0003 v2.1: Just below SUPPORTED_THRESHOLD → counts as weakness.
 
-test('T11: Context score=0.74 → weakness → CONDITIONAL_ALLOW', () => {
+test('T11: Context score=0.49 → weakness → CONDITIONAL_ALLOW', () => {
   const goldSteps = [makeStep(1, 'critical'), makeStep(2, 'supporting')];
   const evals = [
     makeEval('step_1', 1.0, 'supported'),
-    makeEval('step_2', 0.74, 'partial'),
+    makeEval('step_2', 0.49, 'partial'),
   ];
   const { verdict } = deriveVerdict(evals, goldSteps);
   assert.equal(verdict, 'CONDITIONAL_ALLOW');
