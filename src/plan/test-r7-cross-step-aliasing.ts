@@ -1,16 +1,16 @@
 /**
  * R7 Cross-Step Evidence Aliasing — Lock-Tests for the Plan-then-Execute pattern.
  *
- * R7 lifts gold-step scoring from `none` → `partial` (0.5) when evidence is
- * split across trace steps (e.g. step 1 plans, step 4 executes). Defensive
- * Code-Floor caps cross-step evidence at 0.5 — reaching strong (0.75) or
- * verbatim (1.0) still requires a verbatim quote from a SINGLE contiguous
- * span in ONE trace step (R1 + R1a remain non-negotiable).
+ * R7 lifts gold-step scoring from `none` → `partial` (0.40, ADR-0003 v2.1)
+ * when evidence is split across trace steps (e.g. step 1 plans, step 4
+ * executes). Defensive Code-Floor caps cross-step evidence at 0.40 —
+ * reaching supported (≥ 0.5625) still requires a verbatim quote from a SINGLE
+ * contiguous span in ONE trace step (R1 + R1a remain non-negotiable).
  *
  * Lock-test contract:
  *   L1. Prompt contains the R7 section with both example domains
- *       (Healthcare CPR-AHA + Finance IRA) and the explicit hard cap.
- *   L2. R7 Code-Floor caps cross-step-aliasing reasoning at 0.5.
+ *       (Healthcare CPR-AHA + Finance IRA) and the explicit hard cap (0.40).
+ *   L2. R7 Code-Floor caps cross-step-aliasing reasoning at 0.40.
  *   L3. R7 NEVER raises a score (only ever caps downward).
  *   L4. R7 NEVER overrides R6 — wrong-source still zeroes.
  *   L5. R7 does NOT fire on faithfulness mode (support-only by design).
@@ -22,6 +22,7 @@ import assert from 'node:assert/strict';
 import {
   applyScoreFloors,
   GRADED_SUPPORT_SYSTEM_PROMPT_FOR_TEST,
+  R7_CROSS_STEP_FLOOR,
   type StepEvaluation,
 } from './graded-support-evaluator.js';
 
@@ -55,10 +56,10 @@ test('L1a: GRADED_SUPPORT_SYSTEM_PROMPT contains R7 Cross-Step section', () => {
   assert.match(p, /Plan-then-Execute pattern/);
 });
 
-test('L1b: R7 prompt contains the explicit 0.5 hard cap', () => {
+test('L1b: R7 prompt contains the explicit 0.40 hard cap (ADR-0003 v2.1)', () => {
   const p = GRADED_SUPPORT_SYSTEM_PROMPT_FOR_TEST;
-  assert.match(p, /HARD CAP:.*0\.5.*PARTIAL/);
-  assert.match(p, /R7 NEVER raises a score above 0\.5/);
+  assert.match(p, /HARD CAP:.*0\.40.*PARTIAL/);
+  assert.match(p, /R7 NEVER raises a score above 0\.40/);
 });
 
 test('L1c: R7 prompt contains both symmetric examples (Healthcare + Finance)', () => {
@@ -80,7 +81,7 @@ test('L1e: R1 + R1a remain referenced as non-negotiable in R7', () => {
 
 // ─── L2: Code-Floor caps cross-step at 0.5 ────────────────────────────────
 
-test('L2a: R7 floor caps 0.75 → 0.5 when reasoning mentions cross-step aliasing', () => {
+test('L2a: R7 floor caps 0.75 → 0.40 when reasoning mentions cross-step aliasing', () => {
   const ev = buildEval({
     score: 0.75,
     quote: 'Some quote text from one trace step here',
@@ -89,13 +90,13 @@ test('L2a: R7 floor caps 0.75 → 0.5 when reasoning mentions cross-step aliasin
     predicate: 'supported',
   });
   const result = applyScoreFloors(ev, 'trace excerpt with [search] and [observe]', 'support');
-  assert.equal(result.score, 0.5, 'cross-step evidence must be capped at 0.5');
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR, 'cross-step evidence must be capped at R7_CROSS_STEP_FLOOR (0.40)');
   assert.equal(result.tier, 'partial');
   assert.equal(result.predicate, 'partial');
   assert.match(result.reasoning, /\[FLOOR: R7 cross-step evidence/);
 });
 
-test('L2b: R7 floor caps 1.0 → 0.5 when reasoning mentions Plan-then-Execute', () => {
+test('L2b: R7 floor caps 1.0 → 0.40 when reasoning mentions Plan-then-Execute', () => {
   const ev = buildEval({
     score: 1.0,
     quote: 'verbatim quote from execution step',
@@ -104,7 +105,7 @@ test('L2b: R7 floor caps 1.0 → 0.5 when reasoning mentions Plan-then-Execute',
     predicate: 'supported',
   });
   const result = applyScoreFloors(ev, 'trace excerpt', 'support');
-  assert.equal(result.score, 0.5);
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR);
   assert.equal(result.predicate, 'partial');
 });
 
@@ -115,7 +116,7 @@ test('L2c: R7 floor caps when reasoning mentions "spans multiple trace steps"', 
     reasoning: 'Evidence spans multiple trace steps — plan in step_1, fetch in step_3.',
   });
   const result = applyScoreFloors(ev, 'trace excerpt', 'support');
-  assert.equal(result.score, 0.5);
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR);
 });
 
 test('L2d: R7 floor caps when reasoning mentions explicit R7 token', () => {
@@ -125,7 +126,7 @@ test('L2d: R7 floor caps when reasoning mentions explicit R7 token', () => {
     reasoning: 'Applied R7 cross-step aliasing rule.',
   });
   const result = applyScoreFloors(ev, 'trace excerpt', 'support');
-  assert.equal(result.score, 0.5);
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR);
 });
 
 // ─── L3: R7 never raises a score ─────────────────────────────────────────
@@ -145,14 +146,17 @@ test('L3a: R7 never raises 0.0 to 0.5 by itself (Code-Floor is cap-only)', () =>
   assert.equal(result.score, 0.0, 'R7 floor must never raise scores');
 });
 
-test('L3b: R7 floor preserves scores ≤ 0.5 (no-op when below cap)', () => {
+test('L3b: R7 floor preserves scores ≤ R7_CROSS_STEP_FLOOR (no-op at or below cap)', () => {
+  // Under ADR-0003 v2.1, the cap is 0.40. A score at exactly 0.40 must be a
+  // no-op for R7 (cap-only, never raises). A quote is provided here to avoid
+  // triggering quote-too-short or R1 floors that would also touch the score.
   const ev = buildEval({
-    score: 0.5,
-    quote: null,
+    score: R7_CROSS_STEP_FLOOR,
+    quote: 'A sufficiently long quote from one trace step here.',
     reasoning: 'Plan-then-execute pattern; partial credit awarded.',
   });
   const result = applyScoreFloors(ev, 'trace', 'support');
-  assert.equal(result.score, 0.5, 'R7 must be no-op at exactly 0.5');
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR, 'R7 must be no-op at exactly the cap value');
   assert.ok(!/R7 cross-step/.test(result.reasoning),
     'no R7 floor tag should be added when no cap occurred');
 });
@@ -171,7 +175,7 @@ test('L4a: R6 wrong-source still zeroes even when reasoning mentions cross-step'
   assert.match(result.reasoning, /R6 wrong-source/);
 });
 
-test('L4b: R7 cap order — R6 runs first, then R7. Combined: R6 wins.', () => {
+test('L4b: R7 cap order — R6 runs first, then R7. Combined at high input: R7 cap wins.', () => {
   const ev = buildEval({
     score: 0.75,
     quote: 'A sufficiently long quote of at least ten characters here.',
@@ -180,18 +184,18 @@ test('L4b: R7 cap order — R6 runs first, then R7. Combined: R6 wins.', () => {
     predicate: 'supported',
   });
   const result = applyScoreFloors(ev, 'trace', 'support');
-  // R6 fires only on score ∈ (0, 0.5]. So at 0.75 input, R6 won't catch
-  // unless R7 caps first to 0.5. Either way, the final score must reflect
-  // the wrong-source signal — so test the END state: NOT 0.75, and the
-  // R6 reasoning tag must be present.
+  // R6 fires only on score ∈ (0, 0.5]. At 0.75 input, R6's `<=0.5` guard
+  // skips it. R7 then caps to R7_CROSS_STEP_FLOOR (0.40). Note that 0.40 is
+  // INSIDE R6's trigger range — but R6 has already run and skipped, so the
+  // final score stays at 0.40. This is a documented order-sensitivity:
+  // if R6 ran AFTER R7, it would catch the 0.40 output and zero it.
+  // The current order (R6 before R7) is intentional and ADR-0003 keeps it.
   assert.notEqual(result.score, 0.75, 'must not stay at strong with wrong-source');
-  // Either R7 capped to 0.5 (and R6 didn't catch since R6 runs before R7),
-  // OR R6 caught directly. Documenting actual order: R6 runs at line 286
-  // BEFORE R7 cap. So at score=0.75 input, R6's `<=0.5` guard skips it,
-  // R7 then caps to 0.5. Result: 0.5 partial, NOT zeroed.
-  // This is a documented limitation; the call-site must order R6 after R7
-  // if this strict-ordering matters. For now, document with this test.
-  assert.equal(result.score, 0.5, 'documented order: R6 misses 0.75-input, R7 caps to 0.5');
+  assert.equal(
+    result.score,
+    R7_CROSS_STEP_FLOOR,
+    'documented order: R6 misses 0.75-input, R7 caps to R7_CROSS_STEP_FLOOR (0.40)',
+  );
   assert.match(result.reasoning, /R7 cross-step/);
 });
 
@@ -245,5 +249,5 @@ test('L6c: R7 regex is case-insensitive', () => {
     reasoning: 'CROSS-STEP EVIDENCE used here.',
   });
   const result = applyScoreFloors(ev, 'trace', 'support');
-  assert.equal(result.score, 0.5, 'R7 must match case-insensitively');
+  assert.equal(result.score, R7_CROSS_STEP_FLOOR, 'R7 must match case-insensitively');
 });

@@ -22,6 +22,45 @@ import { detectMode5 } from './probes/mode5-truncation-detection.js';
 /** Default seed for deterministic LLM evaluation calls (OpenAI-compatible providers). */
 export const DEFAULT_EVAL_SEED = 42;
 
+// ─── Predicate Band Thresholds (ADR-0003 v2.2) ───────────────────────────────
+
+/**
+ * Predicate-band shift from 0.75 to 0.5625 eliminates the 0.75 cliff that
+ * caused 25%+ run-to-run oscillation (DS+Gemini score-cluster mode at 0.75)
+ * while keeping the 0.50 cluster on the partial side. Phase-2 CM Threshold-
+ * Sweep (Hermes, 2026-04-27) showed 0.5625 as the empirical sweet spot:
+ * plateau of 86.6% accuracy from 0.5625 through 0.75 with 0 gold=HOLD
+ * regressions, vs 80.6% / 4 gold=HOLD regressions at 0.50. Paul ratified
+ * Hard-Rule P1 Auslegung 3 (gold-label-based UNCERTAIN→ALLOW Bewertung)
+ * after auditing the 3 remaining gold=ALLOW cases (CODE-05, MED-05, GAIA-02).
+ * See docs/adr/0003-threshold-shift-DRAFT.md for full rationale and the
+ * rejection of ADR-0002 (Step-Level Triple-Majority) as upstream alternative.
+ */
+export const SUPPORTED_THRESHOLD = 0.5625;
+export const PARTIAL_THRESHOLD = 0.25;
+
+// ─── Score Floor Constants (ADR-0003 v2.2, three coordinated floors) ─────────
+
+/**
+ * R1 floor: when score ≥ SUPPORTED_THRESHOLD but quote is null, cap at 0.25.
+ * Preserves Paul's invariant "no quote ⇒ not supported" under v2.2 bands
+ * where score=0.5625 would otherwise map to supported.
+ */
+export const R1_NO_QUOTE_FLOOR = 0.25;
+
+/**
+ * R7 floor: cross-step evidence aliasing cap. 0.40 keeps aliased evidence
+ * in the partial band (stronger than no-quote at 0.25, weaker than
+ * direct-supported at ≥ 0.5625). See ADR-0003 §Decision.2.
+ */
+export const R7_CROSS_STEP_FLOOR = 0.40;
+
+/**
+ * Quote-too-short floor: degraded evidence quality. Same semantic class as R7
+ * (evidence present but quality-degraded), so same cap value.
+ */
+export const QUOTE_TOO_SHORT_FLOOR = 0.40;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SupportTier = 'none' | 'weak' | 'partial' | 'strong' | 'verbatim';
@@ -323,45 +362,60 @@ export function applyScoreFloors(
 
   // R7: Cross-step evidence aliasing cap (support mode only).
   // If the LLM cites Plan-then-Execute / cross-step aliasing in its reasoning,
-  // cap the score at 0.5 PARTIAL. Reaching ≥ 0.75 still requires a verbatim
-  // quote from a SINGLE contiguous span (R1 + R1a). This is a defensive cap:
-  // R1's quote-required floor would already pull score down to 0.5 if quote
-  // is null, but cross-step evidence with a quote pulled from one of the
-  // steps could otherwise score 0.75 — and that would conflate cross-step
-  // partial-evidence with single-step strong-evidence. Order matters: this
-  // runs AFTER R6 so wrong-source still zeroes (R6 trumps R7).
+  // cap the score at R7_CROSS_STEP_FLOOR (0.40 PARTIAL, ADR-0003 v2.2).
+  // Reaching ≥ SUPPORTED_THRESHOLD (0.5625) still requires a verbatim quote
+  // from a SINGLE contiguous span (R1 + R1a). This is a defensive cap: R1's
+  // quote-required floor would already pull score down to R1_NO_QUOTE_FLOOR
+  // (0.25) if quote is null, but cross-step evidence WITH a quote pulled from
+  // one of the steps could otherwise score ≥ 0.5625 — and that would conflate
+  // cross-step partial-evidence with single-step direct-supported. R7 keeps it
+  // at 0.40 (mid-partial: stronger than no-quote at 0.25, weaker than
+  // direct-supported at ≥ 0.5625). Order matters: this runs AFTER R6 so
+  // wrong-source still zeroes (R6 trumps R7).
   if (mode === 'support') {
     const crossStepSignals = /cross[- ]step|plan[- ]then[- ]execute|R7|spans (multiple|two) (trace )?steps|planning step .* (execution|fetch|search) step|aliasing/i;
-    if (result.score > 0.5 && crossStepSignals.test(result.reasoning)) {
-      result.score = 0.5;
+    if (result.score > R7_CROSS_STEP_FLOOR && crossStepSignals.test(result.reasoning)) {
+      result.score = R7_CROSS_STEP_FLOOR;
       result.tier = 'partial';
       result.predicate = 'partial';
-      result.reasoning += ' [FLOOR: R7 cross-step evidence — capped at 0.5 PARTIAL]';
+      result.reasoning += ' [FLOOR: R7 cross-step evidence — capped at 0.40 PARTIAL]';
     }
   }
 
-  // R1: quote required for score ≥ 0.75
-  if (result.score >= 0.75 && result.quote === null) {
-    result.score = 0.5;
+  // R1: quote required for supported predicate. Trigger range (>= SUPPORTED_THRESHOLD)
+  // mirrors the band shift: any score that would otherwise map to supported but
+  // lacks a quote gets pulled to R1_NO_QUOTE_FLOOR (0.25). See ADR-0003 §Decision.2.
+  if (result.score >= SUPPORTED_THRESHOLD && result.quote === null) {
+    result.score = R1_NO_QUOTE_FLOOR;
     result.tier = 'partial';
     result.predicate = 'partial';
-    result.reasoning += ' [FLOOR: score capped — no quote]';
+    result.reasoning += ' [FLOOR: R1 no-quote — capped at 0.25 PARTIAL]';
   }
 
-  // Quote too short
+  // Quote too short: degraded evidence cap (same semantic class as R7).
+  // Cap at QUOTE_TOO_SHORT_FLOOR (0.40), same as R7. See ADR-0003 §Decision.2.
   if (result.quote !== null && result.quote.trim().length < 10) {
-    result.score = Math.min(result.score, 0.5);
+    result.score = Math.min(result.score, QUOTE_TOO_SHORT_FLOOR);
     result.tier = 'partial';
-    result.reasoning += ' [FLOOR: quote too short]';
+    result.reasoning += ' [FLOOR: quote too short — capped at 0.40 PARTIAL]';
   }
 
-  // Remap predicate after floors
+  // Remap predicate after floors.
+  //
+  // NOTE on faithfulness vs support: ADR-0003 v2.2 shifts the support-mode
+  // threshold from 0.75 to 0.5625. Faithfulness mode keeps 0.75 as the top
+  // threshold for `faithful` because faithfulness has its own verdict pipeline
+  // and is not subject to the 0.75 cliff diagnosed in PLV CM runs. The lower
+  // boundaries (PARTIAL_THRESHOLD = 0.25, mid at SUPPORTED_THRESHOLD = 0.5625)
+  // are reused for faithfulness's intermediate tiers as a side effect of
+  // band coordination — this is acceptable because faithfulness intermediate
+  // bands were already set at 0.5/0.25.
   if (mode === 'faithfulness') {
     if (result.score >= 0.75 && result.quote) {
       result.predicate = 'faithful';
-    } else if (result.score >= 0.5) {
+    } else if (result.score >= SUPPORTED_THRESHOLD) {
       result.predicate = 'partially_faithful';
-    } else if (result.score >= 0.25) {
+    } else if (result.score >= PARTIAL_THRESHOLD) {
       result.predicate = 'weakly_faithful';
     } else {
       result.predicate = 'unfaithful';
@@ -369,9 +423,9 @@ export function applyScoreFloors(
   } else {
     if (result.score === 0.0) {
       result.predicate = 'skipped';
-    } else if (result.score >= 0.75 && result.quote) {
+    } else if (result.score >= SUPPORTED_THRESHOLD && result.quote) {
       result.predicate = 'supported';
-    } else if (result.score >= 0.25) {
+    } else if (result.score >= PARTIAL_THRESHOLD) {
       result.predicate = 'partial';
     } else {
       result.predicate = 'unsupported';
@@ -408,7 +462,10 @@ export function deriveVerdict(
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
     if (!goldStep || goldStep.criticality === 'critical') continue;
-    if (evalItem.score < 0.75 && evalItem.score > 0) {
+    // ADR-0003 v2.2: Weakness range follows the predicate band shift.
+    // A non-critical step counts as a weakness when its score is in (0, SUPPORTED_THRESHOLD),
+    // i.e. anything below the v2.2 "supported" floor (0.5625) but above absence (0).
+    if (evalItem.score < SUPPORTED_THRESHOLD && evalItem.score > 0) {
       nonCriticalWeaknesses.push(`${evalItem.step_id}: ${evalItem.predicate} (score=${evalItem.score}, non-critical)`);
     }
   }
@@ -516,10 +573,10 @@ HARD RULES (non-negotiable):
      trace step at the same index. If you find a planning-step plus a later
      execution-step that together satisfy the gold step, score them as a UNIT.
 
-     HARD CAP: Cross-step evidence is capped at 0.5 (PARTIAL).
-     R7 NEVER raises a score above 0.5 by itself. Reaching 0.75 STRONG or 1.0
-     VERBATIM still requires a verbatim quote from a SINGLE contiguous span in
-     ONE trace step (R1 + R1a remain non-negotiable). R7 only rescues 0.0 → 0.5
+     HARD CAP: Cross-step evidence is capped at 0.40 (PARTIAL).
+     R7 NEVER raises a score above 0.40 by itself. Reaching 0.5625 SUPPORTED or
+     higher still requires a verbatim quote from a SINGLE contiguous span in
+     ONE trace step (R1 + R1a remain non-negotiable). R7 only rescues 0.0 → 0.40
      when the plan-then-execute pattern is genuinely present.
 
      R7 NEVER overrides R6. If the execution step used the wrong source
@@ -532,8 +589,9 @@ HARD RULES (non-negotiable):
        Trace step 2 [search] (web_search): "AHA 2020 CPR guidelines Part 3"
        Trace step 4 [observe]: "Part 3, Section 1: Begin with Compressions (C),
          then Airway (A), then Breathing (B). Rate 100–120/min, depth 5–6 cm."
-       → Score the gold step at 0.5 PARTIAL. Plan-then-execute is satisfied,
-         but quote spans two trace steps so 0.75 is not available.
+       → Score the gold step at 0.40 PARTIAL. Plan-then-execute is satisfied,
+         but quote spans two trace steps so direct-supported (≥ 0.5625) is not
+         available.
 
      Example B (Finance — IRA contribution pattern):
        Gold step: "Verify 2024 IRA contribution limit from IRS source" (critical)
@@ -541,10 +599,11 @@ HARD RULES (non-negotiable):
        Trace step 3 [fetch] (web_fetch): irs.gov/retirement-plans/...
        Trace step 4 [observe]: "For 2024, the contribution limit is $7,000
          ($8,000 if age 50 or older)."
-       → Score the gold step at 0.5 PARTIAL. If the [observe] line is itself a
+       → Score the gold step at 0.40 PARTIAL. If the [observe] line is itself a
          contiguous quotable span addressing the gold criterion AND you quote it
          verbatim, you may score that step at 0.75 STRONG. R7 only governs the
-         0.0 → 0.5 lift; the 0.5 → 0.75 bridge still requires R1 verbatim quote.
+         0.0 → 0.40 lift; the 0.40 → 0.5625 bridge (and onward to STRONG/VERBATIM)
+         still requires R1 verbatim quote from a single contiguous span.
 
      Counter-example (R6 trumps R7):
        Gold step: "Retrieve AHA guidelines from heart.org"
