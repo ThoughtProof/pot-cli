@@ -17,6 +17,11 @@ import { callModelStructured, type ChatMessage } from '../utils/model-router.js'
 import { tier1PreScreen, type Tier1Config, type Tier1Result } from './tier1-prefilter.js';
 import { detectMode5 } from './probes/mode5-truncation-detection.js';
 
+// ─── Evaluation Defaults ─────────────────────────────────────────────────────
+
+/** Default seed for deterministic LLM evaluation calls (OpenAI-compatible providers). */
+export const DEFAULT_EVAL_SEED = 42;
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SupportTier = 'none' | 'weak' | 'partial' | 'strong' | 'verbatim';
@@ -693,6 +698,7 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
       retries: 2,
       maxTokens,
       temperature: 0,
+      seed: DEFAULT_EVAL_SEED,
     },
   );
 

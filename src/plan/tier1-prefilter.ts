@@ -17,6 +17,7 @@
  */
 
 import { callModel, type ChatMessage } from '../utils/model-router.js';
+import { DEFAULT_EVAL_SEED } from './graded-support-evaluator.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ export class LLMBinaryBackend implements Tier1Backend {
       const response = await callModel(this.model, messages, {
         maxTokens: 64,
         temperature: 0,
+        seed: DEFAULT_EVAL_SEED,
       });
 
       const match = response.content.match(/\{[\s\S]*?\}/);

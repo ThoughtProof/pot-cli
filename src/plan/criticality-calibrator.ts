@@ -17,6 +17,7 @@
 
 import { callModelStructured, type ChatMessage } from '../utils/model-router.js';
 import type { PlanStep, GoldPlan } from './tick-auto-gen.js';
+import { DEFAULT_EVAL_SEED } from './graded-support-evaluator.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -155,6 +156,7 @@ export async function calibratePlan(
     parse: (text) => parseCalibrationResponse(text, plan.length),
     retries,
     temperature,
+    seed: DEFAULT_EVAL_SEED,
     maxTokens: 1024,
   });
 

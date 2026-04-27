@@ -19,6 +19,7 @@
  */
 
 import { callModelStructured, type ChatMessage } from '../utils/model-router.js';
+import { DEFAULT_EVAL_SEED } from './graded-support-evaluator.js';
 import crypto from 'crypto';
 import { calibratePlan } from './criticality-calibrator.js';
 
@@ -352,6 +353,7 @@ export async function generateGoldPlan(
       retries,
       maxTokens,
       temperature,
+      seed: DEFAULT_EVAL_SEED,
     });
 
     let plan = result.data;
@@ -385,6 +387,7 @@ export async function generateGoldPlan(
       retries,
       maxTokens,
       temperature,
+      seed: DEFAULT_EVAL_SEED,
     });
 
     let plan = result.data;
