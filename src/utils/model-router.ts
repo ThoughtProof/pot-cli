@@ -94,6 +94,7 @@ async function callAnthropic(
   messages: ChatMessage[],
   maxTokens: number,
   temperature?: number,
+  _seed?: number, // Anthropic API does not support seed; accepted for interface consistency, silently ignored
 ): Promise<ModelResponse> {
   const apiKey = process.env[config.apiKeyEnv];
   if (!apiKey) throw new Error(`Missing env: ${config.apiKeyEnv}`);
@@ -140,6 +141,7 @@ async function callOpenAICompat(
   messages: ChatMessage[],
   maxTokens: number,
   temperature?: number,
+  seed?: number,
 ): Promise<ModelResponse> {
   const apiKey = process.env[config.apiKeyEnv];
   if (!apiKey) throw new Error(`Missing env: ${config.apiKeyEnv}`);
@@ -154,6 +156,7 @@ async function callOpenAICompat(
       model: config.model,
       max_tokens: maxTokens,
       ...(temperature !== undefined ? { temperature } : {}),
+      ...(seed !== undefined ? { seed } : {}),
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     }),
   });
@@ -181,15 +184,15 @@ async function callOpenAICompat(
 export async function callModel(
   modelName: string,
   messages: ChatMessage[],
-  options: { maxTokens?: number; temperature?: number } = {},
+  options: { maxTokens?: number; temperature?: number; seed?: number } = {},
 ): Promise<ModelResponse> {
   const config = resolveModel(modelName);
   const maxTokens = options.maxTokens ?? 1024;
 
   if (config.type === 'anthropic') {
-    return callAnthropic(config, messages, maxTokens, options.temperature);
+    return callAnthropic(config, messages, maxTokens, options.temperature, options.seed);
   }
-  return callOpenAICompat(config, messages, maxTokens, options.temperature);
+  return callOpenAICompat(config, messages, maxTokens, options.temperature, options.seed);
 }
 
 export function listModels(): string[] {
@@ -220,6 +223,7 @@ export async function callModelStructured<T>(
     retries?: number;
     maxTokens?: number;
     temperature?: number;
+    seed?: number;
     onRetry?: (attempt: number, error: Error) => void;
   },
 ): Promise<{ data: T; raw: string; model: string; attempts: number }> {
@@ -229,7 +233,7 @@ export async function callModelStructured<T>(
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     try {
-      const response = await callModel(modelName, messages, { maxTokens: options.maxTokens, temperature: options.temperature });
+      const response = await callModel(modelName, messages, { maxTokens: options.maxTokens, temperature: options.temperature, seed: options.seed });
       raw = response.content;
       const data = options.parse(raw);
       return { data, raw, model: response.model, attempts: attempt };
