@@ -220,12 +220,20 @@ test('runCascade: primary=BLOCK → final BLOCK, secondary not invoked', async (
   assert.equal(r.secondary, undefined);
 });
 
-test('runCascade: primary=HOLD → final HOLD, secondary not invoked', async () => {
+test('runCascade: primary=HOLD + secondary=ALLOW → final HOLD (Strategy C2)', async () => {
   const evaluate = stubEvaluator({ gemini: 'HOLD', sonnet: 'ALLOW' });
   const r = await runCascade('input', evaluate);
   assert.equal(r.verdict, 'HOLD');
   assert.equal(r.reason, 'primary_hold');
-  assert.equal(r.secondaryInvoked, false);
+  assert.equal(r.secondaryInvoked, true);
+});
+
+test('runCascade: primary=HOLD + secondary=BLOCK → final BLOCK (Strategy C2 override)', async () => {
+  const evaluate = stubEvaluator({ gemini: 'HOLD', sonnet: 'BLOCK' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'BLOCK');
+  assert.equal(r.reason, 'disagreement_hold');
+  assert.equal(r.secondaryInvoked, true);
 });
 
 test('runCascade: primary=CONDITIONAL_ALLOW → final CONDITIONAL_ALLOW, secondary not invoked', async () => {

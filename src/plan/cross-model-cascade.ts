@@ -363,16 +363,49 @@ export async function runCascade<TInput>(
     };
   }
   if (primary.verdict === 'HOLD') {
+    // Strategy C2: trust Gemini HOLD, but if Sonnet would say BLOCK,
+    // override to BLOCK (Gemini HOLD on Gold=BLOCK cases: FIN-01, MED-04,
+    // V2-C04, V3-07, V1-R05 — Sonnet catches 3 of these as BLOCK).
+    // Cost: same as early-exit (secondary only invoked for HOLD cases),
+    // Benefit: +3.7pp accuracy vs trusting HOLD blindly.
+    const tSH = Date.now();
+    let secondaryForHold: EvaluatorResult | undefined;
+    try {
+      secondaryForHold = await evaluate(secondaryModel, input);
+    } catch (_err) {
+      // Secondary failed → trust primary HOLD (safe default)
+    }
+    const holdLatency = Date.now() - tSH;
+
+    if (secondaryForHold?.verdict === 'BLOCK') {
+      return {
+        verdict: 'BLOCK',
+        reason: 'disagreement_hold' as CascadeReason,
+        primary,
+        secondary: secondaryForHold,
+        primaryModel,
+        secondaryModel,
+        secondaryInvoked: true,
+        degradedMode: false,
+        errors,
+        primaryLatencyMs,
+        secondaryLatencyMs: holdLatency,
+        totalLatencyMs: Date.now() - startedAt,
+      };
+    }
+
     return {
       verdict: 'HOLD',
       reason: 'primary_hold',
       primary,
+      secondary: secondaryForHold,
       primaryModel,
       secondaryModel,
-      secondaryInvoked: false,
+      secondaryInvoked: !!secondaryForHold,
       degradedMode: false,
       errors,
       primaryLatencyMs,
+      secondaryLatencyMs: secondaryForHold ? holdLatency : undefined,
       totalLatencyMs: Date.now() - startedAt,
     };
   }
