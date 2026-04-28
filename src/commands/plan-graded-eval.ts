@@ -227,33 +227,13 @@ export async function runGradedEval(args: string[]): Promise<void> {
   const predSummary = Object.entries(predCounts).map(([k, v]) => `${k}=${v}`).join(' ');
   console.log(`\nStep predicates: ${predSummary} (total=${totalSteps})`);
 
-  // Detailed step breakdown for mismatches
-  const mismatches = Object.entries(result.items).filter(([id, r]) => GOLD_VERDICTS[id] && r.verdict !== GOLD_VERDICTS[id]);
-  if (mismatches.length > 0) {
-    console.log('\n=== MISMATCH DETAILS ===\n');
-    for (const [id, itemResult] of mismatches) {
-      console.log(`${id} — Gold: ${GOLD_VERDICTS[id]}, Got: ${itemResult.verdict}`);
-      console.log(`  Reason: ${itemResult.verdict_reasoning}`);
-      for (const step of itemResult.step_evaluations) {
-        const goldStep = items.find(i => i.id === id)?.gold_plan_steps.find(g => `step_${g.index}` === step.step_id);
-        console.log(`  ${step.step_id} [${goldStep?.criticality ?? '?'}]: score=${step.score} tier=${step.tier} pred=${step.predicate}`);
-        if (step.quote) console.log(`    quote: "${step.quote.substring(0, 80)}${step.quote.length > 80 ? '...' : ''}"`);
-        console.log(`    reasoning: ${step.reasoning.substring(0, 120)}`);
-      }
-      if (itemResult.provenance_violations.length > 0) {
-        console.log(`  Provenance: ${itemResult.provenance_violations.join('; ')}`);
-      }
-      console.log('');
-    }
-  }
-
-  // Save output — apply verdict mapping for public format
+  // Save output FIRST — never lose data to a formatter crash
+  // (Moved above mismatch details after two crashes in one day)
   if (!outputPath) {
     outputPath = inputPath.replace(/\.json$/, '-graded-eval-result.json');
   }
 
   if (outputFormat === 'public') {
-    // Map internal verdicts to public 3-tier contract
     const publicResult: Record<string, any> = {
       ...result,
       output_format: 'public',
@@ -268,17 +248,40 @@ export async function runGradedEval(args: string[]): Promise<void> {
       publicResult.items[id] = {
         ...item,
         verdict: mapped.verdict,
-        verdict_internal: undefined, // strip internal
-        low_confidence: undefined,   // strip engine-internal flag (lives in metadata.confidence)
+        verdict_internal: undefined,
+        low_confidence: undefined,
         metadata: mapped.metadata,
       };
     }
     writeFileSync(outputPath, JSON.stringify(publicResult, null, 2));
     console.log(`\nResults saved to: ${outputPath} (format: public, 3-tier)`);
   } else {
-    // Internal format — keep engine verdicts as-is
     const internalResult = { ...result, output_format: 'internal' };
     writeFileSync(outputPath, JSON.stringify(internalResult, null, 2));
     console.log(`\nResults saved to: ${outputPath} (format: internal, 5-tier)`);
+  }
+
+  // Detailed step breakdown for mismatches (after file write — crash-safe)
+  const mismatches = Object.entries(result.items).filter(([id, r]) => GOLD_VERDICTS[id] && r.verdict !== GOLD_VERDICTS[id]);
+  if (mismatches.length > 0) {
+    try {
+      console.log('\n=== MISMATCH DETAILS ===\n');
+      for (const [id, itemResult] of mismatches) {
+        console.log(`${id} — Gold: ${GOLD_VERDICTS[id]}, Got: ${itemResult.verdict}`);
+        console.log(`  Reason: ${itemResult.verdict_reasoning ?? 'n/a'}`);
+        for (const step of itemResult.step_evaluations) {
+          const goldStep = items.find(i => i.id === id)?.gold_plan_steps.find(g => `step_${g.index}` === step.step_id);
+          console.log(`  ${step.step_id} [${goldStep?.criticality ?? '?'}]: score=${step.score} tier=${step.tier} pred=${step.predicate}`);
+          if (step.quote) console.log(`    quote: "${(step.quote || '').substring(0, 80)}${(step.quote || '').length > 80 ? '...' : ''}"`);
+          console.log(`    reasoning: ${(step.reasoning || '').substring(0, 120)}`);
+        }
+        if (itemResult.provenance_violations?.length > 0) {
+          console.log(`  Provenance: ${itemResult.provenance_violations.join('; ')}`);
+        }
+        console.log('');
+      }
+    } catch (fmtErr) {
+      console.error(`\n⚠️  Mismatch formatter error (data already saved): ${fmtErr}`);
+    }
   }
 }
