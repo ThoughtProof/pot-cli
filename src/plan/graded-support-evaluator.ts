@@ -121,11 +121,40 @@ export interface StepEvaluation {
   predicate: GradedPredicate | FaithfulnessPredicate;
 }
 
+/**
+ * Evidence source for a gold step.
+ *
+ * - 'trace_evidence' (default, all pre-2026-04-28 cases): the evaluator
+ *   checks whether the step is supported by the agent's research trace.
+ *   This is the historical PLV behaviour and the right check for the vast
+ *   majority of steps ("did the agent actually look up X?").
+ *
+ * - 'answer_consistency' (ADR-0009, 2026-04-28): the evaluator checks
+ *   whether the agent's final answer faithfully represents what the trace
+ *   established. Motivated by Hermes' v2-suite finding that the agent
+ *   may research correctly but synthesise incorrectly (e.g. trace shows
+ *   "$5k with suspect / $25k without", answer states "$5k regardless").
+ *   The trace-only evaluator was structurally blind to this gap.
+ *
+ * Steps with `step_type='answer_consistency'`:
+ *   - are evaluated against `EvalInput.answer` instead of `trace_steps`,
+ *   - skip Tier-1 pre-screen (binary classifiers are a poor fit for
+ *     conflation/distortion detection),
+ *   - have their provenance check rerouted to `answer` so that quotes
+ *     drawn from the answer don't trigger PROV_FAIL_02 substring failures.
+ */
+export type GoldStepType = 'trace_evidence' | 'answer_consistency';
+
 export interface GoldStep {
   index: number;
   description: string;
   criticality: 'critical' | 'supporting' | 'optional' | 'unknown';
   acceptance_criterion?: string;
+  /**
+   * Evidence source. Optional with default `'trace_evidence'` so that all
+   * existing cases remain valid without migration. See {@link GoldStepType}.
+   */
+  step_type?: GoldStepType;
 }
 
 export interface EvalInput {
@@ -268,6 +297,22 @@ function checkTruncatedQuote(quote: string, trace: string): boolean {
     searchFrom = idx + normalizedFrag.length;
   }
   return true;
+}
+
+// ─── Evidence Source Helper (ADR-0009) ────────────────────────────────
+
+/**
+ * Resolve which evidence string a gold step should be evaluated against.
+ *
+ * - `step_type='answer_consistency'` → `item.answer` (faithfulness of synthesis).
+ * - everything else (including legacy steps without `step_type`) →
+ *   `item.trace_steps` (research-evidence support).
+ *
+ * Centralised so that the prompt builder, the provenance verifier and the
+ * score-floors pass all derive the same source from one place. ADR-0009.
+ */
+export function resolveEvidenceSource(item: EvalInput, step: GoldStep): string {
+  return step.step_type === 'answer_consistency' ? item.answer : item.trace_steps;
 }
 
 // ─── Provenance Checks (caller-side) ──────────────────────────────────────────
@@ -516,21 +561,27 @@ export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
 ): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[]; lowConfidence: boolean } {
-  const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
-  const criticalPartial: string[] = [];      // soft fail (score 0.5)
-  const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions
-  const marginBandSteps: string[] = [];      // PR-F (dormant): borderline supported predicates
+  // ADR-0009 v3-calibration (Hermes 2026-04-28): split critical-step buckets
+  // by step_type. Trace-evidence (TE) steps keep full failScore weight (1.0/0.5).
+  // Answer-consistency (AC) steps get HALF weight (0.5/0.25) because a single
+  // faithfulness fail is HOLD-grade, not BLOCK-grade in isolation. A separate
+  // floor-rule below caps verdicts at HOLD when AC is the primary fail-driver.
+  const criticalUnsupportedTE: string[] = [];   // trace-evidence skipped/unsupported (× 1.0)
+  const criticalPartialTE: string[] = [];       // trace-evidence partial          (× 0.5)
+  const criticalUnsupportedAC: string[] = [];   // answer-consistency skipped/unsupported (× 0.5)
+  const criticalPartialAC: string[] = [];       // answer-consistency partial             (× 0.25)
+  const nonCriticalWeaknesses: string[] = [];   // for CONDITIONAL_ALLOW conditions
+  const marginBandSteps: string[] = [];         // PR-F (dormant): borderline supported predicates
 
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
     if (!goldStep || goldStep.criticality !== 'critical') continue;
+    const isAC = goldStep.step_type === 'answer_consistency';
 
     if (evalItem.predicate === 'unsupported' || evalItem.predicate === 'skipped' || evalItem.predicate === 'unfaithful') {
-      criticalUnsupported.push(evalItem.step_id);
-    } else if (evalItem.predicate === 'partial' || evalItem.predicate === 'weakly_faithful') {
-      criticalPartial.push(evalItem.step_id);
-    } else if (evalItem.predicate === 'partially_faithful') {
-      criticalPartial.push(evalItem.step_id);
+      (isAC ? criticalUnsupportedAC : criticalUnsupportedTE).push(evalItem.step_id);
+    } else if (evalItem.predicate === 'partial' || evalItem.predicate === 'weakly_faithful' || evalItem.predicate === 'partially_faithful') {
+      (isAC ? criticalPartialAC : criticalPartialTE).push(evalItem.step_id);
     } else if (isInMarginBand(evalItem)) {
       // PR-F (ADR-0005): margin band is DORMANT. We record the hit for the
       // lowConfidence signal but do NOT mutate criticalPartial/failScore.
@@ -556,7 +607,9 @@ export function deriveVerdict(
     }
   }
 
-  // Weighted fail score: unsupported/skipped = 1.0, partial = 0.5
+  // Weighted fail score per step type:
+  //   trace-evidence (TE):       unsupported/skipped × 1.0,  partial × 0.5
+  //   answer-consistency (AC):   unsupported/skipped × 0.5,  partial × 0.25
   //
   // failScore-Gate (ADR-0005, PRIMARY FIX, post-Hermes 2026-04-27):
   //   ≥ 2.0 → BLOCK
@@ -570,26 +623,56 @@ export function deriveVerdict(
   // 0.50, predicate change → failScore 0) and partial (score 0.40 → failScore
   // 0.5) crossed the gate. Decoupling failScore=0.5 from the gate eliminates
   // 6/8 flips while staying audit-safe (failScore ≥ 1.0 still gates).
-  const failScore = criticalUnsupported.length * 1.0 + criticalPartial.length * 0.5;
+  //
+  // ADR-0009 v3-calibration (Hermes 2026-04-28): AC-step weights halved.
+  // Rationale — v3-Suite-Run zeigte 0/16 HOLD, weil ein zusätzlicher
+  // critical-AC-fail (z.B. score=0 → 1.0) zusammen mit teilweisen TE-Steps
+  // (z.B. 2× partial → 1.0) auf failScore≥2.0 → BLOCK gepusht hat. Mit
+  // halbiertem AC-Beitrag bleibt der gleiche Case bei 1.5 → HOLD.
+  // Plus: AC-Floor (siehe unten) cap't BLOCK auf HOLD, wenn AC der primäre
+  // Fail-Treiber ist und alle TE-Steps okay sind.
+  const failScoreTE =
+    criticalUnsupportedTE.length * 1.0 + criticalPartialTE.length * 0.5;
+  const failScoreAC =
+    criticalUnsupportedAC.length * 0.5 + criticalPartialAC.length * 0.25;
+  const failScore = failScoreTE + failScoreAC;
+
+  const allCriticalUnsupported = [...criticalUnsupportedTE, ...criticalUnsupportedAC];
+  const allCriticalPartial = [...criticalPartialTE, ...criticalPartialAC];
+  const acFailIds = [...criticalUnsupportedAC, ...criticalPartialAC];
+
+  // ADR-0009 v3-calibration: AC-Floor.
+  // When ≥1 AC-step has failed (unsupported/partial) AND no TE-step is
+  // unsupported (i.e. trace-research itself is fundamentally sound), then the
+  // verdict is capped at HOLD — never BLOCK. Rationale: a faithfulness gap on
+  // a clean trace is exactly the HOLD signal we want ("agent researched right
+  // but synthesized wrong; needs human review"), not a BLOCK (which implies
+  // the agent's research itself was unreliable). Belt-and-suspenders fallback
+  // for cases where 0.5×-weighting alone leaves the score above 2.0.
+  const acFloorActive =
+    acFailIds.length > 0 && criticalUnsupportedTE.length === 0;
+  const acFloorSuffix = acFloorActive
+    ? ` [ac-floor: capped to max HOLD; AC-fails=${acFailIds.join(', ')}]`
+    : '';
 
   const marginBandTriggered = marginBandSteps.length > 0;
   const marginBandSuffix = marginBandTriggered
     ? ` [margin-band: ${marginBandSteps.join(', ')}]`
     : '';
 
-  if (failScore >= 2.0) {
+  if (failScore >= 2.0 && !acFloorActive) {
     return {
       verdict: 'BLOCK',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped × 1.0 + ${criticalPartial.length} partial × 0.5). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      reasoning: `failScore=${failScore} (TE: ${criticalUnsupportedTE.length}×1.0 + ${criticalPartialTE.length}×0.5, AC: ${criticalUnsupportedAC.length}×0.5 + ${criticalPartialAC.length}×0.25). IDs: [${[...allCriticalUnsupported, ...allCriticalPartial].join(', ')}]${marginBandSuffix}`,
       // Margin band is irrelevant once we BLOCK; expose it nonetheless for
       // observability but it has no semantic effect on the public verdict.
       lowConfidence: marginBandTriggered,
     };
   }
-  if (failScore >= 1.0) {
+  if (failScore >= 1.0 || acFloorActive) {
     return {
       verdict: 'HOLD',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      reasoning: `failScore=${failScore} (TE: ${criticalUnsupportedTE.length}+${criticalPartialTE.length}p, AC: ${criticalUnsupportedAC.length}+${criticalPartialAC.length}p). IDs: [${[...allCriticalUnsupported, ...allCriticalPartial].join(', ')}]${marginBandSuffix}${acFloorSuffix}`,
       lowConfidence: marginBandTriggered,
     };
   }
@@ -603,7 +686,7 @@ export function deriveVerdict(
   const lowConfidence = failScoreLowConfidence || marginBandTriggered;
 
   if (failScoreLowConfidence) {
-    const fragileIds = [...criticalUnsupported, ...criticalPartial];
+    const fragileIds = [...allCriticalUnsupported, ...allCriticalPartial];
     const fragilityCondition =
       `${fragileIds.join(', ')}: critical step(s) marginally unsupported (failScore=${failScore})`;
     return {
@@ -849,16 +932,33 @@ async function evaluateStepsWithLLM(
   maxTokens: number,
   mode: EvalMode = 'support',
 ): Promise<StepEvaluation[]> {
+  // ADR-0009: per-step EVIDENCE_SOURCE routing.
+  // Steps with step_type='answer_consistency' must be evaluated against the
+  // AGENT ANSWER (synthesis fidelity); everything else against the TRACE EXCERPT
+  // (research support). Both sources are present in the prompt and the model
+  // routes per the EVIDENCE_SOURCE marker. See `resolveEvidenceSource` for the
+  // canonical mapping used downstream by provenance + score-floors.
   const stepsInput = stepsToEvaluate.map(s => {
     const criterion = s.acceptance_criterion ??
       `The trace must show evidence that this step was actually performed with verifiable output: "${s.description}"`;
-    return `STEP_ID: step_${s.index}\nGOLD_STEP: ${s.description}\nCRITICALITY: ${s.criticality}\nACCEPTANCE_CRITERION: ${criterion}`;
+    const evidenceSource = s.step_type === 'answer_consistency' ? 'answer' : 'trace';
+    return `STEP_ID: step_${s.index}\nGOLD_STEP: ${s.description}\nCRITICALITY: ${s.criticality}\nEVIDENCE_SOURCE: ${evidenceSource}\nACCEPTANCE_CRITERION: ${criterion}`;
   }).join('\n\n');
 
-  const userPrompt = `Evaluate ALL steps below against the trace excerpt.
+  const userPrompt = `Evaluate ALL steps below.
+
+Each step has an EVIDENCE_SOURCE field that tells you which section to use:
+  - EVIDENCE_SOURCE: trace  → evaluate against TRACE EXCERPT (was the research performed?)
+  - EVIDENCE_SOURCE: answer → evaluate against AGENT ANSWER (does the answer faithfully
+    represent what the trace established? watch for conflation, omission, distortion).
+
+Quotes in your output MUST come from the section the step's EVIDENCE_SOURCE points to.
+Never quote the trace for an EVIDENCE_SOURCE=answer step, and vice versa.
 
 QUESTION: ${item.question}
-AGENT ANSWER: ${item.answer}
+
+AGENT ANSWER:
+${item.answer}
 
 TRACE EXCERPT:
 ${item.trace_steps}
@@ -951,14 +1051,24 @@ export async function evaluateItem(
   let stepsForTier2: GoldStep[] = allSteps;  // Default: all go to Tier 2
 
   // ── Tier 1 Pre-Screen ──
+  // ADR-0009: `answer_consistency` steps skip Tier-1 entirely. Tier-1 is a
+  // binary support classifier over trace_steps; conflation/distortion in the
+  // answer is semantically off-axis for it. Routing such steps through Tier-1
+  // would either need a parallel Tier-1 over `answer` (out of scope) or risk
+  // false fast-rejects against the wrong evidence.
   if (tier1Config && tier1Config.enabled !== false) {
-    const t1Input = allSteps.map(s => ({
+    const tier1EligibleSteps = allSteps.filter(
+      s => s.step_type !== 'answer_consistency',
+    );
+    const t1Input = tier1EligibleSteps.map(s => ({
       stepId: `step_${s.index}`,
       description: s.description,
       criticality: s.criticality,
     }));
 
-    const t1Result = await tier1PreScreen(item.trace_steps, t1Input, tier1Config);
+    const t1Result = tier1EligibleSteps.length > 0
+      ? await tier1PreScreen(item.trace_steps, t1Input, tier1Config)
+      : { results: [], stats: { total: 0, tier1Resolved: 0, tier2Required: 0, avgConfidence: 0, totalLatencyMs: 0 } };
 
     tier1Stats = {
       ...t1Result.stats,
@@ -1023,7 +1133,14 @@ export async function evaluateItem(
     // Skip provenance for Tier-1 results (no quotes to check)
     if (ev.reasoning?.startsWith('[TIER1')) return ev;
 
-    const violations = verifyProvenance(ev, item.trace_steps);
+    // ADR-0009: provenance + score-floors must use the same evidence source the
+    // step was evaluated against. For step_type='answer_consistency' that's the
+    // answer, otherwise the trace. Without this routing every answer-quote
+    // would PROV_FAIL_02 against trace_steps and get force-downgraded.
+    const goldStep = item.gold_plan_steps.find(g => `step_${g.index}` === ev.step_id);
+    const evidence = goldStep ? resolveEvidenceSource(item, goldStep) : item.trace_steps;
+
+    const violations = verifyProvenance(ev, evidence);
     allViolations.push(...violations.map(v => `${ev.step_id}: ${v}`));
 
     let processed = { ...ev };
@@ -1034,7 +1151,7 @@ export async function evaluateItem(
       processed.reasoning += ' [PROVENANCE DOWNGRADE: quote invalid or missing]';
     }
 
-    processed = applyScoreFloors(processed, item.trace_steps, mode);
+    processed = applyScoreFloors(processed, evidence, mode);
     return processed;
   });
 

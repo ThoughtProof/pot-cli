@@ -341,3 +341,172 @@ describe('deriveVerdict', () => {
     expect(verdict).toBe('CONDITIONAL_ALLOW');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// resolveEvidenceSource (ADR-0009 — Answer-Consistency-Step)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('resolveEvidenceSource (ADR-0009)', () => {
+  const item = {
+    id: 'test',
+    question: 'Q?',
+    answer: 'ANSWER-TEXT',
+    trace_steps: 'TRACE-TEXT',
+    gold_plan_steps: [] as GoldStep[],
+  };
+
+  test('returns trace_steps for legacy step (no step_type)', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep();
+    expect(resolveEvidenceSource(item, step)).toBe('TRACE-TEXT');
+  });
+
+  test('returns trace_steps for explicit trace_evidence step', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep({ step_type: 'trace_evidence' });
+    expect(resolveEvidenceSource(item, step)).toBe('TRACE-TEXT');
+  });
+
+  test('returns answer for answer_consistency step', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep({ step_type: 'answer_consistency' });
+    expect(resolveEvidenceSource(item, step)).toBe('ANSWER-TEXT');
+  });
+
+  test('answer-quote against answer-evidence does NOT trigger PROV_FAIL_02', () => {
+    // The whole point of ADR-0009: a quote drawn from the agent answer must
+    // verify cleanly when the provenance check is rerouted to the answer.
+    const evalWithAnswerQuote = makeEval({
+      score: 0.85,
+      quote: '$5,000 or more regardless of amount',
+    });
+    const answer = 'SAR filing threshold is $5,000 or more regardless of amount.';
+    const violations = verifyProvenance(evalWithAnswerQuote, answer);
+    expect(violations).not.toContainEqual(expect.stringContaining('PROV_FAIL_02'));
+  });
+
+  test('answer-quote against trace_steps DOES trigger PROV_FAIL_02 (negative control)', () => {
+    // Without the routing fix, this is the exact failure mode that would
+    // false-downgrade every answer_consistency step.
+    const evalWithAnswerQuote = makeEval({
+      score: 0.85,
+      quote: '$5,000 or more regardless of amount',
+    });
+    const trace = 'Trace step 4: 31 CFR 1020.320 confirms $5,000 with suspect; $25,000 no suspect.';
+    const violations = verifyProvenance(evalWithAnswerQuote, trace);
+    expect(violations).toContainEqual(expect.stringContaining('PROV_FAIL_02'));
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// deriveVerdict v3-Calibration (ADR-0009 — 0.5× AC weights + AC-Floor)
+// Hermes 2026-04-28 v3-Run zeigte 0/16 HOLD — zusätzlicher AC-fail pushte
+// failScore über 2.0 → BLOCK. Calibration:
+//   AC unsupported/skipped × 0.5 (war 1.0); AC partial × 0.25 (war 0.5).
+//   AC-Floor: AC-fail + saubere TE-Steps → max HOLD, nie BLOCK.
+// ════════════════════════════════════════════════════════════════════════════
+
+describe('deriveVerdict v3-calibration (ADR-0009)', () => {
+  test('AC weight 0.5×: 1 TE-skipped + 1 AC-skipped → HOLD (was BLOCK pre-calib)', () => {
+    // failScore = 1.0 (TE skipped) + 0.5 (AC skipped) = 1.5 → HOLD.
+    // Pre-calibration: 1.0 + 1.0 = 2.0 → BLOCK. Calibration prevents that flip.
+    const goldSteps: GoldStep[] = [
+      makeGoldStep({ index: 1, criticality: 'critical' }),
+      makeGoldStep({ index: 2, criticality: 'critical', step_type: 'answer_consistency' }),
+    ];
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'skipped', score: 0 }),
+      makeEval({ step_id: 'step_2', predicate: 'skipped', score: 0 }),
+    ];
+    const { verdict, reasoning } = deriveVerdict(evals, goldSteps);
+    expect(verdict).toBe('HOLD');
+    // The reasoning should signal the per-type breakdown so audits can see
+    // the calibration applied.
+    expect(reasoning).toMatch(/TE.*AC/);
+  });
+
+  test('AC-Floor: 2 TE-partial + 1 AC-skipped, would-be-BLOCK → HOLD via floor', () => {
+    // The exact MRM-03-shaped case Hermes flagged: TE has multiple partials
+    // pushing failScore high, but trace-research is sound (no TE skipped).
+    // Without floor: TE 2×0.5 + AC 1×0.5 = 1.5 → HOLD already (calib alone
+    // suffices here). To force the floor path we need failScore ≥ 2.0 with
+    // zero TE-skipped: 4 TE-partial (2.0) + 1 AC-skipped (0.5) = 2.5.
+    const goldSteps: GoldStep[] = [
+      makeGoldStep({ index: 1, criticality: 'critical' }),
+      makeGoldStep({ index: 2, criticality: 'critical' }),
+      makeGoldStep({ index: 3, criticality: 'critical' }),
+      makeGoldStep({ index: 4, criticality: 'critical' }),
+      makeGoldStep({ index: 5, criticality: 'critical', step_type: 'answer_consistency' }),
+    ];
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'partial', score: 0.4 }),
+      makeEval({ step_id: 'step_2', predicate: 'partial', score: 0.4 }),
+      makeEval({ step_id: 'step_3', predicate: 'partial', score: 0.4 }),
+      makeEval({ step_id: 'step_4', predicate: 'partial', score: 0.4 }),
+      makeEval({ step_id: 'step_5', predicate: 'skipped', score: 0 }),
+    ];
+    const { verdict, reasoning } = deriveVerdict(evals, goldSteps);
+    // failScore = 4×0.5 + 0.5 = 2.5 → would BLOCK — but no TE-skipped, so
+    // AC-Floor caps to HOLD.
+    expect(verdict).toBe('HOLD');
+    expect(reasoning).toContain('ac-floor');
+  });
+
+  test('AC-Floor inactive: TE-skipped present → BLOCK still possible', () => {
+    // Negative control for the floor: when ANY TE-step is skipped/unsupported,
+    // the trace-research itself is not sound, so AC-Floor must NOT kick in
+    // — the verdict can still escalate to BLOCK on aggregate failScore.
+    const goldSteps: GoldStep[] = [
+      makeGoldStep({ index: 1, criticality: 'critical' }),
+      makeGoldStep({ index: 2, criticality: 'critical' }),
+      makeGoldStep({ index: 3, criticality: 'critical', step_type: 'answer_consistency' }),
+    ];
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'skipped', score: 0 }),  // TE skipped → floor inactive
+      makeEval({ step_id: 'step_2', predicate: 'skipped', score: 0 }),  // TE skipped
+      makeEval({ step_id: 'step_3', predicate: 'skipped', score: 0 }),  // AC skipped
+    ];
+    const { verdict, reasoning } = deriveVerdict(evals, goldSteps);
+    // failScore = 2×1.0 + 0.5 = 2.5 ≥ 2.0 AND TE-unsupported.length > 0 → BLOCK.
+    expect(verdict).toBe('BLOCK');
+    expect(reasoning).not.toContain('ac-floor');
+  });
+
+  test('AC partial only, all TE clean → HOLD via floor (UNCERTAIN-band rescue)', () => {
+    // Hermes' UNCERTAIN-cluster: AC-step came back as partial (score 0.25-0.5),
+    // TE-steps are all supported. Pre-calibration this would have been a
+    // partial → 0.5 failScore → CONDITIONAL_ALLOW (the UNCERTAIN band). With
+    // the floor active, even a partial AC-fail must rescue to HOLD when the
+    // trace itself was sound.
+    const goldSteps: GoldStep[] = [
+      makeGoldStep({ index: 1, criticality: 'critical' }),
+      makeGoldStep({ index: 2, criticality: 'critical' }),
+      makeGoldStep({ index: 3, criticality: 'critical', step_type: 'answer_consistency' }),
+    ];
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_2', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_3', predicate: 'partial', score: 0.4 }),
+    ];
+    const { verdict, reasoning } = deriveVerdict(evals, goldSteps);
+    // failScore = 0 + 0.25 = 0.25 < 0.5 — normally ALLOW. But AC-Floor active
+    // (≥1 AC-fail, 0 TE-unsupported), so cap to HOLD.
+    expect(verdict).toBe('HOLD');
+    expect(reasoning).toContain('ac-floor');
+  });
+
+  test('All-supported clean plan with AC step → ALLOW (floor inactive)', () => {
+    // Sanity: presence of an answer_consistency step alone does not trigger
+    // the floor. Only AC-FAILS trigger it.
+    const goldSteps: GoldStep[] = [
+      makeGoldStep({ index: 1, criticality: 'critical' }),
+      makeGoldStep({ index: 2, criticality: 'critical', step_type: 'answer_consistency' }),
+    ];
+    const evals: StepEvaluation[] = [
+      makeEval({ step_id: 'step_1', predicate: 'supported', score: 0.85 }),
+      makeEval({ step_id: 'step_2', predicate: 'supported', score: 0.85 }),
+    ];
+    const { verdict } = deriveVerdict(evals, goldSteps);
+    expect(verdict).toBe('ALLOW');
+  });
+});

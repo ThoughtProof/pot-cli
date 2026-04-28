@@ -139,7 +139,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
     for (const itemResult of Object.values(result.items)) {
       for (const stepEval of itemResult.step_evaluations) {
         t1Total++;
-        if (stepEval.reasoning.startsWith('[TIER1')) {
+        if (stepEval.reasoning?.startsWith('[TIER1')) {
           t1Rejected++;
         } else {
           t2Evaluated++;
