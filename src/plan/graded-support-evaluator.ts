@@ -561,21 +561,27 @@ export function deriveVerdict(
   stepEvals: StepEvaluation[],
   goldSteps: GoldStep[],
 ): { verdict: EvaluatorVerdict; reasoning: string; conditions?: string[]; lowConfidence: boolean } {
-  const criticalUnsupported: string[] = [];  // hard fail (score 1.0)
-  const criticalPartial: string[] = [];      // soft fail (score 0.5)
-  const nonCriticalWeaknesses: string[] = []; // for CONDITIONAL_ALLOW conditions
-  const marginBandSteps: string[] = [];      // PR-F (dormant): borderline supported predicates
+  // ADR-0009 v3-calibration (Hermes 2026-04-28): split critical-step buckets
+  // by step_type. Trace-evidence (TE) steps keep full failScore weight (1.0/0.5).
+  // Answer-consistency (AC) steps get HALF weight (0.5/0.25) because a single
+  // faithfulness fail is HOLD-grade, not BLOCK-grade in isolation. A separate
+  // floor-rule below caps verdicts at HOLD when AC is the primary fail-driver.
+  const criticalUnsupportedTE: string[] = [];   // trace-evidence skipped/unsupported (× 1.0)
+  const criticalPartialTE: string[] = [];       // trace-evidence partial          (× 0.5)
+  const criticalUnsupportedAC: string[] = [];   // answer-consistency skipped/unsupported (× 0.5)
+  const criticalPartialAC: string[] = [];       // answer-consistency partial             (× 0.25)
+  const nonCriticalWeaknesses: string[] = [];   // for CONDITIONAL_ALLOW conditions
+  const marginBandSteps: string[] = [];         // PR-F (dormant): borderline supported predicates
 
   for (const evalItem of stepEvals) {
     const goldStep = goldSteps.find(g => `step_${g.index}` === evalItem.step_id);
     if (!goldStep || goldStep.criticality !== 'critical') continue;
+    const isAC = goldStep.step_type === 'answer_consistency';
 
     if (evalItem.predicate === 'unsupported' || evalItem.predicate === 'skipped' || evalItem.predicate === 'unfaithful') {
-      criticalUnsupported.push(evalItem.step_id);
-    } else if (evalItem.predicate === 'partial' || evalItem.predicate === 'weakly_faithful') {
-      criticalPartial.push(evalItem.step_id);
-    } else if (evalItem.predicate === 'partially_faithful') {
-      criticalPartial.push(evalItem.step_id);
+      (isAC ? criticalUnsupportedAC : criticalUnsupportedTE).push(evalItem.step_id);
+    } else if (evalItem.predicate === 'partial' || evalItem.predicate === 'weakly_faithful' || evalItem.predicate === 'partially_faithful') {
+      (isAC ? criticalPartialAC : criticalPartialTE).push(evalItem.step_id);
     } else if (isInMarginBand(evalItem)) {
       // PR-F (ADR-0005): margin band is DORMANT. We record the hit for the
       // lowConfidence signal but do NOT mutate criticalPartial/failScore.
@@ -601,7 +607,9 @@ export function deriveVerdict(
     }
   }
 
-  // Weighted fail score: unsupported/skipped = 1.0, partial = 0.5
+  // Weighted fail score per step type:
+  //   trace-evidence (TE):       unsupported/skipped × 1.0,  partial × 0.5
+  //   answer-consistency (AC):   unsupported/skipped × 0.5,  partial × 0.25
   //
   // failScore-Gate (ADR-0005, PRIMARY FIX, post-Hermes 2026-04-27):
   //   ≥ 2.0 → BLOCK
@@ -615,26 +623,56 @@ export function deriveVerdict(
   // 0.50, predicate change → failScore 0) and partial (score 0.40 → failScore
   // 0.5) crossed the gate. Decoupling failScore=0.5 from the gate eliminates
   // 6/8 flips while staying audit-safe (failScore ≥ 1.0 still gates).
-  const failScore = criticalUnsupported.length * 1.0 + criticalPartial.length * 0.5;
+  //
+  // ADR-0009 v3-calibration (Hermes 2026-04-28): AC-step weights halved.
+  // Rationale — v3-Suite-Run zeigte 0/16 HOLD, weil ein zusätzlicher
+  // critical-AC-fail (z.B. score=0 → 1.0) zusammen mit teilweisen TE-Steps
+  // (z.B. 2× partial → 1.0) auf failScore≥2.0 → BLOCK gepusht hat. Mit
+  // halbiertem AC-Beitrag bleibt der gleiche Case bei 1.5 → HOLD.
+  // Plus: AC-Floor (siehe unten) cap't BLOCK auf HOLD, wenn AC der primäre
+  // Fail-Treiber ist und alle TE-Steps okay sind.
+  const failScoreTE =
+    criticalUnsupportedTE.length * 1.0 + criticalPartialTE.length * 0.5;
+  const failScoreAC =
+    criticalUnsupportedAC.length * 0.5 + criticalPartialAC.length * 0.25;
+  const failScore = failScoreTE + failScoreAC;
+
+  const allCriticalUnsupported = [...criticalUnsupportedTE, ...criticalUnsupportedAC];
+  const allCriticalPartial = [...criticalPartialTE, ...criticalPartialAC];
+  const acFailIds = [...criticalUnsupportedAC, ...criticalPartialAC];
+
+  // ADR-0009 v3-calibration: AC-Floor.
+  // When ≥1 AC-step has failed (unsupported/partial) AND no TE-step is
+  // unsupported (i.e. trace-research itself is fundamentally sound), then the
+  // verdict is capped at HOLD — never BLOCK. Rationale: a faithfulness gap on
+  // a clean trace is exactly the HOLD signal we want ("agent researched right
+  // but synthesized wrong; needs human review"), not a BLOCK (which implies
+  // the agent's research itself was unreliable). Belt-and-suspenders fallback
+  // for cases where 0.5×-weighting alone leaves the score above 2.0.
+  const acFloorActive =
+    acFailIds.length > 0 && criticalUnsupportedTE.length === 0;
+  const acFloorSuffix = acFloorActive
+    ? ` [ac-floor: capped to max HOLD; AC-fails=${acFailIds.join(', ')}]`
+    : '';
 
   const marginBandTriggered = marginBandSteps.length > 0;
   const marginBandSuffix = marginBandTriggered
     ? ` [margin-band: ${marginBandSteps.join(', ')}]`
     : '';
 
-  if (failScore >= 2.0) {
+  if (failScore >= 2.0 && !acFloorActive) {
     return {
       verdict: 'BLOCK',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped × 1.0 + ${criticalPartial.length} partial × 0.5). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      reasoning: `failScore=${failScore} (TE: ${criticalUnsupportedTE.length}×1.0 + ${criticalPartialTE.length}×0.5, AC: ${criticalUnsupportedAC.length}×0.5 + ${criticalPartialAC.length}×0.25). IDs: [${[...allCriticalUnsupported, ...allCriticalPartial].join(', ')}]${marginBandSuffix}`,
       // Margin band is irrelevant once we BLOCK; expose it nonetheless for
       // observability but it has no semantic effect on the public verdict.
       lowConfidence: marginBandTriggered,
     };
   }
-  if (failScore >= 1.0) {
+  if (failScore >= 1.0 || acFloorActive) {
     return {
       verdict: 'HOLD',
-      reasoning: `failScore=${failScore} (${criticalUnsupported.length} unsupported/skipped + ${criticalPartial.length} partial). IDs: [${[...criticalUnsupported, ...criticalPartial].join(', ')}]${marginBandSuffix}`,
+      reasoning: `failScore=${failScore} (TE: ${criticalUnsupportedTE.length}+${criticalPartialTE.length}p, AC: ${criticalUnsupportedAC.length}+${criticalPartialAC.length}p). IDs: [${[...allCriticalUnsupported, ...allCriticalPartial].join(', ')}]${marginBandSuffix}${acFloorSuffix}`,
       lowConfidence: marginBandTriggered,
     };
   }
@@ -648,7 +686,7 @@ export function deriveVerdict(
   const lowConfidence = failScoreLowConfidence || marginBandTriggered;
 
   if (failScoreLowConfidence) {
-    const fragileIds = [...criticalUnsupported, ...criticalPartial];
+    const fragileIds = [...allCriticalUnsupported, ...allCriticalPartial];
     const fragilityCondition =
       `${fragileIds.join(', ')}: critical step(s) marginally unsupported (failScore=${failScore})`;
     return {

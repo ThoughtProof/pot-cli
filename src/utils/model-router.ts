@@ -33,7 +33,7 @@ interface ProviderConfig {
 const MODELS: Record<string, ProviderConfig> = {
   // Anthropic
   'opus': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-opus-4-6-20250414', type: 'anthropic' },
-  'sonnet': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-sonnet-4-5-20250514', type: 'anthropic' },
+  'sonnet': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-sonnet-4-6', type: 'anthropic' },
 
   // xAI
   'grok': { baseUrl: 'https://api.x.ai/v1', apiKeyEnv: 'XAI_API_KEY', model: 'grok-4-1-fast', type: 'openai' },
@@ -43,6 +43,7 @@ const MODELS: Record<string, ProviderConfig> = {
   'gemini': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-3.1-flash-lite-preview', type: 'openai' },
   'gemini-flash': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-3.1-flash-lite-preview', type: 'openai' },
   'gemini-2.5': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-2.5-flash', type: 'openai' },
+  'gemini-2.5-pro': { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', apiKeyEnv: 'GEMINI_API_KEY', model: 'gemini-2.5-pro', type: 'openai' },
 
   // DeepSeek
   // DeepSeek (direct API)
@@ -156,7 +157,9 @@ async function callOpenAICompat(
       model: config.model,
       max_tokens: maxTokens,
       ...(temperature !== undefined ? { temperature } : {}),
-      ...(seed !== undefined ? { seed } : {}),
+      // Gemini's OpenAI-compatible endpoint rejects `seed` (returns 400);
+      // silently filter it out for gemini-* models. Other providers honour it.
+      ...(seed !== undefined && !config.model.startsWith('gemini') ? { seed } : {}),
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     }),
   });
