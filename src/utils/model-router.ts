@@ -33,7 +33,7 @@ interface ProviderConfig {
 const MODELS: Record<string, ProviderConfig> = {
   // Anthropic
   'opus': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-opus-4-6-20250414', type: 'anthropic' },
-  'sonnet': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-sonnet-4-5-20250514', type: 'anthropic' },
+  'sonnet': { baseUrl: 'https://api.anthropic.com', apiKeyEnv: 'ANTHROPIC_API_KEY', model: 'claude-sonnet-4-6-20250514', type: 'anthropic' },
 
   // xAI
   'grok': { baseUrl: 'https://api.x.ai/v1', apiKeyEnv: 'XAI_API_KEY', model: 'grok-4-1-fast', type: 'openai' },

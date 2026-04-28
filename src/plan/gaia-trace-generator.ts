@@ -385,7 +385,7 @@ function resolveGeneratorOptions(): GeneratorOptions {
     ?? (process.env.ANTHROPIC_API_KEY ? 'anthropic' : 'openai');
 
   const defaultModel = provider === 'anthropic'
-    ? (process.env.GAIA_TRACE_MODEL ?? 'claude-sonnet-4-5')
+    ? (process.env.GAIA_TRACE_MODEL ?? 'claude-sonnet-4-6')
     : (process.env.GAIA_TRACE_MODEL ?? 'gpt-4o');
 
   const model = args.values.model ?? defaultModel;

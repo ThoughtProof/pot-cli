@@ -69,11 +69,11 @@ test('buildFirstPartyTrace emits benchmark-ready first-party traces', () => {
       { kind: 'reason', tool: 'internal', summary: 'Recalled the capital of France.' },
       { kind: 'answer', summary: 'Submitted Paris.' },
     ],
-  }, 'claude-sonnet-4-5');
+  }, 'claude-sonnet-4-6');
 
   assert.equal(trace.task_id, 'gaia-2');
   assert.equal(trace.level, '2');
-  assert.equal(trace.model, 'claude-sonnet-4-5');
+  assert.equal(trace.model, 'claude-sonnet-4-6');
   assert.equal(trace.answer, 'Paris');
   assert.equal(trace.final_correct, true);
   assert.equal(trace.trace.steps.length, 2);
