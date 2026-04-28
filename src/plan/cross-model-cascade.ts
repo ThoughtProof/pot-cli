@@ -70,11 +70,30 @@ export type ProviderFamily =
   | 'google'
   | 'unknown';
 
-/** Resolve a model alias or full identifier to its provider family. */
+/**
+ * Resolve a model alias or full identifier to its provider family.
+ *
+ * Multi-character brand tokens (claude, sonnet, gemini, …) use plain
+ * substring matching — they are unique enough across the current model
+ * landscape that collisions are not a concern.
+ *
+ * Short numeric reasoning-model tokens (o1, o3, o4) require a
+ * word-boundary regex: bare substring matching for `o4` would also fire
+ * on coincidental sequences like `gpt-4o4-mini` (hypothetical) or
+ * arbitrary identifiers that happen to contain the bigram. The boundary
+ * pattern `(^|[^a-z0-9])(o[134])(?![a-z0-9])` requires the token to be
+ * delimited by start-of-string, end-of-string, or a non-alphanumeric
+ * separator — matching real aliases like `o1-preview`, `o3-mini`, `o4`
+ * without leaking onto unrelated substrings.
+ *
+ * Per Hermes' #27 review (Finding 1, 2026-04-28).
+ */
+const OPENAI_REASONING_TOKEN = /(^|[^a-z0-9])o[134](?![a-z0-9])/;
+
 export function familyOf(model: string): ProviderFamily {
   const m = model.toLowerCase();
   if (m.includes('claude') || m.includes('opus') || m.includes('sonnet') || m.includes('haiku')) return 'anthropic';
-  if (m.includes('gpt') || m.includes('o1') || m.includes('o3') || m.includes('o4')) return 'openai';
+  if (m.includes('gpt') || OPENAI_REASONING_TOKEN.test(m)) return 'openai';
   if (m.includes('grok')) return 'xai';
   if (m.includes('kimi') || m.includes('moonshot')) return 'moonshot';
   if (m.includes('deepseek')) return 'deepseek';
@@ -104,7 +123,16 @@ export interface CascadeConfig {
   generatorModel?: string;
   /** Disable cascade entirely (fallback to primary-only). Default: false. */
   disabled?: boolean;
-  /** Per-call timeout in ms. Default: 60000. */
+  /**
+   * Per-call timeout in ms. Default: 60000.
+   *
+   * NOTE: this value is currently advisory — the cascade does NOT enforce
+   * the timeout itself. The host-provided `evaluate` callback is
+   * responsible for honoring it (typically via its own AbortController or
+   * Promise.race). Hermes #27 review Finding 3 (2026-04-28): cascade-level
+   * enforcement (Promise.race + AbortController plumbed through to the
+   * evaluator) is a planned hardening for the wire-up PR.
+   */
   perCallTimeoutMs?: number;
   /**
    * Failover behavior on secondary error after primary=ALLOW.
@@ -353,6 +381,12 @@ export async function runCascade<TInput>(
     // TODO (Phase-1): decide whether CONDITIONAL_ALLOW should also trigger
     // secondary verification. Current bias: do NOT trigger — conditions are
     // the primary's explicit hedge.
+    //
+    // Hermes #27 review Finding 2 (2026-04-28): if this branch is later
+    // changed to invoke secondary, aggregateBatchStats() must be revisited.
+    // Today CONDITIONAL_ALLOW counts as primaryOnly (secondaryInvoked=false),
+    // which is correct under current semantics but would silently drift
+    // if the branch starts triggering a secondary call.
     return {
       verdict: 'CONDITIONAL_ALLOW',
       reason: 'primary_uncertain',

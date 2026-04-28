@@ -104,6 +104,28 @@ test('familyOf: unknown for unrecognized aliases', () => {
   assert.equal(familyOf('random-string'), 'unknown');
 });
 
+// Hermes #27 review Finding 1: o1/o3/o4 must not match coincidental substrings.
+test('familyOf: openai reasoning tokens require word boundary (no substring leak)', () => {
+  // Real aliases must still match.
+  assert.equal(familyOf('o1'), 'openai');
+  assert.equal(familyOf('o1-preview'), 'openai');
+  assert.equal(familyOf('o3-mini'), 'openai');
+  assert.equal(familyOf('o4'), 'openai');
+  assert.equal(familyOf('openai-o3'), 'openai');
+  assert.equal(familyOf('o4_mini'), 'openai');
+
+  // Coincidental substrings must NOT match.
+  assert.equal(familyOf('proto4col'), 'unknown');
+  assert.equal(familyOf('photo3d'), 'unknown');
+  assert.equal(familyOf('demo1-engine'), 'unknown');
+  assert.equal(familyOf('cargo3-runner'), 'unknown');
+
+  // Adjacent alphanumerics must not falsely qualify the token.
+  assert.equal(familyOf('o1x'), 'unknown');
+  assert.equal(familyOf('xo3'), 'unknown');
+  assert.equal(familyOf('o42'), 'unknown'); // numeric continuation
+});
+
 // ─── 2. sameFamily ────────────────────────────────────────────────────────────
 
 test('sameFamily: cross-family returns false', () => {

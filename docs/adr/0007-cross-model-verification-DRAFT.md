@@ -197,7 +197,7 @@ Wenn ein Kriterium reißt: zurück zur Diskussion, kein Auto-Pivot. Mögliche An
 - Andere Cascade-Reihenfolge (z.B. Sonnet→Gemini)
 - Anderes Disagreement-Mapping (z.B. Score-Differenz statt Verdict-Differenz)
 - HOLD-Rate-Tuning durch Threshold-Anpassung
-- Pipeline-Erweiterung (RAG-Layer für Banking-Nuancen, falls H4 bestätigt)
+- Pipeline-Erweiterung (RAG-Layer): **nicht erforderlich** — siehe D8 unten (RESOLVED)
 
 ---
 
@@ -212,7 +212,7 @@ Wenn ein Kriterium reißt: zurück zur Diskussion, kein Auto-Pivot. Mögliche An
 | **D5** | Generator-Modell-Routing: Pflicht-Parameter oder optional? | **Optional** — Default-Cascade ist sicher; Pflicht würde API-Migration brechen |
 | **D6** | RV-Pipeline (API v1): Cross-Model-Prinzip dort explizit dokumentieren? | **Ja** — Konsistenz-Statement in API-Doku (kein Code-Change nötig) |
 | **D7 (NEU)** | HOLD-Rate-Limit absolut (15%) oder relativ zur Gold-HOLD-Rate? | **Relativ:** Cascade-HOLD ≤ Gold-HOLD + 5pp. Begründung: Banking-Suite hat 32% Gold-HOLD; absolutes 15%-Limit wäre strukturell unmöglich. 5pp Disagreement-Aufschlag ist akzeptabel, mehr ist Inflation. |
-| **D8 (NEU)** | HOLD→ALLOW auf Banking-Cases — strukturelle Lücke (RAG-Layer) oder Test-Suite-Defekt? | **Pending Hermes-Inspektion.** Hypothesen H1/H2/H3/H4 in Inspektions-Briefing. Falls H4 (strukturelles Pipeline-Limit) bestätigt → ADR-0008 für RAG-Layer-Erweiterung notwendig. |
+| **D8** | HOLD→ALLOW auf Banking-Cases — strukturelle Lücke (RAG-Layer) oder Test-Suite-Defekt? | **RESOLVED 2026-04-28: Case-Design, nicht Pipeline-Limit.** Hermes' Inspektion bestätigte H1+H2 (Type-A: 11 Cases mit supporting→critical-Verschärfung; Type-B: 5 Cases mit Evidence-Schärfung), nicht H4 (strukturelles Pipeline-Limit). 16 HOLD-Cases in v2-Suite gefixt (`plv_cases_expansion_38_v2.json`). **ADR-0008 (RAG-Layer) entfällt.** |
 
 ---
 
@@ -240,4 +240,4 @@ Wenn ein Kriterium reißt: zurück zur Diskussion, kein Auto-Pivot. Mögliche An
 3. **Hermes:** Cascade-Test auf 120-Case-Suite mit Gemini 3.1 Preview → Sonnet 4.6 (3× Re-Run)
 4. **Paul:** Review DRAFT v2 (insbesondere D7, D8, neues Acceptance-Kriterium 5)
 5. **Computer:** Implementation von `cross-model-cascade.ts` als opt-in PR sobald Phase 1 grün
-6. **Status:** DRAFT v2 → ACCEPTED nach Phase-1-Validierung; falls H4 bestätigt → komplementäre ADR-0008 (RAG-Layer)
+6. **Status:** DRAFT v2 → ACCEPTED nach Phase-1-Validierung. (ADR-0008 RAG-Layer entfällt — D8 RESOLVED durch Hermes' H1+H2-Bestätigung.)
