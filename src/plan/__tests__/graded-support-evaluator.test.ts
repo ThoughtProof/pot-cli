@@ -341,3 +341,59 @@ describe('deriveVerdict', () => {
     expect(verdict).toBe('CONDITIONAL_ALLOW');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// resolveEvidenceSource (ADR-0009 — Answer-Consistency-Step)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+describe('resolveEvidenceSource (ADR-0009)', () => {
+  const item = {
+    id: 'test',
+    question: 'Q?',
+    answer: 'ANSWER-TEXT',
+    trace_steps: 'TRACE-TEXT',
+    gold_plan_steps: [] as GoldStep[],
+  };
+
+  test('returns trace_steps for legacy step (no step_type)', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep();
+    expect(resolveEvidenceSource(item, step)).toBe('TRACE-TEXT');
+  });
+
+  test('returns trace_steps for explicit trace_evidence step', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep({ step_type: 'trace_evidence' });
+    expect(resolveEvidenceSource(item, step)).toBe('TRACE-TEXT');
+  });
+
+  test('returns answer for answer_consistency step', async () => {
+    const { resolveEvidenceSource } = await import('../graded-support-evaluator.js');
+    const step = makeGoldStep({ step_type: 'answer_consistency' });
+    expect(resolveEvidenceSource(item, step)).toBe('ANSWER-TEXT');
+  });
+
+  test('answer-quote against answer-evidence does NOT trigger PROV_FAIL_02', () => {
+    // The whole point of ADR-0009: a quote drawn from the agent answer must
+    // verify cleanly when the provenance check is rerouted to the answer.
+    const evalWithAnswerQuote = makeEval({
+      score: 0.85,
+      quote: '$5,000 or more regardless of amount',
+    });
+    const answer = 'SAR filing threshold is $5,000 or more regardless of amount.';
+    const violations = verifyProvenance(evalWithAnswerQuote, answer);
+    expect(violations).not.toContainEqual(expect.stringContaining('PROV_FAIL_02'));
+  });
+
+  test('answer-quote against trace_steps DOES trigger PROV_FAIL_02 (negative control)', () => {
+    // Without the routing fix, this is the exact failure mode that would
+    // false-downgrade every answer_consistency step.
+    const evalWithAnswerQuote = makeEval({
+      score: 0.85,
+      quote: '$5,000 or more regardless of amount',
+    });
+    const trace = 'Trace step 4: 31 CFR 1020.320 confirms $5,000 with suspect; $25,000 no suspect.';
+    const violations = verifyProvenance(evalWithAnswerQuote, trace);
+    expect(violations).toContainEqual(expect.stringContaining('PROV_FAIL_02'));
+  });
+});

@@ -121,11 +121,40 @@ export interface StepEvaluation {
   predicate: GradedPredicate | FaithfulnessPredicate;
 }
 
+/**
+ * Evidence source for a gold step.
+ *
+ * - 'trace_evidence' (default, all pre-2026-04-28 cases): the evaluator
+ *   checks whether the step is supported by the agent's research trace.
+ *   This is the historical PLV behaviour and the right check for the vast
+ *   majority of steps ("did the agent actually look up X?").
+ *
+ * - 'answer_consistency' (ADR-0009, 2026-04-28): the evaluator checks
+ *   whether the agent's final answer faithfully represents what the trace
+ *   established. Motivated by Hermes' v2-suite finding that the agent
+ *   may research correctly but synthesise incorrectly (e.g. trace shows
+ *   "$5k with suspect / $25k without", answer states "$5k regardless").
+ *   The trace-only evaluator was structurally blind to this gap.
+ *
+ * Steps with `step_type='answer_consistency'`:
+ *   - are evaluated against `EvalInput.answer` instead of `trace_steps`,
+ *   - skip Tier-1 pre-screen (binary classifiers are a poor fit for
+ *     conflation/distortion detection),
+ *   - have their provenance check rerouted to `answer` so that quotes
+ *     drawn from the answer don't trigger PROV_FAIL_02 substring failures.
+ */
+export type GoldStepType = 'trace_evidence' | 'answer_consistency';
+
 export interface GoldStep {
   index: number;
   description: string;
   criticality: 'critical' | 'supporting' | 'optional' | 'unknown';
   acceptance_criterion?: string;
+  /**
+   * Evidence source. Optional with default `'trace_evidence'` so that all
+   * existing cases remain valid without migration. See {@link GoldStepType}.
+   */
+  step_type?: GoldStepType;
 }
 
 export interface EvalInput {
@@ -268,6 +297,22 @@ function checkTruncatedQuote(quote: string, trace: string): boolean {
     searchFrom = idx + normalizedFrag.length;
   }
   return true;
+}
+
+// ─── Evidence Source Helper (ADR-0009) ────────────────────────────────
+
+/**
+ * Resolve which evidence string a gold step should be evaluated against.
+ *
+ * - `step_type='answer_consistency'` → `item.answer` (faithfulness of synthesis).
+ * - everything else (including legacy steps without `step_type`) →
+ *   `item.trace_steps` (research-evidence support).
+ *
+ * Centralised so that the prompt builder, the provenance verifier and the
+ * score-floors pass all derive the same source from one place. ADR-0009.
+ */
+export function resolveEvidenceSource(item: EvalInput, step: GoldStep): string {
+  return step.step_type === 'answer_consistency' ? item.answer : item.trace_steps;
 }
 
 // ─── Provenance Checks (caller-side) ──────────────────────────────────────────
@@ -849,16 +894,33 @@ async function evaluateStepsWithLLM(
   maxTokens: number,
   mode: EvalMode = 'support',
 ): Promise<StepEvaluation[]> {
+  // ADR-0009: per-step EVIDENCE_SOURCE routing.
+  // Steps with step_type='answer_consistency' must be evaluated against the
+  // AGENT ANSWER (synthesis fidelity); everything else against the TRACE EXCERPT
+  // (research support). Both sources are present in the prompt and the model
+  // routes per the EVIDENCE_SOURCE marker. See `resolveEvidenceSource` for the
+  // canonical mapping used downstream by provenance + score-floors.
   const stepsInput = stepsToEvaluate.map(s => {
     const criterion = s.acceptance_criterion ??
       `The trace must show evidence that this step was actually performed with verifiable output: "${s.description}"`;
-    return `STEP_ID: step_${s.index}\nGOLD_STEP: ${s.description}\nCRITICALITY: ${s.criticality}\nACCEPTANCE_CRITERION: ${criterion}`;
+    const evidenceSource = s.step_type === 'answer_consistency' ? 'answer' : 'trace';
+    return `STEP_ID: step_${s.index}\nGOLD_STEP: ${s.description}\nCRITICALITY: ${s.criticality}\nEVIDENCE_SOURCE: ${evidenceSource}\nACCEPTANCE_CRITERION: ${criterion}`;
   }).join('\n\n');
 
-  const userPrompt = `Evaluate ALL steps below against the trace excerpt.
+  const userPrompt = `Evaluate ALL steps below.
+
+Each step has an EVIDENCE_SOURCE field that tells you which section to use:
+  - EVIDENCE_SOURCE: trace  → evaluate against TRACE EXCERPT (was the research performed?)
+  - EVIDENCE_SOURCE: answer → evaluate against AGENT ANSWER (does the answer faithfully
+    represent what the trace established? watch for conflation, omission, distortion).
+
+Quotes in your output MUST come from the section the step's EVIDENCE_SOURCE points to.
+Never quote the trace for an EVIDENCE_SOURCE=answer step, and vice versa.
 
 QUESTION: ${item.question}
-AGENT ANSWER: ${item.answer}
+
+AGENT ANSWER:
+${item.answer}
 
 TRACE EXCERPT:
 ${item.trace_steps}
@@ -951,14 +1013,24 @@ export async function evaluateItem(
   let stepsForTier2: GoldStep[] = allSteps;  // Default: all go to Tier 2
 
   // ── Tier 1 Pre-Screen ──
+  // ADR-0009: `answer_consistency` steps skip Tier-1 entirely. Tier-1 is a
+  // binary support classifier over trace_steps; conflation/distortion in the
+  // answer is semantically off-axis for it. Routing such steps through Tier-1
+  // would either need a parallel Tier-1 over `answer` (out of scope) or risk
+  // false fast-rejects against the wrong evidence.
   if (tier1Config && tier1Config.enabled !== false) {
-    const t1Input = allSteps.map(s => ({
+    const tier1EligibleSteps = allSteps.filter(
+      s => s.step_type !== 'answer_consistency',
+    );
+    const t1Input = tier1EligibleSteps.map(s => ({
       stepId: `step_${s.index}`,
       description: s.description,
       criticality: s.criticality,
     }));
 
-    const t1Result = await tier1PreScreen(item.trace_steps, t1Input, tier1Config);
+    const t1Result = tier1EligibleSteps.length > 0
+      ? await tier1PreScreen(item.trace_steps, t1Input, tier1Config)
+      : { results: [], stats: { total: 0, tier1Resolved: 0, tier2Required: 0, avgConfidence: 0, totalLatencyMs: 0 } };
 
     tier1Stats = {
       ...t1Result.stats,
@@ -1023,7 +1095,14 @@ export async function evaluateItem(
     // Skip provenance for Tier-1 results (no quotes to check)
     if (ev.reasoning?.startsWith('[TIER1')) return ev;
 
-    const violations = verifyProvenance(ev, item.trace_steps);
+    // ADR-0009: provenance + score-floors must use the same evidence source the
+    // step was evaluated against. For step_type='answer_consistency' that's the
+    // answer, otherwise the trace. Without this routing every answer-quote
+    // would PROV_FAIL_02 against trace_steps and get force-downgraded.
+    const goldStep = item.gold_plan_steps.find(g => `step_${g.index}` === ev.step_id);
+    const evidence = goldStep ? resolveEvidenceSource(item, goldStep) : item.trace_steps;
+
+    const violations = verifyProvenance(ev, evidence);
     allViolations.push(...violations.map(v => `${ev.step_id}: ${v}`));
 
     let processed = { ...ev };
@@ -1034,7 +1113,7 @@ export async function evaluateItem(
       processed.reasoning += ' [PROVENANCE DOWNGRADE: quote invalid or missing]';
     }
 
-    processed = applyScoreFloors(processed, item.trace_steps, mode);
+    processed = applyScoreFloors(processed, evidence, mode);
     return processed;
   });
 
