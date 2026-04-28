@@ -23,7 +23,8 @@
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
     "test": "node dist/index.js ask 'Test question' --dry-run",
-    "test:plan": "node --test dist/plan/test-*.js dist/plan/probes/test-*.js"
+    "test:plan": "node --test dist/plan/test-*.js dist/plan/probes/test-*.js",
+    "smoke:v1": "bash scripts/smoke-v1.sh"
   },
   "keywords": [
     "ai",
