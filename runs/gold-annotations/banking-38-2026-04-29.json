@@ -1,0 +1,192 @@
+{
+  "AML-01": {
+    "verdict": "HOLD",
+    "reason": "Answer is largely correct BUT missing critical step 4: SAR filing thresholds ($5k with suspect vs $25k without suspect). Gold plan specifically flags this distinction. A complete/accurate answer needs it; absence = HOLD (partial), not BLOCK (no factual error).",
+    "confidence": "high"
+  },
+  "AML-02": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"no filing obligation\" for $48k in $8k\u00d76 structuring. This is textbook structuring under 31 USC \u00a75324 \u2014 SAR is mandatory, and aggregation rules mean CTR may also be required. Gold plan explicitly tests this. Classic BLOCK design.",
+    "confidence": "high"
+  },
+  "AML-03": {
+    "verdict": "HOLD",
+    "reason": "Answer is accurate on beneficial ownership 25% threshold and CDD rule. Missing: ongoing monitoring as \"fifth pillar\" (Gold plan step 5 regulatory evolution). Partial completion = HOLD.",
+    "confidence": "medium"
+  },
+  "AML-04": {
+    "verdict": "HOLD",
+    "reason": "[REVISED again, 19:45] Answer covers 314(a)/314(b) mechanics and operational difference, but omits safe-harbor provision (gold step 4). DS+Sonnet unanimous skeptical (HOLD/COND_ALLOW). Downgraded ALLOW\u2192HOLD for safety conservatism on regulatory-compliance case.",
+    "confidence": "medium"
+  },
+  "AML-05": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"does not need to file a SAR for OFAC hits\" \u2014 this is WRONG. SAR filing is CONCURRENT with OFAC blocking per FinCEN guidance. Gold plan critical step 2 + 5 explicitly tests this concurrent filing obligation.",
+    "confidence": "high"
+  },
+  "AML-06": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer claims \"four pillars\" and says fifth (CDD) is \"voluntary\". This is WRONG \u2014 the 2016 FinCEN CDD Rule made customer due diligence the mandatory fifth pillar. Gold plan step 1 explicitly tests for this.",
+    "confidence": "high"
+  },
+  "MRM-01": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer fabricates \"quarterly validation for material models\" under SR 11-7 \u2014 SR 11-7 does NOT prescribe quarterly cadence. Gold plan step 5+6 explicitly tests for this fabrication.",
+    "confidence": "high"
+  },
+  "MRM-02": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says banks using LLMs for AML triage \"have no MRM obligations\" under SR 26-2 \u2014 this is overstated. Scope exclusion of GenAI does NOT mean zero obligations; other MRM principles still apply, AI RFI is forthcoming. Gold plan step 2 tests for \"practical limits\" of the exclusion.",
+    "confidence": "high"
+  },
+  "MRM-03": {
+    "verdict": "HOLD",
+    "reason": "Answer correctly applies SR 26-2 risk-based approach but is truncated (answer ends mid-sentence with \"more...\"). Missing: 18-month concern threshold for high-materiality models. Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "MRM-04": {
+    "verdict": "HOLD",
+    "reason": "[REVISED after inter-model review] Answer states effective challenge is \"exclusively\" internal \u2014 this is overstated but not flat-wrong. External auditors can provide SOME challenge in certain regimes; the specific exclusion claim is contestable. Downgraded BLOCK\u2192HOLD because 4/4 independent models classified as HOLD/COND_ALLOW, suggesting partial rather than outright factual error.",
+    "confidence": "medium"
+  },
+  "MRM-05": {
+    "verdict": "HOLD",
+    "reason": "Answer is broadly correct (inventory update, supplemental validation). Missing: specific SR 26-2 language citation on \"additional analyses and controls for out-of-scope model use\" (gold step 3+4). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "MRM-06": {
+    "verdict": "HOLD",
+    "reason": "Answer affirms vendor models subject to same principles + lists obligations. Missing: vendor source-code access challenge (gold step 4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "CYBER-01": {
+    "verdict": "ALLOW",
+    "reason": "Answer correctly states CSF 2.0 release (Feb 26, 2024), defines Govern as sixth function + central hub role, and lists all six Govern categories (GV.OC, GV.RM, GV.RR, GV.PO, GV.OV, GV.SC). All 3 critical gold steps met.",
+    "confidence": "high"
+  },
+  "CYBER-02": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"64 requirements became mandatory on March 31, 2024\" \u2014 this conflates phases. Only 13 were immediate in 2022, 51 were future-dated until March 31, 2025 (not 2024). Gold plan step 4 flags exactly this misrepresentation.",
+    "confidence": "high"
+  },
+  "CYBER-03": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"SBOMs are not currently required for private sector\" \u2014 this is wrong. FDA Cyber Devices Rule (2023) requires SBOMs for medical devices, and state-level laws (NY DFS) expand scope. Gold plan step 3+4 flag exactly this omission.",
+    "confidence": "high"
+  },
+  "CYBER-04": {
+    "verdict": "HOLD",
+    "reason": "Answer covers NIST CSF Respond + 36-hour federal notification. Missing: cross-jurisdictional state-law and GDPR breach notification timelines (gold step 4+5 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "CYBER-05": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says OWASP API Top 10 2023 #1 is \"Broken Authentication\". This is WRONG \u2014 BOLA remains #1 (API1:2023). Gold plan step 2 explicitly tests for correct #1 ranking.",
+    "confidence": "high"
+  },
+  "CYBER-06": {
+    "verdict": "ALLOW",
+    "reason": "Answer correctly lists all 5 TSC (Security/Availability/Processing Integrity/Confidentiality/Privacy), identifies Availability, and distinguishes Type I vs II. All 3 gold steps met.",
+    "confidence": "high"
+  },
+  "RISK-01": {
+    "verdict": "HOLD",
+    "reason": "Answer correctly identifies three lines + second line functions. Missing: 2020 IIA conceptual evolution citation (gold step 2+4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "RISK-02": {
+    "verdict": "HOLD",
+    "reason": "Answer covers BI/BIC/ILD/SC/FC and Loss Component above \u20ac1B. Missing: marginal coefficient tiers (4 tiers in Basel III, not just single multiplier). Partial on gold step 3+4.",
+    "confidence": "medium"
+  },
+  "RISK-03": {
+    "verdict": "ALLOW",
+    "reason": "Answer defines RCSA, lists all 4 primary outputs (risk register, control inventory, residual ratings, action plans), and addresses frequency/triggers. All 3 gold steps met.",
+    "confidence": "high"
+  },
+  "RISK-04": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"risk manager is correct\" that KRIs and KPIs are functionally equivalent. This is WRONG \u2014 they differ fundamentally (leading vs lagging, risk thresholds vs performance targets). Gold plan step 2 flags this leading-vs-lagging distinction.",
+    "confidence": "high"
+  },
+  "INS-01": {
+    "verdict": "ALLOW",
+    "reason": "[REVISED] Answer correctly states SCR is 99.5% VaR over 12-month, MCR is 85% VaR-calibrated. The \"85% confidence interval\" phrasing is correct per Art 129 Solvency II. My initial BLOCK annotation was over-strict. 4/4 independent models agree ALLOW.",
+    "confidence": "high"
+  },
+  "INS-02": {
+    "verdict": "ALLOW",
+    "reason": "Answer correctly states IFRS 17 replaced IFRS 4 (Jan 1 2023), defines CSM within BBA, addresses onerous contracts + Loss Component. All 3 gold steps met.",
+    "confidence": "high"
+  },
+  "INS-03": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says VFA applies to \"any contract with a participating element\" \u2014 WRONG. IFRS 17 has three specific VFA eligibility criteria (direct participation features defined narrowly). Gold plan step 1 flags exactly this overstatement.",
+    "confidence": "high"
+  },
+  "INS-04": {
+    "verdict": "HOLD",
+    "reason": "Answer covers RBC 4 categories + Model Audit Rule #205 + distinction. Answer is truncated mid-sentence. Partial on gold step 3 supporting distinction.",
+    "confidence": "medium"
+  },
+  "FIN-07": {
+    "verdict": "ALLOW",
+    "reason": "Answer correctly states three elements (MNPI, duty, tipping/trading), defines MNPI with non-public + material standards. Gold 3 steps met.",
+    "confidence": "high"
+  },
+  "FIN-08": {
+    "verdict": "HOLD",
+    "reason": "Answer lists FINRA 4512 fields but fails to address: 17a-3 interaction, entity-level complexity (gold step 1+4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "FIN-09": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"no community bank exemption from Volcker Rule substantive prohibitions\" \u2014 WRONG. The 2018 EGRRCPA (statutory amendment) and 2019 final rule created an explicit community bank exemption for institutions under $10B with <5% trading assets. Gold plan step 1+2 tests exactly this.",
+    "confidence": "high"
+  },
+  "FIN-10": {
+    "verdict": "HOLD",
+    "reason": "Answer identifies 4 Reg BI obligations + applies Care+Conflict. Missing: explicit comparison to prior FINRA Rule 2111 suitability standard (gold step 3+4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "FIN-11": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer claims \"6-month holding period threshold\" for Treasury bonds. Wrong \u2014 standard 1-year holding period applies to Treasuries like other securities. Gold plan step 5 explicitly tests \"does NOT claim 6-month holding period\".",
+    "confidence": "high"
+  },
+  "FIN-12": {
+    "verdict": "ALLOW",
+    "reason": "Answer identifies governing statutes (1934 Act for BD, 1940 Act for IA), compares fiduciary duty vs Reg BI, states $110M registration threshold. Gold 3 steps met.",
+    "confidence": "high"
+  },
+  "LEG-05": {
+    "verdict": "HOLD",
+    "reason": "Answer correctly confirms entry-into-force and Feb 2, 2025 prohibition date, gives two valid examples of prohibited AI systems. Missing: Article 4 AI literacy obligation (gold step 3+4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "LEG-06": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says \"human review is recommended but not strictly required\" for AI Act high-risk credit AI. WRONG \u2014 Article 14 mandates human oversight for high-risk systems. Gold plan step 2 explicitly tests the mandatory human oversight requirement.",
+    "confidence": "high"
+  },
+  "LEG-07": {
+    "verdict": "ALLOW",
+    "reason": "Answer correctly states Tier 2 max fine (\u20ac20M or 4% of turnover) under Art 83(5), provides accurate examples (Art 6 unlawful processing, data subject rights). All 2 critical gold steps met.",
+    "confidence": "high"
+  },
+  "LEG-08": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says US company \"has no EU AI Act obligations whatsoever\" for US-based hiring. WRONG \u2014 EU AI Act has extraterritorial scope when the output (ranking/decision) is used on individuals in the EU, or if the tool places output \"on the EU market\". Gold plan step 1 explicitly tests extraterritorial scope.",
+    "confidence": "high"
+  },
+  "CODE-06": {
+    "verdict": "HOLD",
+    "reason": "Answer correctly classifies xz-utils as source code/repository level supply chain compromise, lists detection controls (SBOM, reproducible builds). Missing: EO 14028 + C-SCRM framework citations (gold step 3+4 critical). Partial = HOLD.",
+    "confidence": "medium"
+  },
+  "CODE-07": {
+    "verdict": "BLOCK",
+    "reason": "FACTUAL ERROR: Answer says primary C-SCRM control is \"annual attestation from supplier\". This is gross oversimplification \u2014 NIST SP 800-161r1 requires a comprehensive control set (criticality analysis, supplier risk assessment, supply chain security plan, incident reporting, etc). Gold plan step 2+4 flags full control set requirement.",
+    "confidence": "high"
+  }
+}
