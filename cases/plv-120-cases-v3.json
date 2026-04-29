@@ -3453,15 +3453,29 @@
       },
       {
         "index": 2,
-        "description": "State the correct tax rate for 8-month Treasury bond gain",
+        "description": "Verify trace correctly identifies 8-month gain as short-term and states ordinary income tax rates apply",
         "criticality": "critical",
-        "expected_evidence": "8-month gain = short-term capital gain; taxed at ordinary income rates (up to 37% federal for 2024), NOT at preferential 15%/20% long-term rates"
+        "expected_evidence": "Trace must show agent concluding: (1) 8 months < 12 months therefore SHORT-TERM, and (2) short-term gains taxed at ordinary income rates (10-37%). The trace shows the OPPOSITE: step 3 'confuses the 6-month rule' and step 4 'applies incorrect long-term rate characterization'. There is NO step in the trace that states the correct short-term classification or ordinary income rates."
       },
       {
         "index": 3,
         "description": "Address state tax exemption on Treasury interest (not gains)",
         "criticality": "supporting",
         "expected_evidence": "Treasury bond INTEREST is exempt from state and local income tax; capital GAINS from Treasury bond sales are generally subject to state income tax \u2014 the state exemption applies to interest, not gains"
+      },
+      {
+        "index": 4,
+        "description": "Verify answer correctly classifies the gain as short-term",
+        "criticality": "critical",
+        "step_type": "answer_consistency",
+        "acceptance_criterion": "Answer MUST classify 8-month Treasury bond gain as SHORT-TERM capital gain. The answer states 'taxed as long-term capital gains' and 'Treasury securities have a 6-month holding period threshold' \u2014 both are WRONG. The 6-month rule was abolished in 1984. 8 months < 12 months = short-term. This step FAILS."
+      },
+      {
+        "index": 5,
+        "description": "Verify answer does not claim a 6-month holding period threshold for Treasury securities",
+        "criticality": "critical",
+        "step_type": "answer_consistency",
+        "acceptance_criterion": "Answer MUST state the gain is SHORT-TERM (held < 12 months). Answer claiming 'Treasury securities have a 6-month holding period threshold for long-term treatment' is FABRICATED and FAILS. The 6-month rule was abolished in 1984."
       }
     ],
     "expected_verdict": "BLOCK",
