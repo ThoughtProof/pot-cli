@@ -1,6 +1,6 @@
 # ADR-0008: Primary-Model Selection Matrix (DRAFT)
 
-**Status:** DRAFT v1 — pending review (Paul, Hermes), pending M5 Ensemble-Experiment
+**Status:** DRAFT v1 — pending review (Paul, Hermes), M5 Ensemble-Experiment laufend (Hermes, M4)
 **Date:** 2026-04-29 (16:30 CEST)
 **Owners:** Computer (Architektur, Tier-Schema), Paul (Decisions), Hermes (Empirik, M4)
 **Related:** ADR-0005 (failScore-Gate-Decoupling), ADR-0007 (Cross-Model-Verification), zukünftige ADR-0009 (Ensemble-Veto, falls M5 erfolgreich)
@@ -101,7 +101,7 @@ IF use_case = "rapid_triage_first_pass":
 
 ### Was diese ADR NICHT entscheidet
 
-- **M5 Ensemble (Parallel-Voting).** Wenn Hermes' späteres M5-Experiment zeigt dass DS+Gemini parallel mit Veto-Logik 97% BLOCK + 96% ALLOW Recall kombiniert bei <2× Sonnet-Solo-Kosten, würde das die Matrix erweitern um einen `thorough_max_recall`-Tier. Eigene ADR-0009 falls M5 erfolgreich.
+- **M5 Ensemble (Parallel-Voting).** Hermes' M5-Experiment läuft bereits auf M4. Wenn die Resultate zeigen dass DS+Gemini parallel mit Veto-Logik 97% BLOCK + 96% ALLOW Recall kombiniert bei <2× Sonnet-Solo-Kosten, würde das die Matrix erweitern um einen `thorough_max_recall`-Tier. Eigene ADR-0009 nach M5-Resultaten — kann ADR-0008 noch vor dem ersten Merge-Versuch erweitern wenn die Daten rechtzeitig kommen.
 - **Schema-Format für `/v2/verify/tiers`.** Diese ADR liefert die Tier-Definitionen; das HTTP-Schema und Multi-Tenancy-Locking-Modell wird in einer separaten Schema-Skizze behandelt (post-Borthwick-Feedback Embedded-First).
 - **Default-Tier ohne Parameter.** Pauls Empfehlung: `standard` (DS Pro Solo). Wird im Schema-Workstream finalisiert, nicht hier.
 
@@ -177,4 +177,4 @@ interface PLVTier {
 - [ ] Paul Review (decisions on open questions, naming convention)
 - [ ] Hermes Review (correctness of empirical numbers, additional data points)
 - [ ] Schema-Workstream (`/v2/verify/tiers` endpoint design with embedded-first multi-tenancy)
-- [ ] M5 Ensemble Experiment (DS+Gemini Parallel-Voting, ~2 weeks out — would extend matrix with `thorough_max_recall` tier if successful)
+- [ ] M5 Ensemble Experiment (DS+Gemini Parallel-Voting, **läuft auf M4** — Resultate würden Matrix mit `thorough_max_recall` Tier erweitern wenn erfolgreich; ADR-0008 v2 oder ADR-0009 je nach Timing)
