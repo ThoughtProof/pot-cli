@@ -28,14 +28,16 @@ Die empirischen Datenpunkte aus dieser Woche zeigen ein anderes Bild: **Solo-Mod
 
 ### Empirischer Anker — sechs Konfigurationen auf 120v3-Suite (full 120, post-Hermes-Vollstand-Validation)
 
-| Setup | Overall 120 | B→A | A→B | ALLOW rec. | HOLD rec. | BLOCK rec. | Cost |
+| Setup | Overall 120 | B→A | A→B | ALLOW rec. | HOLD rec. | BLOCK rec. | Cost/verification (USD) |
 |---|---|---|---|---|---|---|---|
-| 🥇 DS Pro Solo | **79.2%** | 0 ✅ | 1 | 75.8% | 71.4% | 82.7% | $0.96 |
-| 🥈 **Gem→Son Cascade (fix2)** | **78.3%** | 0 ✅ | **0** ✅ | **97.0%** | **80.0%** | 61.5% | $3.25 |
-| 🥉 M5 Ensemble (DS⊕Gem) | 77.5% | 0 ✅ | 1 | 69.7% | 71.4% | 82.7% | $2.10 |
-| Sonnet Solo | 73.3% | 0 ✅ | 0 | 63.6% | 74.3% | 75.0% | $6.50 |
-| Gemini Solo | 68.3% | **2** ❌ | 0 | 75.8% | 68.6% | 61.5% | $0.40 |
+| 🥇 DS Pro Solo | **79.2%** | 0 ✅ | 1 | 75.8% | 71.4% | 82.7% | **$0.0080** |
+| 🥈 **Gem→Son Cascade (fix2)** | **78.3%** | 0 ✅ | **0** ✅ | **97.0%** | **80.0%** | 61.5% | **$0.0271** |
+| 🥉 M5 Ensemble (DS⊕Gem) | 77.5% | 0 ✅ | 1 | 69.7% | 71.4% | 82.7% | **$0.0175** |
+| Sonnet Solo | 73.3% | 0 ✅ | 0 | 63.6% | 74.3% | 75.0% | **$0.0542** |
+| Gemini Solo | 68.3% | **2** ❌ | 0 | 75.8% | 68.6% | 61.5% | **$0.0033** |
 | Kimi k2.6 Solo | n/a | **2** ❌ | n/a | n/a | n/a | n/a | n/a |
+
+> *Per-call estimates assume ~3k-token verification (1k input plan + 2k reasoning/output). Full 120-Case benchmark validation totals: $0.96 / $3.25 / $2.10 / $6.50 / $0.40 per tier.*
 
 ### Domain-Shift-Befund (Achse 1b Auswertung)
 
@@ -97,12 +99,14 @@ Wir etablieren eine **Primary-Model Selection Matrix** mit zwei Achsen: **Cost**
 
 | Tier | Architektur | Primary-Modell(e) | Bias | B→A Guarantee | ALLOW Recall | BLOCK Recall | Cost | Default? |
 |------|-------------|-------------------|------|---------------|--------------|--------------|------|----------|
-| `fast` | Solo | DS Flash | strict-light | 0 (preliminary) | n/a | n/a | $0.20 | — |
-| `standard` | Solo | DS Pro | strict-balanced | 0 | 75.8% | 82.7% | $0.96 | — |
-| **`thorough_balanced`** | Cascade | Gemini → Sonnet | balanced | 0 | **97.0%** | 61.5% | $3.25 | ✅ **DEFAULT** |
-| `thorough_strict` | Cascade | DS Pro → Sonnet | strict | 0 | 64.0% | 97.1% | $2.55 | — |
-| `thorough_ensemble` | Parallel | DS Pro ⊕ Gemini, BLOCK-Veto | strict-via-veto | **0 strukturell** | 69.7% | 82.7% | $2.10 | — |
-| `thorough_max` | Solo | Sonnet | mid | 0 | 63.6% | 75.0% | $6.50 | — |
+| `fast` | Solo | DS Flash | strict-light | 0 (preliminary) | n/a | n/a | **$0.0013** | — |
+| `standard` | Solo | DS Pro | strict-balanced | 0 | 75.8% | 82.7% | **$0.0080** | — |
+| **`thorough_balanced`** | Cascade | Gemini → Sonnet | balanced | 0 | **97.0%** | 61.5% | **$0.0271** | ✅ **DEFAULT** |
+| `thorough_strict` | Cascade | DS Pro → Sonnet | strict | 0 | 64.0% | 97.1% | **$0.0212** | — |
+| `thorough_ensemble` | Parallel | DS Pro ⊕ Gemini, BLOCK-Veto | strict-via-veto | **0 strukturell** | 69.7% | 82.7% | **$0.0175** | — |
+| `thorough_max` | Solo | Sonnet | mid | 0 | 63.6% | 75.0% | **$0.0542** | — |
+
+> *Cost-Spalte ist Per-Call (USD), nicht Per-Benchmark. Annahme: ~3k Tokens pro Verification (1k Plan + 2k Reasoning/Output). Full 120-Case Benchmark-Totals zur Referenz: $0.96 / $3.25 / $2.55 / $2.10 / $6.50 pro Tier. Vergleich: InsumerAPI = $0.04/Verification — `thorough_balanced` ist **32% günstiger**.*
 
 **Hard Invariant über alle Tiers:** B→A = 0 (Hard Rule P1, ADR-0001). Procurement-Garantieanker.
 
@@ -136,10 +140,10 @@ IF use_case = "regulated_audit_with_structural_guarantee_required":
 
 IF use_case = "high_volume_compliance_screening" AND budget_per_eval matters
    AND domain IN ['ml_risk', 'insurance', 'aml']:
-    → standard (DS Pro Solo, $0.96, stark auf diesen Domänen)
+    → standard (DS Pro Solo, $0.0080/call, stark auf diesen Domänen)
 
 IF use_case = "high_consequence_compliance" AND need_max_block_recall:
-    → thorough_strict (97.1% BLOCK-Recall, $2.55)
+    → thorough_strict (97.1% BLOCK-Recall, $0.0212/call)
 
 IF use_case = "rapid_triage_first_pass":
     → fast (DS Flash) → escalate to thorough on HOLD/BLOCK
@@ -168,7 +172,7 @@ IF max_tier-Constraint vom Plattform-Operator (Pauls Punkt):
 
 ### Ausschlusskriterien
 
-- **Sonnet Solo wird NICHT als Primary-Tier ausgespielt** außer als `thorough_max`-Backstop. $6.50 ohne Cross-Model-Verification ist kein Procurement-defensibles Angebot.
+- **Sonnet Solo wird NICHT als Primary-Tier ausgespielt** außer als `thorough_max`-Backstop. $0.0542/call ohne Cross-Model-Verification ist kein Procurement-defensibles Angebot.
 - **Gemini Solo ist disqualifiziert** (2× B→A: GAIA-16 mit `Gem=CONDITIONAL_ALLOW`, GAIA-19 mit `Gem=ALLOW`). P1-Verletzung. Nur als Cascade-Primary mit Sonnet-Rescue oder als Ensemble-Voter mit DS-Veto verwendbar.
 - **Kimi k2.6 ist disqualifiziert** (2× B→A auf 120v3, P1-Verletzung). Endgültig.
 
@@ -251,6 +255,7 @@ Self-revision ist Methodologie in Aktion, nicht Schwäche — Trust-Signal für 
 4. **Strukturelle Robustheit gegen Model-Provider-Risk.** Wenn DeepSeek aus dem Markt verschwindet, bleibt `thorough_balanced` und `thorough_max` verfügbar.
 5. **M5 Ensemble bleibt im Portfolio** als Audit-Compliance-Tier — strukturelle B→A-Garantie ist ein Banking-Procurement-Asset, auch ohne Accuracy-Premium.
 6. **Self-revision als Trust-Signal**: Die drei dokumentierten Annotation-Korrekturen während Validation sind ein Vertrauens-Anker in Methodik-Reviews.
+7. **Agentic-Commerce-kompatible Per-Call-Ökonomie.** Default-Tier `thorough_balanced` liegt bei $0.0271/call — **32% unter InsumerAPI** ($0.04/Verification) und damit verteidigbar gegen den derzeit dominanten Agent-Compliance-Vergleichspunkt. `standard` ($0.0080) und `fast` ($0.0013) öffnen High-Volume-Triage-Workloads, die bei Per-Verification-Pricing >$0.04 unwirtschaftlich sind. Cost-Story ist damit nicht nur Genauigkeits-, sondern auch Volumen-Argument.
 
 ### Negative / Risk
 
