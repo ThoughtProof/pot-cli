@@ -10,18 +10,31 @@
  * eigenen Benchmarks belegt korrelierte Fehler).
  *
  * Architecture: Cascade with Early-Exit
- *   1. Primary model evaluates first. Verdict ∈ {BLOCK, UNCERTAIN, ALLOW}.
- *   2. Primary ∈ {BLOCK, UNCERTAIN} → done (~63% of cases per Hermes' 60-case test).
- *   3. Primary = ALLOW → Secondary model evaluates.
- *   4. Secondary = ALLOW → final verdict ALLOW.
- *   5. Secondary ≠ ALLOW → final verdict HOLD (disagreement = caution).
+ *   1. Primary model evaluates first. Verdict ∈ {BLOCK, HOLD, ALLOW, CONDITIONAL_ALLOW}.
+ *   2. Primary ∈ {BLOCK, HOLD} → done (Early-Exit, no Secondary call).
+ *   3. Primary ∈ {ALLOW, CONDITIONAL_ALLOW} → Secondary model evaluates.
+ *   4. Secondary ∈ {ALLOW, CONDITIONAL_ALLOW} → final verdict reflects Primary's
+ *      strength (ALLOW if both ALLOW, CONDITIONAL_ALLOW if Primary was COND_ALLOW).
+ *   5. Secondary ∈ {HOLD, BLOCK} → final verdict HOLD (disagreement = caution).
  *
- * Empirical anchor (Hermes, 2026-04-28):
+ * Empirical anchor (Hermes, 2026-04-28 / 2026-04-29):
  *   - Cross-Family Test (60 cases): Sonnet 8.7% / Gemini-3.1-Preview 2.1%
  *     oscillation, both with 1 reproducible BLOCK→ALLOW.
  *   - Cascade Gemini-3.1-Preview→Sonnet (60 cases): 0% oscillation, 0 flips,
  *     0 BLOCK→ALLOW, +37% cost (Early-Exit on 63% of cases).
- *   - Phase-1-Validierung auf 120-Case-Suite ausstehend.
+ *   - Live-Run 120v3-Suite (2026-04-29): 78.1% accuracy, 3 BLOCK→ALLOW.
+ *     Root cause: CONDITIONAL_ALLOW was a 1-call blind spot — Primary's
+ *     CONDITIONAL_ALLOW returned without Secondary verification, and ADR-0005
+ *     maps CONDITIONAL_ALLOW → public ALLOW, so under-scored BLOCK cases
+ *     leaked through. Fix (this commit): route CONDITIONAL_ALLOW from
+ *     Primary to Secondary, identical to ALLOW path.
+ *   - Disagreement-overcorrection (Hermes, 2026-04-29): all 3 false-positive
+ *     disagreement_hold cases had Secondary=CONDITIONAL_ALLOW. Secondary
+ *     CONDITIONAL_ALLOW now counts as Agreement, not Disagreement — only
+ *     Secondary∈{HOLD, BLOCK} overrides Primary's ALLOW.
+ *   - Phase-1-Validierung re-run on 120v3-Suite mit diesen Fixes ausstehend.
+ *   - Note: 60-case Simulation auf alter Architektur war ein Subset, keine
+ *     volle 120-Case-Baseline; Solo Sonnet 84.1% bleibt der referenz-Vergleich.
  *
  * Status: SKELETON (this file). Full implementation requires:
  *   - Phase-1-Validierung successful (3× re-run on fixed 120-case suite).
@@ -154,15 +167,16 @@ export const CASCADE_DEFAULTS: Required<Omit<CascadeConfig, 'generatorModel'>> &
 
 /** Why a cascade reached its final verdict. Used in audit trails. */
 export type CascadeReason =
-  | 'primary_block'              // primary=BLOCK → final BLOCK
-  | 'primary_uncertain'           // primary=UNCERTAIN → final HOLD/UNCERTAIN
-  | 'primary_hold'                // primary=HOLD → final HOLD
-  | 'agreement_allow'             // primary=ALLOW + secondary=ALLOW → ALLOW
-  | 'disagreement_hold'           // primary=ALLOW + secondary≠ALLOW → HOLD
-  | 'cascade_disabled'            // disabled flag → primary-only result
-  | 'primary_error_fallback'     // primary failed → secondary as standalone
-  | 'secondary_error_fallback'   // secondary failed → fallback per config
-  | 'both_error';                 // both failed → propagate error;
+  | 'primary_block'                       // primary=BLOCK → final BLOCK
+  | 'primary_hold'                        // primary=HOLD → final HOLD
+  | 'agreement_allow'                     // primary=ALLOW + secondary=ALLOW → ALLOW
+  | 'agreement_conditional_allow'         // primary=COND_ALLOW + secondary=ALLOW/COND_ALLOW → COND_ALLOW
+  | 'disagreement_hold'                   // primary=ALLOW + secondary∈{HOLD,BLOCK} → HOLD
+  | 'disagreement_conditional_hold'       // primary=COND_ALLOW + secondary∈{HOLD,BLOCK} → HOLD
+  | 'cascade_disabled'                    // disabled flag → primary-only result
+  | 'primary_error_fallback'              // primary failed → secondary as standalone
+  | 'secondary_error_fallback'            // secondary failed → fallback per config
+  | 'both_error';                         // both failed → propagate error
 
 export interface CascadeResult {
   /** Final verdict after cascade logic. */
@@ -195,14 +209,15 @@ export interface CascadeResult {
 
 export interface CascadeBatchStats {
   total: number;
-  primaryOnly: number;       // cases resolved by primary alone
-  cascaded: number;          // cases that invoked secondary
-  agreements: number;        // cases ending in ALLOW (both agreed)
-  disagreements: number;     // cases ending in HOLD due to disagreement
-  degraded: number;          // cases with errors that forced fallback
+  primaryOnly: number;              // cases resolved by primary alone (BLOCK or HOLD only)
+  cascaded: number;                 // cases that invoked secondary (ALLOW or CONDITIONAL_ALLOW from primary)
+  agreements: number;               // cases ending in ALLOW (both agreed full ALLOW)
+  conditionalAgreements: number;    // cases ending in CONDITIONAL_ALLOW (cond agreement)
+  disagreements: number;            // cases ending in HOLD due to disagreement (any path)
+  degraded: number;                 // cases with errors that forced fallback
   avgPrimaryLatencyMs: number;
   avgSecondaryLatencyMs: number;
-  earlyExitRate: number;     // primaryOnly / total
+  earlyExitRate: number;            // primaryOnly / total
 }
 
 // ─── Model Selection ──────────────────────────────────────────────────────────
@@ -409,32 +424,35 @@ export async function runCascade<TInput>(
       totalLatencyMs: Date.now() - startedAt,
     };
   }
-  if (primary.verdict === 'CONDITIONAL_ALLOW') {
-    // CONDITIONAL_ALLOW carries conditions; treat like uncertain in cascade.
-    // TODO (Phase-1): decide whether CONDITIONAL_ALLOW should also trigger
-    // secondary verification. Current bias: do NOT trigger — conditions are
-    // the primary's explicit hedge.
-    //
-    // Hermes #27 review Finding 2 (2026-04-28): if this branch is later
-    // changed to invoke secondary, aggregateBatchStats() must be revisited.
-    // Today CONDITIONAL_ALLOW counts as primaryOnly (secondaryInvoked=false),
-    // which is correct under current semantics but would silently drift
-    // if the branch starts triggering a secondary call.
+  // ── Primary ∈ {ALLOW, CONDITIONAL_ALLOW} → invoke secondary ──
+  // Both branches share identical secondary-verification logic. The only
+  // difference is the agreement verdict: full ALLOW agreement yields ALLOW,
+  // while CONDITIONAL_ALLOW agreement yields CONDITIONAL_ALLOW (preserving
+  // the primary's explicit hedge through the cascade).
+  //
+  // Live-Run 120v3 (2026-04-29) confirmed: routing CONDITIONAL_ALLOW through
+  // secondary closes the BLOCK→ALLOW blind spot identified by Hermes
+  // (3 violations on the original 1-call CONDITIONAL_ALLOW path).
+  if (primary.verdict !== 'ALLOW' && primary.verdict !== 'CONDITIONAL_ALLOW') {
+    // Defensive: any other verdict here is unexpected at this point in the
+    // flow (BLOCK and HOLD are handled above). Treat as HOLD with degraded
+    // mode rather than silently passing through.
+    errors.push(`primary(${primaryModel}): unexpected verdict ${primary.verdict} after early-exit checks`);
     return {
-      verdict: 'CONDITIONAL_ALLOW',
-      reason: 'primary_uncertain',
+      verdict: 'HOLD',
+      reason: 'primary_hold',
       primary,
       primaryModel,
       secondaryModel,
       secondaryInvoked: false,
-      degradedMode: false,
+      degradedMode: true,
       errors,
       primaryLatencyMs,
       totalLatencyMs: Date.now() - startedAt,
     };
   }
 
-  // ── Primary = ALLOW → invoke secondary ──
+  const primaryWasConditional = primary.verdict === 'CONDITIONAL_ALLOW';
   let secondary: EvaluatorResult | undefined;
   let secondaryLatencyMs: number | undefined;
   const tS = Date.now();
@@ -443,9 +461,10 @@ export async function runCascade<TInput>(
     secondaryLatencyMs = Date.now() - tS;
   } catch (err) {
     errors.push(`secondary(${secondaryModel}): ${err instanceof Error ? err.message : String(err)}`);
-    // Secondary failed → consult config
+    // Secondary failed → consult config. Fallback verdict mirrors primary's
+    // strength (CONDITIONAL_ALLOW stays CONDITIONAL_ALLOW under 'allow' policy).
     const fallbackVerdict: EvaluatorVerdict = cfg.secondaryErrorFallback === 'allow'
-      ? 'ALLOW'
+      ? (primaryWasConditional ? 'CONDITIONAL_ALLOW' : 'ALLOW')
       : 'HOLD';
     return {
       verdict: fallbackVerdict,
@@ -462,8 +481,29 @@ export async function runCascade<TInput>(
   }
 
   // ── Both succeeded; check agreement ──
-  const finalVerdict: EvaluatorVerdict = secondary.verdict === 'ALLOW' ? 'ALLOW' : 'HOLD';
-  const reason: CascadeReason = finalVerdict === 'ALLOW' ? 'agreement_allow' : 'disagreement_hold';
+  // Secondary CONDITIONAL_ALLOW counts as Agreement (Hermes 2026-04-29 finding):
+  // CONDITIONAL_ALLOW is the secondary's hedge, not a disagreement signal.
+  // Only secondary ∈ {HOLD, BLOCK} qualifies as disagreement → HOLD.
+  const secondaryAgrees =
+    secondary.verdict === 'ALLOW' || secondary.verdict === 'CONDITIONAL_ALLOW';
+
+  let finalVerdict: EvaluatorVerdict;
+  let reason: CascadeReason;
+  if (secondaryAgrees) {
+    if (primaryWasConditional || secondary.verdict === 'CONDITIONAL_ALLOW') {
+      // Either side hedged → final reflects the hedge.
+      finalVerdict = 'CONDITIONAL_ALLOW';
+      reason = 'agreement_conditional_allow';
+    } else {
+      // Both full ALLOW.
+      finalVerdict = 'ALLOW';
+      reason = 'agreement_allow';
+    }
+  } else {
+    // Secondary ∈ {HOLD, BLOCK} → disagreement → HOLD.
+    finalVerdict = 'HOLD';
+    reason = primaryWasConditional ? 'disagreement_conditional_hold' : 'disagreement_hold';
+  }
 
   return {
     verdict: finalVerdict,
@@ -500,6 +540,7 @@ export function aggregateBatchStats(results: CascadeResult[]): CascadeBatchStats
       primaryOnly: 0,
       cascaded: 0,
       agreements: 0,
+      conditionalAgreements: 0,
       disagreements: 0,
       degraded: 0,
       avgPrimaryLatencyMs: 0,
@@ -511,6 +552,7 @@ export function aggregateBatchStats(results: CascadeResult[]): CascadeBatchStats
   let primaryOnly = 0;
   let cascaded = 0;
   let agreements = 0;
+  let conditionalAgreements = 0;
   let disagreements = 0;
   let degraded = 0;
   let sumPrimary = 0;
@@ -522,7 +564,10 @@ export function aggregateBatchStats(results: CascadeResult[]): CascadeBatchStats
     if (!r.secondaryInvoked) primaryOnly++;
     else cascaded++;
     if (r.reason === 'agreement_allow') agreements++;
-    if (r.reason === 'disagreement_hold') disagreements++;
+    if (r.reason === 'agreement_conditional_allow') conditionalAgreements++;
+    if (r.reason === 'disagreement_hold' || r.reason === 'disagreement_conditional_hold') {
+      disagreements++;
+    }
     if (r.degradedMode) degraded++;
     if (r.primaryLatencyMs !== undefined) {
       sumPrimary += r.primaryLatencyMs;
@@ -539,6 +584,7 @@ export function aggregateBatchStats(results: CascadeResult[]): CascadeBatchStats
     primaryOnly,
     cascaded,
     agreements,
+    conditionalAgreements,
     disagreements,
     degraded,
     avgPrimaryLatencyMs: countPrimary > 0 ? sumPrimary / countPrimary : 0,

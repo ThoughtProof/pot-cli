@@ -134,7 +134,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
   console.log(`\n=== PLV Graded ${modeLabel} Evaluator (v2.0 Two-Tier) ===`);
   console.log(`Mode: ${evalMode}`);
   if (cascadeEnabled) {
-    console.log(`Tier 2: cascade (primary=${cascadePrimary} → secondary=${cascadeSecondary} on ALLOW)`);
+    console.log(`Tier 2: cascade (primary=${cascadePrimary} → secondary=${cascadeSecondary} on ALLOW or CONDITIONAL_ALLOW)`);
   } else {
     console.log(`Tier 2 Model: ${model}`);
   }
@@ -360,6 +360,7 @@ export async function runGradedEval(args: string[]): Promise<void> {
     console.log(`  Primary-only (1-call): ${cascadeStats.primaryOnly} (${(cascadeStats.earlyExitRate * 100).toFixed(1)}% early-exit rate)`);
     console.log(`  Cascaded (2-call):     ${cascadeStats.cascaded}`);
     console.log(`  Agreements (ALLOW):    ${cascadeStats.agreements}`);
+    console.log(`  Cond. Agreements:      ${cascadeStats.conditionalAgreements}  (CONDITIONAL_ALLOW)`);
     console.log(`  Disagreements (HOLD):  ${cascadeStats.disagreements}`);
     console.log(`  Degraded mode:         ${cascadeStats.degraded}`);
     if (cascadeStats.avgPrimaryLatencyMs > 0) {
