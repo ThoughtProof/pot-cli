@@ -52,7 +52,7 @@ const MODELS: Record<string, ProviderConfig> = {
   'deepseek-r1': { baseUrl: 'https://api.deepseek.com/v1', apiKeyEnv: 'DEEPSEEK_API_KEY', model: 'deepseek-reasoner', type: 'openai' },
 
   // Moonshot (Kimi)
-  'kimi': { baseUrl: 'https://api.moonshot.ai/v1', apiKeyEnv: 'MOONSHOT_API_KEY', model: 'kimi-k2.5', type: 'openai' },
+  'kimi': { baseUrl: 'https://api.moonshot.ai/v1', apiKeyEnv: 'MOONSHOT_API_KEY', model: 'kimi-k2.6', type: 'openai' },
 };
 
 // Allow full model strings like "anthropic/claude-sonnet-4-5" or "xai/grok-4-1-fast"
@@ -156,10 +156,17 @@ async function callOpenAICompat(
     body: JSON.stringify({
       model: config.model,
       max_tokens: maxTokens,
-      ...(temperature !== undefined ? { temperature } : {}),
+      // Moonshot/Kimi rejects non-default temperature (400 error). Filter it out.
+      ...(temperature !== undefined && !config.baseUrl.includes('moonshot') ? { temperature } : {}),
       // Gemini's OpenAI-compatible endpoint rejects `seed` (returns 400);
       // silently filter it out for gemini-* models. Other providers honour it.
       ...(seed !== undefined && !config.model.startsWith('gemini') ? { seed } : {}),
+      // Reasoning models (DeepSeek v4 Pro, Kimi k2.6) return empty `content`
+      // when thinking is enabled — all output goes to `reasoning_content`.
+      // Disable thinking so they behave like standard frontier models and
+      // return parseable JSON in `content`. Tested 2026-04-29.
+      ...(config.model.includes('deepseek-v4-pro') || config.model.startsWith('kimi-k2')
+        ? { thinking: { type: 'disabled' } } : {}),
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     }),
   });
@@ -247,7 +254,7 @@ export async function callModelStructured<T>(
         // Add a hint to the messages for retry
         messages = [
           ...messages,
-          { role: 'assistant' as const, content: raw },
+          { role: 'assistant' as const, content: raw || '(empty response)' },
           {
             role: 'user' as const,
             content: `Your response could not be parsed: ${lastError.message}. Please respond again with the exact required format.`,

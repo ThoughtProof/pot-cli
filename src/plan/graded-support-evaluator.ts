@@ -986,8 +986,20 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
     messages,
     {
       parse: (text: string) => {
-        const match = text.match(/\[[\s\S]*\]/);
-        if (!match) throw new Error('No JSON array found');
+        // Strip markdown code fences (models often wrap JSON in ```json...```)
+        const stripped = text.replace(/```(?:json)?\s*/g, '').replace(/```/g, '');
+        // Target [{ ... }] — the JSON-array-of-objects pattern.
+        // This avoids false matches on prose brackets like [step 1] or [note: ...]
+        // which cause greedy /\[[\s\S]*\]/ to grab prose+JSON as one blob.
+        const start = stripped.indexOf('[{');
+        const end = stripped.lastIndexOf('}]');
+        if (start !== -1 && end !== -1 && end > start) {
+          const parsed = JSON.parse(stripped.substring(start, end + 2));
+          if (Array.isArray(parsed)) return parsed as StepEvaluation[];
+        }
+        // Fallback: original greedy regex (works for clean outputs)
+        const match = stripped.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('No JSON array found in response');
         const parsed = JSON.parse(match[0]);
         if (!Array.isArray(parsed)) throw new Error('Expected array');
         return parsed as StepEvaluation[];
