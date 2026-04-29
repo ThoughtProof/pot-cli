@@ -236,13 +236,11 @@ test('runCascade: primary=HOLD + secondary=BLOCK → final BLOCK (Strategy C2 ov
   assert.equal(r.secondaryInvoked, true);
 });
 
-test('runCascade: primary=CONDITIONAL_ALLOW → final CONDITIONAL_ALLOW, secondary not invoked', async () => {
-  const evaluate = stubEvaluator({ gemini: 'CONDITIONAL_ALLOW', sonnet: 'ALLOW' });
-  const r = await runCascade('input', evaluate);
-  assert.equal(r.verdict, 'CONDITIONAL_ALLOW');
-  assert.equal(r.reason, 'primary_uncertain');
-  assert.equal(r.secondaryInvoked, false);
-});
+// Live-Run 120v3 (2026-04-29): CONDITIONAL_ALLOW from Primary now triggers
+// Secondary verification (closes BLOCK→ALLOW blind spot, 3 violations on the
+// original 1-call path). Secondary CONDITIONAL_ALLOW counts as Agreement
+// (Hermes finding: all 3 false-positive disagreement_hold cases had
+// Secondary=CONDITIONAL_ALLOW — it's the secondary's hedge, not disagreement).
 
 test('runCascade: primary=ALLOW + secondary=ALLOW → agreement_allow', async () => {
   const evaluate = stubEvaluator({ gemini: 'ALLOW', sonnet: 'ALLOW' });
@@ -272,11 +270,52 @@ test('runCascade: primary=ALLOW + secondary=BLOCK → disagreement_hold (NOT BLO
   assert.equal(r.reason, 'disagreement_hold');
 });
 
-test('runCascade: primary=ALLOW + secondary=CONDITIONAL_ALLOW → disagreement_hold', async () => {
+test('runCascade: primary=ALLOW + secondary=CONDITIONAL_ALLOW → agreement_conditional_allow (post-2026-04-29)', async () => {
+  // Hermes 2026-04-29: secondary CONDITIONAL_ALLOW = secondary's hedge, not
+  // disagreement. Final verdict = CONDITIONAL_ALLOW (cond agreement).
   const evaluate = stubEvaluator({ gemini: 'ALLOW', sonnet: 'CONDITIONAL_ALLOW' });
   const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'CONDITIONAL_ALLOW');
+  assert.equal(r.reason, 'agreement_conditional_allow');
+  assert.equal(r.secondaryInvoked, true);
+});
+
+test('runCascade: primary=CONDITIONAL_ALLOW + secondary=ALLOW → agreement_conditional_allow', async () => {
+  // Post-2026-04-29: Primary CONDITIONAL_ALLOW now triggers Secondary.
+  // Final reflects Primary's hedge → CONDITIONAL_ALLOW.
+  const evaluate = stubEvaluator({ gemini: 'CONDITIONAL_ALLOW', sonnet: 'ALLOW' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'CONDITIONAL_ALLOW');
+  assert.equal(r.reason, 'agreement_conditional_allow');
+  assert.equal(r.secondaryInvoked, true);
+  assert.ok(r.primary);
+  assert.ok(r.secondary);
+});
+
+test('runCascade: primary=CONDITIONAL_ALLOW + secondary=CONDITIONAL_ALLOW → agreement_conditional_allow', async () => {
+  const evaluate = stubEvaluator({ gemini: 'CONDITIONAL_ALLOW', sonnet: 'CONDITIONAL_ALLOW' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'CONDITIONAL_ALLOW');
+  assert.equal(r.reason, 'agreement_conditional_allow');
+  assert.equal(r.secondaryInvoked, true);
+});
+
+test('runCascade: primary=CONDITIONAL_ALLOW + secondary=HOLD → disagreement_conditional_hold (closes B→A blind spot)', async () => {
+  // Live-Run 120v3 (2026-04-29) root cause: previously this returned
+  // CONDITIONAL_ALLOW alone, mapping to public ALLOW — 3 BLOCK→ALLOW violations.
+  // Now: Secondary verifies, disagreement collapses to HOLD.
+  const evaluate = stubEvaluator({ gemini: 'CONDITIONAL_ALLOW', sonnet: 'HOLD' });
+  const r = await runCascade('input', evaluate);
   assert.equal(r.verdict, 'HOLD');
-  assert.equal(r.reason, 'disagreement_hold');
+  assert.equal(r.reason, 'disagreement_conditional_hold');
+  assert.equal(r.secondaryInvoked, true);
+});
+
+test('runCascade: primary=CONDITIONAL_ALLOW + secondary=BLOCK → disagreement_conditional_hold', async () => {
+  const evaluate = stubEvaluator({ gemini: 'CONDITIONAL_ALLOW', sonnet: 'BLOCK' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'HOLD');
+  assert.equal(r.reason, 'disagreement_conditional_hold');
 });
 
 // ─── 5. runCascade — disabled flag ────────────────────────────────────────────
@@ -402,21 +441,24 @@ test('aggregateBatchStats: mixed results aggregated correctly', () => {
     r(false, 'primary_hold', 'HOLD', false, 120),
     r(true, 'agreement_allow', 'ALLOW', false, 110, 200),
     r(true, 'agreement_allow', 'ALLOW', false, 90, 220),
+    r(true, 'agreement_conditional_allow', 'CONDITIONAL_ALLOW', false, 95, 215),
     r(true, 'disagreement_hold', 'HOLD', false, 130, 210),
+    r(true, 'disagreement_conditional_hold', 'HOLD', false, 105, 205),
     r(true, 'secondary_error_fallback', 'HOLD', true, 100), // degraded, no secondaryMs
   ];
 
   const s = aggregateBatchStats(results);
-  assert.equal(s.total, 6);
+  assert.equal(s.total, 8);
   assert.equal(s.primaryOnly, 2);
-  assert.equal(s.cascaded, 4);
+  assert.equal(s.cascaded, 6);
   assert.equal(s.agreements, 2);
-  assert.equal(s.disagreements, 1);
+  assert.equal(s.conditionalAgreements, 1);
+  assert.equal(s.disagreements, 2);
   assert.equal(s.degraded, 1);
-  assert.equal(s.earlyExitRate, 2 / 6);
-  // primaryLatency: avg over 6 = (100+120+110+90+130+100)/6 = 650/6
-  assert.equal(s.avgPrimaryLatencyMs, 650 / 6);
-  // secondaryLatency: avg over 3 (only those with values) = (200+220+210)/3 = 210
+  assert.equal(s.earlyExitRate, 2 / 8);
+  // primaryLatency: avg over 8 = (100+120+110+90+95+130+105+100)/8 = 850/8
+  assert.equal(s.avgPrimaryLatencyMs, 850 / 8);
+  // secondaryLatency: avg over 5 (only those with values) = (200+220+215+210+205)/5 = 1050/5 = 210
   assert.equal(s.avgSecondaryLatencyMs, 210);
 });
 

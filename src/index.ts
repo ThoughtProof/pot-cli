@@ -244,19 +244,33 @@ program
   .option('--input <file>', 'Input JSON with PLV items')
   .option('--model <model>', 'Model alias (grok, sonnet, deepseek)', 'grok')
   .option('--output <file>', 'Output JSON path')
-  .option('--tier1 <backend>', 'Tier-1 pre-filter backend: llm, minicheck, hf-inference')
+  .option('--mode <mode>', 'Evaluation mode: support|faithfulness', 'support')
+  .option('--format <format>', 'Output format: public|internal', 'public')
+  .option('--tier1 <backend>', 'Tier-1 pre-filter backend: llm, minicheck, hf-inference, ollama')
   .option('--tier1-model <model>', 'Tier-1 LLM model alias', 'deepseek')
+  .option('--ollama-url <url>', 'Ollama base URL', 'http://localhost:11434')
+  .option('--ollama-model <model>', 'Ollama model tag', 'qwen2.5:7b')
   .option('--t-low <number>', 'Tier-1 low confidence threshold', '0.20')
   .option('--t-high <number>', 'Tier-1 high confidence threshold', '0.80')
+  .option('--cascade', 'Enable cross-model cascade (ADR-0007 / Strategy C2). Requires --tier1 to be set explicitly so cascade runs are apples-to-apples with solo runs.')
+  .option('--cascade-primary <model>', 'Cascade primary evaluator', 'gemini')
+  .option('--cascade-secondary <model>', 'Cascade secondary evaluator', 'sonnet')
   .action(async (options) => {
     const args: string[] = [];
     if (options.input) args.push('--input', options.input);
     if (options.model) args.push('--model', options.model);
     if (options.output) args.push('--output', options.output);
+    if (options.mode) args.push('--mode', options.mode);
+    if (options.format) args.push('--format', options.format);
     if (options.tier1) args.push('--tier1', options.tier1);
     if (options.tier1Model) args.push('--tier1-model', options.tier1Model);
+    if (options.ollamaUrl) args.push('--ollama-url', options.ollamaUrl);
+    if (options.ollamaModel) args.push('--ollama-model', options.ollamaModel);
     if (options.tLow) args.push('--t-low', options.tLow);
     if (options.tHigh) args.push('--t-high', options.tHigh);
+    if (options.cascade) args.push('--cascade');
+    if (options.cascadePrimary) args.push('--cascade-primary', options.cascadePrimary);
+    if (options.cascadeSecondary) args.push('--cascade-secondary', options.cascadeSecondary);
     await runGradedEval(args);
   });
 

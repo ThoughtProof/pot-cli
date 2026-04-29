@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { evaluateBatch, type EvalInput, type EvalRunResult, type ItemResult, type EvalMode } from '../plan/graded-support-evaluator.js';
 import type { Tier1Config } from '../plan/tier1-prefilter.js';
+import { runCascade, aggregateBatchStats, type CascadeConfig, type CascadeResult, type CascadeBatchStats } from '../plan/cross-model-cascade.js';
 import { toPublicVerdict, assertInternalFormat, type InternalVerdict } from '../verdict-mapper.js';
 
 interface GoldVerdicts {
@@ -61,6 +62,15 @@ export async function runGradedEval(args: string[]): Promise<void> {
   let ollamaModel = 'qwen2.5:7b';
   let outputFormat: 'public' | 'internal' = 'public';
   let evalMode: EvalMode = 'support';
+  // Cascade flags (ADR-0007 / Strategy C2 wire-up).
+  // When --cascade is set, the CLI runs a per-case Tier-2 cascade:
+  //   primary (default: gemini) evaluates first; on ALLOW the secondary
+  //   (default: sonnet) evaluates and a disagreement downgrades to HOLD.
+  // Tier-1 (Ollama step-prefilter) remains active inside each evaluator
+  // call, preserving the 3-stage pipeline Ollama → Gemini → Sonnet.
+  let cascadeEnabled = false;
+  let cascadePrimary = 'gemini';
+  let cascadeSecondary = 'sonnet';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--input' && args[i + 1]) inputPath = args[++i];
@@ -74,6 +84,20 @@ export async function runGradedEval(args: string[]): Promise<void> {
     else if (args[i] === '--ollama-model' && args[i + 1]) ollamaModel = args[++i];
     else if (args[i] === '--format' && args[i + 1]) outputFormat = args[++i] as 'public' | 'internal';
     else if (args[i] === '--mode' && args[i + 1]) evalMode = args[++i] as EvalMode;
+    else if (args[i] === '--cascade') cascadeEnabled = true;
+    else if (args[i] === '--cascade-primary' && args[i + 1]) cascadePrimary = args[++i];
+    else if (args[i] === '--cascade-secondary' && args[i + 1]) cascadeSecondary = args[++i];
+  }
+
+  // Cascade requires Tier-1 to remain explicit — protects against silent
+  // "apples-to-oranges" comparisons against solo runs that always include
+  // Tier-1 prefilter. (Hermes 2026-04-29: solo runs use --tier1 ollama, the
+  // cascade run must too.)
+  if (cascadeEnabled && !tier1Backend && evalMode !== 'faithfulness') {
+    console.error('[cascade] --cascade requires --tier1 to be set explicitly (e.g. --tier1 ollama).');
+    console.error('[cascade] This guards against accidental apples-to-oranges comparisons against solo runs.');
+    console.error('[cascade] Pass --mode faithfulness to bypass Tier-1 entirely.');
+    process.exit(2);
   }
 
   // Guard: --format internal requires THOUGHTPROOF_INTERNAL=1
@@ -82,13 +106,18 @@ export async function runGradedEval(args: string[]): Promise<void> {
   }
 
   if (!inputPath) {
-    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--mode support|faithfulness] [--tier1 llm|minicheck|hf-inference|ollama] [--tier1-model deepseek] [--ollama-url http://localhost:11434] [--ollama-model qwen2.5:7b] [--t-low 0.20] [--t-high 0.80]');
+    console.error('Usage: pot-cli plan-graded-eval --input <path> [--model grok] [--output <path>] [--mode support|faithfulness] [--tier1 llm|minicheck|hf-inference|ollama] [--tier1-model deepseek] [--ollama-url http://localhost:11434] [--ollama-model qwen2.5:7b] [--t-low 0.20] [--t-high 0.80] [--cascade [--cascade-primary gemini] [--cascade-secondary sonnet]]');
     process.exit(1);
   }
 
   // Read input
   const raw = readFileSync(inputPath, 'utf-8');
   const items: EvalInput[] = JSON.parse(raw);
+
+  if (items.length === 0) {
+    console.error('[error] input contains zero items — nothing to evaluate.');
+    process.exit(1);
+  }
 
   // Build Tier-1 config
   const tier1Config: Tier1Config | undefined = tier1Backend ? {
@@ -104,7 +133,11 @@ export async function runGradedEval(args: string[]): Promise<void> {
   const modeLabel = evalMode === 'faithfulness' ? 'Faithfulness' : 'Support';
   console.log(`\n=== PLV Graded ${modeLabel} Evaluator (v2.0 Two-Tier) ===`);
   console.log(`Mode: ${evalMode}`);
-  console.log(`Tier 2 Model: ${model}`);
+  if (cascadeEnabled) {
+    console.log(`Tier 2: cascade (primary=${cascadePrimary} → secondary=${cascadeSecondary} on ALLOW or CONDITIONAL_ALLOW)`);
+  } else {
+    console.log(`Tier 2 Model: ${model}`);
+  }
   if (evalMode === 'faithfulness') {
     console.log(`Tier 1: disabled (faithfulness mode — all steps → Tier 2)`);
   } else if (tier1Config) {
@@ -120,16 +153,104 @@ export async function runGradedEval(args: string[]): Promise<void> {
   console.log(`Schema: plv-graded-support-v2.0`);
   console.log('');
 
-  // Run evaluation
-  const result = await evaluateBatch(items, model, {
-    concurrency: 1,  // Sequential to avoid OOM on Mac mini with two-tier API calls
-    maxTokens: 4096,
-    tier1: tier1Config,
-    mode: evalMode,
-    onProgress: (done, total, id) => {
-      console.log(`  [${done}/${total}] ${id} — evaluated`);
-    },
-  });
+  // ─── Cascade or Solo run ───────────────────────────────────────────────
+  // Solo path: single evaluateBatch() call — unchanged legacy behavior.
+  // Cascade path: per-item runCascade() that calls evaluateBatch() with one
+  // item at a time, first against the primary model and (on ALLOW) against
+  // the secondary. Tier-1 prefilter remains active inside every call,
+  // preserving the 3-stage pipeline (Ollama → primary → secondary).
+  let result: EvalRunResult;
+  // Map of item id → cascade audit trail. Populated only when cascadeEnabled.
+  // Stored alongside the standard result so downstream tooling can ignore it.
+  const cascadePerItem = new Map<string, CascadeResult>();
+
+  if (!cascadeEnabled) {
+    // Solo path — unchanged.
+    result = await evaluateBatch(items, model, {
+      concurrency: 1,
+      maxTokens: 4096,
+      tier1: tier1Config,
+      mode: evalMode,
+      onProgress: (done, total, id) => {
+        console.log(`  [${done}/${total}] ${id} — evaluated`);
+      },
+    });
+  } else {
+    // Cascade path — per-item primary/secondary with early-exit.
+    //
+    // Per-item evaluator closure: returns the ItemResult for a single item
+    // by running evaluateBatch with concurrency=1 and a single-element list.
+    // This re-uses the full Tier-1 + Tier-2 pipeline unmodified.
+    const evaluateForCascade = async (modelAlias: string, item: EvalInput) => {
+      const sub = await evaluateBatch([item], modelAlias, {
+        concurrency: 1,
+        maxTokens: 4096,
+        tier1: tier1Config,
+        mode: evalMode,
+      });
+      const itemResult = sub.items[item.id];
+      if (!itemResult) {
+        throw new Error(`[cascade] evaluator ${modelAlias} returned no result for ${item.id}`);
+      }
+      return itemResult;
+    };
+
+    const cascadeConfig: CascadeConfig = {
+      primaryModel: cascadePrimary,
+      secondaryModel: cascadeSecondary,
+      // generatorModel intentionally omitted — PLV gold cases are not tied
+      // to a specific generator. ADR-0007 invariant only enforces
+      // primary ≠ secondary family here.
+    };
+
+    // Use the *primary* model's metadata to seed the result envelope so
+    // the schema stays compatible with solo runs. Cascade-specific data
+    // lives under metadata.cascade in the saved artefact.
+    let envelopeSeeded = false;
+    const seededResult: EvalRunResult = {
+      evaluator_model: `cascade(${cascadePrimary}→${cascadeSecondary})`,
+      schema_version: 'plv-graded-support-v2.0',
+      eval_mode: evalMode,
+      evaluated_at: new Date().toISOString(),
+      items: {},
+    };
+
+    let done = 0;
+    for (const item of items) {
+      done++;
+      try {
+        const cr = await runCascade(item, evaluateForCascade, cascadeConfig);
+        cascadePerItem.set(item.id, cr);
+        // Final per-item result: prefer secondary if invoked, else primary.
+        // Override the verdict with the cascade's final verdict (which may
+        // downgrade ALLOW → HOLD on disagreement).
+        const baseItem = cr.secondary ?? cr.primary;
+        if (!baseItem) {
+          throw new Error(`[cascade] no item result available for ${item.id}`);
+        }
+        seededResult.items[item.id] = {
+          ...baseItem,
+          verdict: cr.verdict,
+          verdict_reasoning: `${baseItem.verdict_reasoning}\n\n[cascade ${cr.reason}: primary=${cr.primary?.verdict ?? 'ERR'}` +
+            (cr.secondary ? `, secondary=${cr.secondary.verdict}` : '') + ']',
+        };
+        envelopeSeeded = true;
+        console.log(
+          `  [${done}/${items.length}] ${item.id} — cascade(${cr.reason}) verdict=${cr.verdict}` +
+            (cr.secondaryInvoked ? ' [2-call]' : ' [1-call]') +
+            (cr.degradedMode ? ' ⚠️ degraded' : ''),
+        );
+      } catch (err) {
+        console.error(`  [${done}/${items.length}] ${item.id} — cascade FAILED: ${err instanceof Error ? err.message : String(err)}`);
+        throw err;
+      }
+    }
+
+    if (!envelopeSeeded) {
+      throw new Error('[cascade] no items produced results — aborting before write');
+    }
+    result = seededResult;
+  }
 
   // Print Tier-1 aggregate stats if available
   if (tier1Config) {
@@ -229,9 +350,59 @@ export async function runGradedEval(args: string[]): Promise<void> {
 
   // Save output FIRST — never lose data to a formatter crash
   // (Moved above mismatch details after two crashes in one day)
+
+  // ─── Cascade aggregate stats ──────────────────────────────────────────────
+  let cascadeStats: CascadeBatchStats | undefined;
+  if (cascadeEnabled && cascadePerItem.size > 0) {
+    cascadeStats = aggregateBatchStats(Array.from(cascadePerItem.values()));
+    console.log('\n=== CASCADE STATS ===');
+    console.log(`  Total items:           ${cascadeStats.total}`);
+    console.log(`  Primary-only (1-call): ${cascadeStats.primaryOnly} (${(cascadeStats.earlyExitRate * 100).toFixed(1)}% early-exit rate)`);
+    console.log(`  Cascaded (2-call):     ${cascadeStats.cascaded}`);
+    console.log(`  Agreements (ALLOW):    ${cascadeStats.agreements}`);
+    console.log(`  Cond. Agreements:      ${cascadeStats.conditionalAgreements}  (CONDITIONAL_ALLOW)`);
+    console.log(`  Disagreements (HOLD):  ${cascadeStats.disagreements}`);
+    console.log(`  Degraded mode:         ${cascadeStats.degraded}`);
+    if (cascadeStats.avgPrimaryLatencyMs > 0) {
+      console.log(`  Avg primary latency:   ${cascadeStats.avgPrimaryLatencyMs.toFixed(0)}ms`);
+    }
+    if (cascadeStats.avgSecondaryLatencyMs > 0) {
+      console.log(`  Avg secondary latency: ${cascadeStats.avgSecondaryLatencyMs.toFixed(0)}ms`);
+    }
+  }
+
+  // Save output — apply verdict mapping for public format
   if (!outputPath) {
     outputPath = inputPath.replace(/\.json$/, '-graded-eval-result.json');
   }
+
+  // Build cascade metadata block (saved alongside both public and internal
+  // formats so the audit trail survives format conversion).
+  const cascadeMetadata = cascadeEnabled
+    ? {
+        enabled: true,
+        primary_model: cascadePrimary,
+        secondary_model: cascadeSecondary,
+        stats: cascadeStats,
+        per_item: Object.fromEntries(
+          Array.from(cascadePerItem.entries()).map(([id, cr]) => [
+            id,
+            {
+              verdict: cr.verdict,
+              reason: cr.reason,
+              primary_verdict: cr.primary?.verdict,
+              secondary_verdict: cr.secondary?.verdict,
+              secondary_invoked: cr.secondaryInvoked,
+              degraded_mode: cr.degradedMode,
+              errors: cr.errors,
+              primary_latency_ms: cr.primaryLatencyMs,
+              secondary_latency_ms: cr.secondaryLatencyMs,
+              total_latency_ms: cr.totalLatencyMs,
+            },
+          ]),
+        ),
+      }
+    : { enabled: false };
 
   if (outputFormat === 'public') {
     const publicResult: Record<string, any> = {
@@ -253,10 +424,12 @@ export async function runGradedEval(args: string[]): Promise<void> {
         metadata: mapped.metadata,
       };
     }
+    (publicResult as { cascade?: typeof cascadeMetadata }).cascade = cascadeMetadata;
     writeFileSync(outputPath, JSON.stringify(publicResult, null, 2));
     console.log(`\nResults saved to: ${outputPath} (format: public, 3-tier)`);
   } else {
-    const internalResult = { ...result, output_format: 'internal' };
+    // Internal format — keep engine verdicts as-is
+    const internalResult = { ...result, output_format: 'internal', cascade: cascadeMetadata };
     writeFileSync(outputPath, JSON.stringify(internalResult, null, 2));
     console.log(`\nResults saved to: ${outputPath} (format: internal, 5-tier)`);
   }
