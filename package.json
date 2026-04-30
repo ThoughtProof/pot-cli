@@ -9,12 +9,34 @@
   },
   "exports": {
     ".": "./dist/index.js",
-    "./plan": "./dist/plan/graded-support-evaluator.js",
-    "./verdict": "./dist/verdict-mapper.js",
-    "./tier1": "./dist/plan/tier1-prefilter.js",
-    "./model-router": "./dist/utils/model-router.js",
-    "./config": "./dist/config.js",
-    "./types": "./dist/types.js"
+    "./plan": {
+      "types": "./dist/plan/graded-support-evaluator.d.ts",
+      "default": "./dist/plan/graded-support-evaluator.js"
+    },
+    "./cascade": {
+      "types": "./dist/plan/cross-model-cascade.d.ts",
+      "default": "./dist/plan/cross-model-cascade.js"
+    },
+    "./verdict": {
+      "types": "./dist/verdict-mapper.d.ts",
+      "default": "./dist/verdict-mapper.js"
+    },
+    "./tier1": {
+      "types": "./dist/plan/tier1-prefilter.d.ts",
+      "default": "./dist/plan/tier1-prefilter.js"
+    },
+    "./model-router": {
+      "types": "./dist/utils/model-router.d.ts",
+      "default": "./dist/utils/model-router.js"
+    },
+    "./config": {
+      "types": "./dist/config.d.ts",
+      "default": "./dist/config.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    }
   },
   "scripts": {
     "build": "tsc && npm run build:fixtures",

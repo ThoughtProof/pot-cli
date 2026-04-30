@@ -15,3 +15,9 @@ blocks/
 
 # Temp/experiment files
 tmp/
+runs/
+.env
+*.env
+
+# Local benchmark suites / artifacts (not part of runtime package)
+cases/plv-*.json
