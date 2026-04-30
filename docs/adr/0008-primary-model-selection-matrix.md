@@ -1,7 +1,7 @@
-# ADR-0008: Primary-Model Selection Matrix (DRAFT v3)
+# ADR-0008: Primary-Model Selection Matrix (v3)
 
-**Status:** DRAFT v3 — **Validierung abgeschlossen, ready for Review.** Pending Paul Strategic Review.
-**Date:** 2026-04-29 (17:45 CEST, v3 nach Hermes Validierungs-Report)
+**Status:** ACCEPTED (2026-04-29, post-Paul-review on PR #32 + cost-correction patch).
+**Date:** 2026-04-29 (v3 nach Hermes Validierungs-Report; ACCEPTED nach Paul-Approval)
 **Owners:** Computer (Architektur, Tier-Schema), Paul (Strategic Review), Hermes (Empirik, Validierung — abgeschlossen)
 **Related:** ADR-0005 (failScore-Gate-Decoupling), ADR-0007 (Cross-Model-Verification), ADR-0001 (Verdict-Model)
 
