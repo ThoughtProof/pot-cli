@@ -128,6 +128,8 @@ DS Pro Solo ist **kein verlierer** — es ist der **strong challenger** im `stan
 
 ### Tier-Selection-Heuristik (Embedded-Plattform-Integratoren)
 
+> **End-User-Doku:** Diese Heuristik dokumentiert das **interne Reasoning** für Tier-Selection. Für **End-User-API-Doku, Procurement-Reviewer und Plattform-Integratoren** siehe die [End-User Decision Matrix](../tier-selection.md), die diese Heuristik als 3-Achsen-Matrix (Stakes × Domain × Mode), Decision-Tree und Worked-Examples aufbereitet.
+
 ```
 DEFAULT (no use_case specified):
     → thorough_balanced (Gem→Son Cascade)
