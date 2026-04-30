@@ -106,7 +106,7 @@ Wir etablieren eine **Primary-Model Selection Matrix** mit zwei Achsen: **Cost**
 | `thorough_ensemble` | Parallel | DS Pro ⊕ Gemini, BLOCK-Veto | strict-via-veto | **0 strukturell** | 69.7% | 82.7% | **$0.0175** | — |
 | `thorough_max` | Solo | Sonnet | mid | 0 | 63.6% | 75.0% | **$0.0542** | — |
 
-> *Cost-Spalte ist Per-Call (USD), nicht Per-Benchmark. Annahme: ~3k Tokens pro Verification (1k Plan + 2k Reasoning/Output). Full 120-Case Benchmark-Totals zur Referenz: $0.96 / $3.25 / $2.55 / $2.10 / $6.50 pro Tier. Vergleich: InsumerAPI = $0.04/Verification — `thorough_balanced` ist **32% günstiger**.*
+> *Cost-Spalte ist Per-Call (USD), nicht Per-Benchmark. Annahme: ~3k Tokens pro Verification (1k Plan + 2k Reasoning/Output). Full 120-Case Benchmark-Totals zur Referenz: $0.96 / $3.25 / $2.55 / $2.10 / $6.50 pro Tier. Vergleich: InsumerAPI = $0.04/Verification[^insumer-pricing] — `thorough_balanced` ist **32% günstiger**.*
 
 **Hard Invariant über alle Tiers:** B→A = 0 (Hard Rule P1, ADR-0001). Procurement-Garantieanker.
 
@@ -255,7 +255,9 @@ Self-revision ist Methodologie in Aktion, nicht Schwäche — Trust-Signal für 
 4. **Strukturelle Robustheit gegen Model-Provider-Risk.** Wenn DeepSeek aus dem Markt verschwindet, bleibt `thorough_balanced` und `thorough_max` verfügbar.
 5. **M5 Ensemble bleibt im Portfolio** als Audit-Compliance-Tier — strukturelle B→A-Garantie ist ein Banking-Procurement-Asset, auch ohne Accuracy-Premium.
 6. **Self-revision als Trust-Signal**: Die drei dokumentierten Annotation-Korrekturen während Validation sind ein Vertrauens-Anker in Methodik-Reviews.
-7. **Agentic-Commerce-kompatible Per-Call-Ökonomie.** Default-Tier `thorough_balanced` liegt bei $0.0271/call — **32% unter InsumerAPI** ($0.04/Verification) und damit verteidigbar gegen den derzeit dominanten Agent-Compliance-Vergleichspunkt. `standard` ($0.0080) und `fast` ($0.0013) öffnen High-Volume-Triage-Workloads, die bei Per-Verification-Pricing >$0.04 unwirtschaftlich sind. Cost-Story ist damit nicht nur Genauigkeits-, sondern auch Volumen-Argument.
+7. **Agentic-Commerce-kompatible Per-Call-Ökonomie.** Default-Tier `thorough_balanced` liegt bei $0.0271/call — **32% unter InsumerAPI** ($0.04/Verification[^insumer-pricing]) und damit verteidigbar gegen den derzeit dominanten Agent-Compliance-Vergleichspunkt. `standard` ($0.0080) und `fast` ($0.0013) öffnen High-Volume-Triage-Workloads, die bei Per-Verification-Pricing >$0.04 unwirtschaftlich sind. Cost-Story ist damit nicht nur Genauigkeits-, sondern auch Volumen-Argument.
+
+[^insumer-pricing]: InsumerAPI Pricing-Quelle: $0.04/Call ist der Base-Preis für `POST /v1/attest` im USDC-Prepay-Tier $5–$99 (1 Credit à $0.04). Volume-Discounts: $0.03/Call ($100–$499 Tier), $0.02/Call ($500+ Tier). Alternative Pricing-Pfad via Subscription: Pro-Tier $9/Monat = ~$0.09/Call, Enterprise-Tier $29/Monat = ~$0.058/Call. Der **$0.04-Vergleichspunkt ist der niedrigste publizierte On-Chain-Pay-as-you-go-Preis** und damit der härteste Procurement-Vergleich. Quellen: [insumermodel.com/terms-of-service](https://insumermodel.com/terms-of-service/), [Smithery Insumer Skill](https://smithery.ai/skills/douglasborthwick/insumer-skill). Stand: 2026-04 — Re-Verifizierung quartalsweise empfohlen.
 
 ### Negative / Risk
 
