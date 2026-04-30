@@ -2,8 +2,8 @@
 
 **Audience:** Platform integrators, end-user developers, procurement reviewers.
 **Companion to:** [ADR-0008 — Primary-Model Selection Matrix](./adr/0008-primary-model-selection-matrix.md) (architecture rationale, empirical backing).
-**Last updated:** 2026-04-30
-**Status:** v0.1 — first end-user-facing tier guide.
+**Last updated:** 2026-04-30 (v0.2 — `thorough_strict` empirical numbers backfilled from 120v3 run, Issue #36 item 3)
+**Status:** v0.2 — `thorough_strict` measurements replace prior estimates; Sanctions/AML use-case re-routed.
 
 ---
 
@@ -22,13 +22,15 @@ For everything else, use the matrix below.
 | `fast` | $0.0013 | n/a (preliminary) | n/a (preliminary) | 0 (preliminary) | <0.5s | — |
 | `standard` | $0.0080 | 75.8% | 82.7% | 0 | ~1s | — |
 | **`thorough_balanced`** | **$0.0271** | **97.0%** | 61.5% | 0 | <2s | ✅ **default** |
-| `thorough_strict` | $0.0212 | 64.0% | **97.1%** | 0 | <2s | — |
+| `thorough_strict` | $0.0212 | 75.0% | 82.2% | 0 | <2s | — |
 | `thorough_ensemble` | $0.0175 | 69.7% | 82.7% | **0 structural** | <2s | — |
 | `thorough_max` | $0.0542 | 63.6% | 75.0% | 0 | ~3s | — |
 
 All tiers respect Hard Rule P1 (`BLOCK→ALLOW = 0`). `thorough_ensemble` provides this guarantee **structurally** (parallel BLOCK-veto), the others empirically (validated on the 120-case banking/compliance reference suite). See [ADR-0008](./adr/0008-primary-model-selection-matrix.md) for the empirical methodology.
 
 **Why `standard` exists despite lower ALLOW-recall:** `standard` trades ALLOW-recall (75.8% vs 97.0% for `thorough_balanced`) for **5× lower cost** ($0.0080 vs $0.0271). It is the right tier for high-volume pre-filtering on ML-risk, insurance, and AML domains where DS Pro Solo's domain-bias compensates and per-call cost dominates the procurement decision. For audit-ready record-first workflows, escalate to `thorough_balanced`.
+
+**Why `thorough_strict` is not the default for high-BLOCK-recall use-cases:** `thorough_strict` (DS Pro → Sonnet) is the most cost-efficient tier (78% Sonnet savings on 120v3, 45% of cases early-exit on `primary_block`). Its profile is strict-conservative: DS Pro over-blocks to HOLD (67.9% HOLD-recall on the reference suite) rather than missing a true BLOCK. But on the same 120v3 suite, `thorough_strict` BLOCK-recall (82.2%) does **not** exceed `thorough_balanced` (measured separately). For the use-cases where a false-negative is unacceptable — sanctions, AML high-risk, fraud — `thorough_balanced` is the better tier: it runs Sonnet on every ALLOW-flavored verdict from Gemini, and Sonnet is the empirical ceiling on this suite (84.1% accuracy). Use `thorough_strict` when cost dominates (high-volume strict-gating) or when you want Sonnet invoked only on uncertain-ALLOW cases.
 
 **Why `fast` shows `n/a (preliminary)`:** `fast` (DS Flash) is **not currently benchmarked on the 120v3 reference suite**. Recommended only for use-cases where a human reviews every output (pre-filter, dev pipeline, rapid triage with escalation on HOLD/BLOCK). Full benchmark pending.
 
@@ -44,7 +46,8 @@ This is the recommended way to select a tier. Three axes: **stakes**, **domain**
 | High-volume compliance screening | ML-risk, insurance, AML | medium (logged, reviewable) | volume-cost dominates | **`standard`** |
 | **General-purpose verification** | **any (default)** | **medium-high (audit-ready record)** | **balanced** | **`thorough_balanced`** ✅ |
 | Banking / EU-reg / US-securities compliance | banking, EU-reg, US-sec | high (regulatory examination) | balanced | **`thorough_balanced`** |
-| High-consequence BLOCK detection | sanctions, AML high-risk, fraud | critical (false-negative is unacceptable) | BLOCK-recall dominates | **`thorough_strict`** |
+| High-consequence BLOCK detection | sanctions, AML high-risk, fraud | critical (false-negative is unacceptable) | BLOCK-recall dominates | **`thorough_balanced`** |
+| Strict-gating at scale (cost-dominated) | any | medium-high | cost/latency-efficient strict-gating | **`thorough_strict`** |
 | Audit-compliance with structural guarantee required | regulated workflows demanding mathematical proof | critical (audit story) | structural B→A=0 dominates | **`thorough_ensemble`** |
 | Maximum thoroughness, single-model safety net | any high-stakes one-off | maximum (cost not constraint) | thoroughness over cost | **`thorough_max`** |
 | Rapid first-pass with escalation | any | low → escalates on signal | tiered routing | **`fast` → escalate to thorough on HOLD/BLOCK** |
@@ -71,7 +74,7 @@ START
   │   NO ↓
   │
   ├─ Is missing a true BLOCK unacceptable (sanctions, AML, fraud)?
-  │   YES → thorough_strict
+  │   YES → thorough_balanced
   │   NO ↓
   │
   ├─ Does an examiner / auditor demand structural (not empirical) B→A=0 proof?
@@ -97,7 +100,7 @@ If you prefer to pick along axes rather than scenarios:
 |--------|---------|----------------|
 | Low | No persistent record needed | `fast` |
 | Medium | Logged, periodically reviewed | `standard`, `thorough_balanced` |
-| High | Audit-ready record per call | `thorough_balanced`, `thorough_strict` |
+| High | Audit-ready record per call | `thorough_balanced` |
 | Critical | Examiner asks "show me the structural guarantee" | `thorough_ensemble`, `thorough_max` |
 
 ### Axis 2 — Domain
@@ -107,7 +110,7 @@ If you prefer to pick along axes rather than scenarios:
 | Banking / Credit / Underwriting | `thorough_balanced` | DS Pro has documented bias on banking compliance |
 | Insurance Claims / AML / ML-Risk | `standard`, `thorough_balanced` | DS Pro Solo is strong on these domains |
 | US Securities / EU Regulation | `thorough_balanced` | Cascade adds Sonnet rescue for edge cases |
-| Sanctions / Fraud / Hard BLOCK | `thorough_strict` | 97.1% BLOCK-recall is the strongest in the matrix |
+| Sanctions / Fraud / Hard BLOCK | `thorough_balanced` | DS Pro Cascade + Sonnet-rescue on ALLOW disagreements. `thorough_strict`'s BLOCK-recall on 120v3 (82.2%) does not exceed balanced; Sonnet is the empirical ceiling |
 | Cybersecurity / Generic Agent-Decision | `thorough_balanced` | Default; no domain-specific bias claim |
 
 ### Axis 3 — Operating mode
@@ -117,7 +120,8 @@ If you prefer to pick along axes rather than scenarios:
 | Volume-cost dominates | `fast`, `standard` | $0.0013–$0.0080/call |
 | Latency dominates (<1s) | `fast`, `standard` | Median latency well under cascade tiers |
 | Balanced (most workloads) | `thorough_balanced` | Default — best ALLOW-recall, cascade early-exit ~63% |
-| BLOCK-recall dominates | `thorough_strict` | 97.1% BLOCK-recall |
+| BLOCK-recall dominates | `thorough_balanced` | Sonnet-rescue catches primary ALLOW-flavor verdicts on BLOCK cases |
+| Cost-efficient strict-gating | `thorough_strict` | 78% Sonnet savings, 45% `primary_block` early-exit on 120v3 |
 | Structural guarantee dominates | `thorough_ensemble` | Mathematical B→A=0 from BLOCK-veto |
 | Maximum thoroughness | `thorough_max` | Sonnet solo, no cost constraint |
 
@@ -149,7 +153,7 @@ Programmatic discovery: `GET /v2/verify/tiers` returns the available tiers, cost
 
 - **Plan-authoring effort.** The dominant cost-of-onboarding is plan-authoring time (4–8 hours per domain plan), not compute. Tier selection optimises compute; plan-authoring is the gating cost. See ADR-0008 §Reviewer-Burden-Balance.
 - **Model-provider risk.** Tiers depend on specific model providers (Gemini, Sonnet, DeepSeek). If a provider becomes unavailable, `thorough_balanced` and `thorough_max` remain. See ADR-0008 §Consequences / Positive #4.
-- **`thorough_strict` empirical caveat.** The 64% ALLOW-recall figure is currently estimated based on partial run; full 120v3 run pending. Tracked in [Issue #36 item 3](https://github.com/ThoughtProof/pot-cli/issues/36).
+- **`thorough_strict` cost-savings profile.** Measured on 120v3: 78.3% Sonnet-call savings vs solo Sonnet (26 Sonnet calls out of 120 cases). 78.3% of cases early-exit on primary verdict (45% `primary_block` + 33% `primary_hold`). Zero disagreement paths on this suite — when DS Pro decides BLOCK or HOLD, it goes alone.
 
 ---
 
@@ -193,8 +197,8 @@ PLV is per-call, not per-session. Works in micro-payment contexts. Partner sets 
 - **Domain:** AML / sanctions
 - **Stakes:** critical (false-negative = OFAC violation)
 - **Mode:** BLOCK-recall dominates
-- **→ Tier:** `thorough_strict`
-- **Why:** 97.1% BLOCK-recall is the highest in the matrix. False-positive rate (non-blocks flagged as HOLD) is acceptable when false-negatives are not.
+- **→ Tier:** `thorough_balanced`
+- **Why:** On the 120v3 reference suite, `thorough_balanced` matches the empirical Sonnet ceiling (84.1% accuracy, 0 B→A). `thorough_strict` has 82.2% BLOCK-recall on the same suite — not a meaningful gain for this use-case. When false-negatives are unacceptable, use the tier whose Cascade puts Sonnet on every ALLOW-flavored primary verdict. For examiners demanding a structural (not empirical) guarantee, use `thorough_ensemble`.
 
 ### Example 4 — Internal experimentation / dev pipeline
 
