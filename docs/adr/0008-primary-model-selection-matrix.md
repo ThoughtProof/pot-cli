@@ -37,6 +37,8 @@ Die empirischen Datenpunkte aus dieser Woche zeigen ein anderes Bild: **Solo-Mod
 | Gemini Solo | 68.3% | **2** ❌ | 0 | 75.8% | 68.6% | 61.5% | **$0.0033** |
 | Kimi k2.6 Solo | n/a | **2** ❌ | n/a | n/a | n/a | n/a | n/a |
 
+**Post-acceptance addendum (Issue #36 item 3, 2026-04-30):** `thorough_strict` (DS Pro → Sonnet cascade) was subsequently run on the 120v3 suite: 76.2% accuracy, 0 B→A, 75.0% ALLOW-recall, 67.9% HOLD-recall, 82.2% BLOCK-recall, 78.3% Sonnet-call savings. This resolves the prior estimate caveat and changes `thorough_strict` positioning from “max BLOCK-recall” to “cost-efficient strict-gating.” The end-user matrix in `docs/tier-selection.md` is the source of truth for current routing.
+
 > *Per-call estimates assume ~3k-token verification (1k input plan + 2k reasoning/output). Full 120-Case benchmark validation totals: $0.96 / $3.25 / $2.10 / $6.50 / $0.40 per tier.*
 
 ### Domain-Shift-Befund (Achse 1b Auswertung)
@@ -102,11 +104,11 @@ Wir etablieren eine **Primary-Model Selection Matrix** mit zwei Achsen: **Cost**
 | `fast` | Solo | DS Flash | strict-light | 0 (preliminary) | n/a | n/a | **$0.0013** | — |
 | `standard` | Solo | DS Pro | strict-balanced | 0 | 75.8% | 82.7% | **$0.0080** | — |
 | **`thorough_balanced`** | Cascade | Gemini → Sonnet | balanced | 0 | **97.0%** | 61.5% | **$0.0271** | ✅ **DEFAULT** |
-| `thorough_strict` | Cascade | DS Pro → Sonnet | strict | 0 | 64.0% | 97.1% | **$0.0212** | — |
+| `thorough_strict` | Cascade | DS Pro → Sonnet | strict | 0 | 75.0% | 82.2% | **$0.0212** | — |
 | `thorough_ensemble` | Parallel | DS Pro ⊕ Gemini, BLOCK-Veto | strict-via-veto | **0 strukturell** | 69.7% | 82.7% | **$0.0175** | — |
 | `thorough_max` | Solo | Sonnet | mid | 0 | 63.6% | 75.0% | **$0.0542** | — |
 
-> *Cost-Spalte ist Per-Call (USD), nicht Per-Benchmark. Annahme: ~3k Tokens pro Verification (1k Plan + 2k Reasoning/Output). Full 120-Case Benchmark-Totals zur Referenz: $0.96 / $3.25 / $2.55 / $2.10 / $6.50 pro Tier. Vergleich: InsumerAPI = $0.04/Verification[^insumer-pricing] — `thorough_balanced` ist **32% günstiger**.*
+> *Cost-Spalte ist Per-Call (USD), nicht Per-Benchmark. Annahme: ~3k Tokens pro Verification (1k Plan + 2k Reasoning/Output). Full 120-Case Benchmark-Totals zur Referenz: $0.96 / $3.25 / $2.55 / $2.10 / $6.50 pro Tier. Vergleich: InsumerAPI = $0.04/Verification[^insumer-pricing] — `thorough_balanced` ist **32% günstiger**. `thorough_strict` empirical backfill is recorded in Issue #36 comment 4353425556.*
 
 **Hard Invariant über alle Tiers:** B→A = 0 (Hard Rule P1, ADR-0001). Procurement-Garantieanker.
 
@@ -145,7 +147,10 @@ IF use_case = "high_volume_compliance_screening" AND budget_per_eval matters
     → standard (DS Pro Solo, $0.0080/call, stark auf diesen Domänen)
 
 IF use_case = "high_consequence_compliance" AND need_max_block_recall:
-    → thorough_strict (97.1% BLOCK-Recall, $0.0212/call)
+    → thorough_balanced (false-negative avoidance dominates; `thorough_strict` measured 82.2% BLOCK-recall on 120v3)
+
+IF use_case = "strict_gating_at_scale" AND budget_per_eval matters:
+    → thorough_strict (DS Pro→Sonnet, 78.3% Sonnet-call savings, 0 B→A on 120v3)
 
 IF use_case = "rapid_triage_first_pass":
     → fast (DS Flash) → escalate to thorough on HOLD/BLOCK
@@ -267,7 +272,7 @@ Self-revision ist Methodologie in Aktion, nicht Schwäche — Trust-Signal für 
 2. **DS Pro Solo Domain-Bias muss kommuniziert werden.** Wenn ein Plattform-Operator naiv `standard` für US-Securities-Use-Case wählt, sieht er 17% Accuracy. Mitigation: Tier-Selection-Heuristik flaggt das, API-Response kann Domain-Mismatch-Warnings liefern.
 3. **Tier-Capabilities driften mit Modell-Updates.** DeepSeek v5 Pro könnte BLOCK-Recall ändern. Mitigation: `last_validated`-Feld pro Tier, Pflicht-Re-Benchmark vor Modell-Upgrade.
 4. **M5-Marketing ist heikel.** "Strukturelle Garantie ohne Accuracy-Premium" ist ehrlicher als "best of both worlds", aber schwieriger zu pitchen. Mitigation: explizit als Banking-Audit-Compliance-Tier positionieren, nicht als Accuracy-Optimum.
-5. **DS-Primary-Cascade hat schlechte ALLOW-Recall (64%).** Plattformen mit ALLOW-Heavy-Traffic werden hohe False-HOLD-Raten sehen bei `thorough_strict`. Mitigation: explizit als "regulated_high_consequence"-Use-Case dokumentieren.
+5. **DS-Primary-Cascade ist kein Max-BLOCK-Recall-Tier.** Der 120v3-Backfill misst `thorough_strict` bei 75.0% ALLOW-recall und 82.2% BLOCK-recall, nicht bei den ursprünglichen 64.0% / 97.1%-Schätzungen. Mitigation: als "cost-efficient strict-gating" dokumentieren; High-consequence false-negative Use-Cases zu `thorough_balanced` routen.
 
 ### Open Questions
 
