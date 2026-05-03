@@ -2,8 +2,8 @@
 
 **Audience:** Platform integrators, end-user developers, procurement reviewers.
 **Companion to:** [ADR-0008 — Primary-Model Selection Matrix](./adr/0008-primary-model-selection-matrix.md) (architecture rationale, empirical backing).
-**Last updated:** 2026-04-30 (v0.2 — `thorough_strict` empirical numbers backfilled from 120v3 run, Issue #36 item 3)
-**Status:** v0.2 — `thorough_strict` measurements replace prior estimates; Sanctions/AML use-case re-routed.
+**Last updated:** 2026-05-03 (v0.3 — `fast` empirical single-run numbers backfilled from 120v3 DS Flash run)
+**Status:** v0.3 — `fast` no longer marked unbenchmarked; DS Flash single-run measurements added with single-run caveat.
 
 ---
 
@@ -19,7 +19,7 @@ For everything else, use the matrix below.
 
 | Tier | Cost/call (USD) | ALLOW-recall | BLOCK-recall | B→A guarantee | Latency (median) | Default? |
 |------|-----------------|--------------|--------------|---------------|------------------|----------|
-| `fast` | $0.0013 | n/a (preliminary) | n/a (preliminary) | 0 (preliminary) | <0.5s | — |
+| `fast` | $0.0013 | 90.6% | 73.3% | 0 | <0.5s | — |
 | `standard` | $0.0080 | 75.8% | 82.7% | 0 | ~1s | — |
 | **`thorough_balanced`** | **$0.0271** | **97.0%** | 61.5% | 0 | <2s | ✅ **default** |
 | `thorough_strict` | $0.0212 | 75.0% | 82.2% | 0 | <2s | — |
@@ -32,7 +32,7 @@ All tiers respect Hard Rule P1 (`BLOCK→ALLOW = 0`). `thorough_ensemble` provid
 
 **Why `thorough_strict` is not the default for high-BLOCK-recall use-cases:** `thorough_strict` (DS Pro → Sonnet) is the most cost-efficient tier (78% Sonnet savings on 120v3, 45% of cases early-exit on `primary_block`). Its profile is strict-conservative: DS Pro over-blocks to HOLD (67.9% HOLD-recall on the reference suite) rather than missing a true BLOCK. But on the same 120v3 suite, `thorough_strict` BLOCK-recall (82.2%) does **not** exceed `thorough_balanced` (measured separately). For the use-cases where a false-negative is unacceptable — sanctions, AML high-risk, fraud — `thorough_balanced` is the better tier: it runs Sonnet on every ALLOW-flavored verdict from Gemini, and Sonnet is the empirical ceiling on this suite (84.1% accuracy). Use `thorough_strict` when cost dominates (high-volume strict-gating) or when you want Sonnet invoked only on uncertain-ALLOW cases.
 
-**Why `fast` shows `n/a (preliminary)`:** `fast` (DS Flash) is **not currently benchmarked on the 120v3 reference suite**. Recommended only for use-cases where a human reviews every output (pre-filter, dev pipeline, rapid triage with escalation on HOLD/BLOCK). Full benchmark pending.
+**Why `fast` remains triage-only despite good single-run numbers:** `fast` (DS Flash) now has a 120v3 single-run benchmark: 78.1% accuracy (82/105 labeled), 0 `BLOCK→ALLOW`, 90.6% ALLOW-recall, 73.3% BLOCK-recall. That is strong enough to remove the old "unbenchmarked" caveat, but it is still a **single run** and its BLOCK-recall is below `standard`/cascade tiers. Recommended use remains pre-filter, dev pipeline, and rapid triage with escalation on HOLD/BLOCK or high-stakes outputs.
 
 ---
 

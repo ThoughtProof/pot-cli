@@ -101,7 +101,7 @@ Wir etablieren eine **Primary-Model Selection Matrix** mit zwei Achsen: **Cost**
 
 | Tier | Architektur | Primary-Modell(e) | Bias | B→A Guarantee | ALLOW Recall | BLOCK Recall | Cost | Default? |
 |------|-------------|-------------------|------|---------------|--------------|--------------|------|----------|
-| `fast` | Solo | DS Flash | strict-light | 0 (preliminary) | n/a | n/a | **$0.0013** | — |
+| `fast` | Solo | DS Flash | strict-light | 0 | 90.6% | 73.3% | **$0.0013** | — |
 | `standard` | Solo | DS Pro | strict-balanced | 0 | 75.8% | 82.7% | **$0.0080** | — |
 | **`thorough_balanced`** | Cascade | Gemini → Sonnet | balanced | 0 | **97.0%** | 61.5% | **$0.0271** | ✅ **DEFAULT** |
 | `thorough_strict` | Cascade | DS Pro → Sonnet | strict | 0 | 75.0% | 82.2% | **$0.0212** | — |
@@ -263,6 +263,7 @@ Self-revision ist Methodologie in Aktion, nicht Schwäche — Trust-Signal für 
 5. **M5 Ensemble bleibt im Portfolio** als Audit-Compliance-Tier — strukturelle B→A-Garantie ist ein Banking-Procurement-Asset, auch ohne Accuracy-Premium.
 6. **Self-revision als Trust-Signal**: Die drei dokumentierten Annotation-Korrekturen während Validation sind ein Vertrauens-Anker in Methodik-Reviews.
 7. **Agentic-Commerce-kompatible Per-Call-Ökonomie.** Default-Tier `thorough_balanced` liegt bei $0.0271/call — **32% unter InsumerAPI** ($0.04/Verification[^insumer-pricing]) und damit verteidigbar gegen den derzeit dominanten Agent-Compliance-Vergleichspunkt. `standard` ($0.0080) und `fast` ($0.0013) öffnen High-Volume-Triage-Workloads, die bei Per-Verification-Pricing >$0.04 unwirtschaftlich sind. Cost-Story ist damit nicht nur Genauigkeits-, sondern auch Volumen-Argument.
+8. **`fast` ist nicht mehr unbenchmarked.** DS Flash Single Run auf 120v3 (2026-05-03, `runs/120v3-deepseek-flash-single-2026-05-03.json`) erreicht 78.1% Accuracy (82/105 labeled), 0 B→A, 90.6% ALLOW-recall und 73.3% BLOCK-recall. Das reicht für ehrliche Triage-Positionierung; für Audit-/High-Stakes-Default bleibt `thorough_balanced`.
 
 [^insumer-pricing]: InsumerAPI Pricing-Quelle: $0.04/Call ist der Base-Preis für `POST /v1/attest` im USDC-Prepay-Tier $5–$99 (1 Credit à $0.04). Volume-Discounts: $0.03/Call ($100–$499 Tier), $0.02/Call ($500+ Tier). Alternative Pricing-Pfad via Subscription: Pro-Tier $9/Monat = ~$0.09/Call, Enterprise-Tier $29/Monat = ~$0.058/Call. Der **$0.04-Vergleichspunkt ist der niedrigste publizierte On-Chain-Pay-as-you-go-Preis** und damit der härteste Procurement-Vergleich. Quellen: [insumermodel.com/terms-of-service](https://insumermodel.com/terms-of-service/), [Smithery Insumer Skill](https://smithery.ai/skills/douglasborthwick/insumer-skill). Stand: 2026-04 — Re-Verifizierung quartalsweise empfohlen.
 
@@ -273,12 +274,14 @@ Self-revision ist Methodologie in Aktion, nicht Schwäche — Trust-Signal für 
 3. **Tier-Capabilities driften mit Modell-Updates.** DeepSeek v5 Pro könnte BLOCK-Recall ändern. Mitigation: `last_validated`-Feld pro Tier, Pflicht-Re-Benchmark vor Modell-Upgrade.
 4. **M5-Marketing ist heikel.** "Strukturelle Garantie ohne Accuracy-Premium" ist ehrlicher als "best of both worlds", aber schwieriger zu pitchen. Mitigation: explizit als Banking-Audit-Compliance-Tier positionieren, nicht als Accuracy-Optimum.
 5. **DS-Primary-Cascade ist kein Max-BLOCK-Recall-Tier.** Der 120v3-Backfill misst `thorough_strict` bei 75.0% ALLOW-recall und 82.2% BLOCK-recall, nicht bei den ursprünglichen 64.0% / 97.1%-Schätzungen. Mitigation: als "cost-efficient strict-gating" dokumentieren; High-consequence false-negative Use-Cases zu `thorough_balanced` routen.
+6. **`fast` hat nur Single-Run-Empirie.** 0 B→A auf einem Run ist ein gutes Signal, aber kein strukturelles Guarantee und noch keine Varianzstudie. Mitigation: weiter als pre-filter / dev-pipeline / rapid-triage positionieren und HOLD/BLOCK/high-stakes Outputs zu `thorough_balanced` eskalieren.
 
 ### Open Questions
 
 1. **`case_type`-Metadaten** (real | hypothetical | temporal_probe) — separater Issue, blockiert ADR-0008-Merge nicht.
 2. **Inter-Tier-Korrelation**: Wenn ein Plattform-Operator `fast` für Bulk und `thorough_strict` für Final-Review parallel nutzt, korrelieren Fehler? Separate Studie nötig.
 3. **DS Pro v5 Re-Validation**: Wenn DeepSeek Modell-Update kommt, prüft sich der Domain-Bias möglicherweise. Pflicht-Re-Benchmark vor Tier-Update.
+4. **`fast` Varianzstudie**: Falls `fast` produktiv als autonomer Gatekeeper statt Triage eingesetzt werden soll, braucht es mindestens Run-B/Run-C auf 120v3 und Drift-Analyse.
 
 ---
 
@@ -325,6 +328,7 @@ interface PlatformKeyConfig {
 ## References
 
 - **Hermes Validierungs-Report (final): `hermes-validation-report-for-computer-2026-04-29.md`**
+- Fast Tier Single Run: `runs/fast-single-report-2026-05-03.md` (`runs/120v3-deepseek-flash-single-2026-05-03.json`)
 - M5 Ensemble Report: `runs/m5-ensemble-report-2026-04-29.md`
 - DS-Primary Cascade Report: `runs/cascade-dsprimary-report-2026-04-29.md`
 - Multi-Model-Briefing: `briefing-2026-04-29-cascade-multimodel-summary.md`
