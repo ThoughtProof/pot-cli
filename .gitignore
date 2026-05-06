@@ -5,6 +5,8 @@ blocks/
 *.log
 .DS_Store
 .npmrc
+.env
+*.env
 benchmark-results/
 truthfulqa-50.json
 truthfulqa-benchmark.sh
@@ -13,3 +15,10 @@ manual-audits-*/
 security-audit-*.md
 security-audit-*.json
 tmp/
+
+# SERV/OpenServ beta artifacts are private/NDA by default.
+# Keep local synthetic smoke tests, model outputs, screenshots, and metrics out of git.
+experiments/serv-private/
+experiments/rv/serv/private/
+experiments/plv/serv/private/
+runs/serv-*

@@ -5,6 +5,8 @@
 **Last updated:** 2026-05-04 (v0.4 — Track-2 n=3 stability refresh across fast/standard/balanced/max + offline ensemble simulation)
 **Status:** v0.4 — n=3 measured accuracy, recall, P1 safety, and reproducibility metrics backfilled from `runs/track2-n3-aggregation-and-ensemble-2026-05-04.md`.
 
+**Product scope:** These tiers apply to PLV (Plan-Level Verification): `plan_steps + trace/final action`. They do not define PoT/RV (`claim + rationale + evidence/context`) pricing or model policy. See [`product-boundary-rv-vs-plv.md`](product-boundary-rv-vs-plv.md).
+
 ---
 
 ## TL;DR

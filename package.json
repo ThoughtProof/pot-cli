@@ -13,6 +13,14 @@
       "types": "./dist/plan/graded-support-evaluator.d.ts",
       "default": "./dist/plan/graded-support-evaluator.js"
     },
+    "./plv": {
+      "types": "./dist/plan/graded-support-evaluator.d.ts",
+      "default": "./dist/plan/graded-support-evaluator.js"
+    },
+    "./rv": {
+      "types": "./dist/rv/index.d.ts",
+      "default": "./dist/rv/index.js"
+    },
     "./cascade": {
       "types": "./dist/plan/cross-model-cascade.d.ts",
       "default": "./dist/plan/cross-model-cascade.js"
@@ -46,6 +54,7 @@
     "prepublishOnly": "npm run build",
     "test": "node dist/index.js ask 'Test question' --dry-run",
     "test:plan": "node --test dist/plan/test-*.js dist/plan/probes/test-*.js",
+    "check:boundaries": "node scripts/check-product-boundaries.mjs",
     "smoke:v1": "bash scripts/smoke-v1.sh"
   },
   "keywords": [

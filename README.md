@@ -39,9 +39,27 @@ Your Question → 4 Generators → Adversarial Critic → Synthesizer → Episte
 - 📊 **Disagreement scoring:** Model Diversity Index quantifies how much models disagree
 - 🔄 **Deep mode:** 3 runs with rotated critic roles + meta-synthesis
 
+## Product Boundary: PoT/RV vs PLV
+
+This repository currently contains two related but distinct verification products. Keep them separate:
+
+1. **PoT/RV — Reasoning Verification**
+   - Input: `claim + rationale + evidence/context`
+   - Question: is the reasoning defensible from the provided record?
+   - Output: `ALLOW / UNCERTAIN / BLOCK` plus dissent, risk flags, and evidence gaps.
+
+2. **PLV — Plan-Level Verification**
+   - Input: `question/goal + plan_steps + agent trace/final action`
+   - Question: does the agent output/action faithfully follow a supported plan or trace?
+   - Output: `ALLOW / UNCERTAIN / BLOCK` plus step scores and objections.
+
+SERV Reasoning beta work is private by default. Label every run by product: **SERV PoT/RV** for `claim + rationale + evidence/context`, or **SERV PLV** for `plan_steps + trace/final action`. Do not publish SERV artifacts, outputs, screenshots, metrics, or benchmark-style claims without explicit written approval.
+
+Canonical boundary doc: [`docs/product-boundary-rv-vs-plv.md`](docs/product-boundary-rv-vs-plv.md)
+
 ## Plan-Level Verification Workflow
 
-pot-cli now also includes a local plan-level evaluation workflow for first-party traces:
+pot-cli also includes a local plan-level evaluation workflow for first-party traces:
 
 - `plan-enrich-first-party`
 - `plan-enrich-source-pages`
