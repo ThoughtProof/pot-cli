@@ -3,6 +3,8 @@
 Date: 2026-04-21
 Status: local workflow notes for plan-level verification experiments
 
+**Product scope:** This document is PLV (Plan-Level Verification): `plan_steps + trace/final action`. It is not classic PoT/RV (`claim + rationale + evidence/context`). See [`product-boundary-rv-vs-plv.md`](product-boundary-rv-vs-plv.md).
+
 ## Purpose
 This document captures the current first-class CLI workflow for local plan-level verification experiments.
 It replaces the earlier pattern of one-off enrichment and policy rerun scripts.

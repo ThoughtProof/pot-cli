@@ -16,6 +16,9 @@ blocks/
 # Temp/experiment files
 tmp/
 runs/
+experiments/serv-private/
+experiments/rv/serv/private/
+experiments/plv/serv/private/
 .env
 *.env
 
