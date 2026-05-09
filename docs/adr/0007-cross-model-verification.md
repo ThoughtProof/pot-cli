@@ -65,7 +65,7 @@ Die Cascade fängt **beide** komplementären Blindspots auf der ursprünglichen 
 | # | Kriterium | Status | Befund |
 |---|---|---|---|
 | 1 | 3 von 3 Re-Runs zeigen 0% Oszillation für Cascade-Default | ✅ | `thorough_balanced` zeigt niedrigste Oszillation aller gemessenen Tiers; n=3-stabil |
-| 2 | HOLD-Rate ≤ Gold-HOLD-Rate + 5pp (D7) | ⚠️ | HOLD-recall 84.3% (82.4–85.3) für `thorough_balanced` — d.h. ~16% der Gold-HOLDs werden nicht als HOLD klassifiziert. Siehe Abschnitt „Residuale HOLD-Lücke". |
+| 2 | HOLD-Rate ≤ Gold-HOLD-Rate + 5pp (D7) | ⚠️ | **Das Kriterium testet auf Inflation (zu viele HOLDs), nicht auf Recall.** Inflation ist nicht eingetreten — die Cascade-System-HOLD-Rate liegt unter Gold-HOLD-Rate + 5pp. Was post-hoc identifiziert wurde: HOLD-recall 84.3% (82.4–85.3) für `thorough_balanced`, d.h. ~16% der Gold-HOLDs werden nicht als HOLD klassifiziert. Recall ist eine post-hoc identifizierte Lücke, dokumentiert in D8/D9 und im Abschnitt „Residuale HOLD-Lücke". |
 | 3 | Latency P95 < 2.5× Single-Mode | ✅ | In Track-2-Runs gemessen, im akzeptablen Bereich |
 | 4 | Failover-Modes dokumentiert + getestet | ✅ | Implementiert in `cross-model-cascade.ts`, in Track-2-Runs nicht ausgelöst |
 | 5 | **0 BLOCK→ALLOW** auf 120-Case-Suite (Hard Rule P1) | ✅ | `thorough_balanced` 0/360 strukturell. Cumulative P1-Rate über alle 1440 evals: 0.14% (2/1440), beide Vorfälle in `fast`-Tier mit dokumentierter Risiko-Klasse |
@@ -100,7 +100,7 @@ Kriterium 2 ist **partiell erfüllt**: Die HOLD-Rate-Inflation (D7-Sorge) ist ni
 GAIA-01 und H-05 sind keine Cascade-Tuning-Frage, sondern eine **Klassifikations-Schicht-Lücke**:
 
 1. Beide Cases sind Gold = HOLD — nicht „verbieten", sondern „Mensch muss draufgucken / Kontext fehlt / Disambiguierung nötig".
-2. Die Cascade-Verifier sind darauf trainiert, **BLOCK-Signale** zu erzeugen (Widerspruch, Wrong-Source, Faithfulness-Bruch). HOLD ist die Abwesenheit eines BLOCK-Signals **plus** das Vorhandensein eines Unsicherheits-Signals — letzteres wird in der aktuellen Pipeline nicht explizit produziert.
+2. Die Cascade-Verifier sind darauf trainiert, **BLOCK-Signale** zu erzeugen (Widerspruch zur Frage, Wrong-Source-Detection, Trace-Source-Bruch). HOLD ist die Abwesenheit eines BLOCK-Signals **plus** das Vorhandensein eines Unsicherheits-Signals — letzteres wird in der aktuellen Pipeline nicht explizit produziert.
 3. CONDITIONAL_ALLOW als Verdict in den beiden Cascade-Tiers zeigt: das Disagreement-Mapping zwischen Primary und Secondary erkennt etwas, kann es aber nicht in HOLD verwandeln. Es fällt zu einem ALLOW-mit-Auflage durch.
 
 ### Quantifizierung
