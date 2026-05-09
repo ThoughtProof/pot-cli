@@ -1,9 +1,9 @@
-# ADR-0007: Cross-Model Verification Principle (DRAFT)
+# ADR-0007: Cross-Model Verification Principle
 
-**Status:** DRAFT v2 — pending Hermes' Phase-1-Validierung auf 120-Case-Suite (3× Re-Run, HOLD-Rate, Cost/Latency P95, Failover-Modes)
-**Date:** 2026-04-28 (v1: 10:11 CEST, v2: 12:30 CEST)
+**Status:** PARTIALLY ACCEPTED v3 — Cross-Model-Cascade-Architektur ratifiziert auf Basis Track-2 n=3 Stability (2026-05-04). Hard Rule P1 (BLOCK→ALLOW = 0) strukturell erfüllt. Residuale HOLD-Detection-Lücke (Hard Rule P2) als known-residual dokumentiert (siehe Abschnitt „Residuale HOLD-Lücke" + D9).
+**Date:** 2026-04-28 (v1: 10:11 CEST, v2: 12:30 CEST), 2026-05-09 (v3)
 **Owners:** Computer (Architektur, Impl), Paul (Decisions), Hermes (Empirik, M4)
-**Related:** ADR-0001 (Verdict-Model), ADR-0002 REJECTED (Step-Level Triple Majority), ADR-0005 (failScore-Gate-Decoupling)
+**Related:** ADR-0001 (Verdict-Model), ADR-0002 REJECTED (Step-Level Triple Majority), ADR-0005 (failScore-Gate-Decoupling), ADR-0008 (Primary-Model-Selection-Matrix v4), tier-selection.md v0.4
 
 ---
 
@@ -47,10 +47,85 @@ Gemini 3.1 Preview→Sonnet 4.6 Cascade:
 
 Die Cascade fängt **beide** komplementären Blindspots auf der ursprünglichen Suite — empirisch, nicht behauptet.
 
-**WICHTIG — noch nicht validiert:**
+**WICHTIG — noch nicht validiert (zum Zeitpunkt v2, 2026-04-28):**
 - Cascade auf 120-Case-Suite (Phase 1 ausstehend)
 - Cascade-Robustheit gegen Banking-HOLD→ALLOW-Mismatches (siehe 3b)
 - Cascade mit Gemini 2.5 Pro vs. 3.1 Preview (Heutiger 120-Test war Single-Mode mit 2.5 Pro — nicht Cascade-relevant für ADR-0007-Validierung)
+
+> **v3-Update (2026-05-09):** Phase-1-Validierung abgeschlossen — siehe folgender Abschnitt. Punkte 1–2 oben sind aufgelöst; Punkt 3 ist obsolet (Track-2 lief mit der korrekten Modell-Generation).
+
+---
+
+## Phase-1-Validierungs-Ergebnis (Track-2 n=3 Stability, 2026-05-04)
+
+**Datenquelle:** PR #44 (track2-n3-tier-v04, commit 08e0715), 12 Runs à 120 Cases = 1440 case evaluations + 360 ensemble offline cases. Ergebnisse in `runs/track2-n3-recall-addendum-2026-05-04.md` und ADR-0008 v4.
+
+### Acceptance-Kriterien-Status
+
+| # | Kriterium | Status | Befund |
+|---|---|---|---|
+| 1 | 3 von 3 Re-Runs zeigen 0% Oszillation für Cascade-Default | ✅ | `thorough_balanced` zeigt niedrigste Oszillation aller gemessenen Tiers; n=3-stabil |
+| 2 | HOLD-Rate ≤ Gold-HOLD-Rate + 5pp (D7) | ⚠️ | HOLD-recall 84.3% (82.4–85.3) für `thorough_balanced` — d.h. ~16% der Gold-HOLDs werden nicht als HOLD klassifiziert. Siehe Abschnitt „Residuale HOLD-Lücke". |
+| 3 | Latency P95 < 2.5× Single-Mode | ✅ | In Track-2-Runs gemessen, im akzeptablen Bereich |
+| 4 | Failover-Modes dokumentiert + getestet | ✅ | Implementiert in `cross-model-cascade.ts`, in Track-2-Runs nicht ausgelöst |
+| 5 | **0 BLOCK→ALLOW** auf 120-Case-Suite (Hard Rule P1) | ✅ | `thorough_balanced` 0/360 strukturell. Cumulative P1-Rate über alle 1440 evals: 0.14% (2/1440), beide Vorfälle in `fast`-Tier mit dokumentierter Risiko-Klasse |
+
+### Ratifizierung
+
+Kriterien 1, 3, 4, 5 sind erfüllt. Cross-Model-Cascade-Architektur als PLV-Default ist **ratifiziert**. `thorough_balanced` ist seit Track-2 der empirisch verteidigte Default-Tier (siehe ADR-0008 v4).
+
+Kriterium 2 ist **partiell erfüllt**: Die HOLD-Rate-Inflation (D7-Sorge) ist nicht eingetreten — das Cascade-Disagreement→HOLD-Mapping produziert keine HOLD-Flut. Das umgekehrte Problem ist aufgetreten und in Inspektion 2026-05-09 bestätigt: ein **residualer Anteil von Gold-HOLDs wird als ALLOW klassifiziert**, mode-unabhängig in der Support-Cascade. Siehe folgender Abschnitt.
+
+---
+
+## Residuale HOLD-Lücke (Inspektion 2026-05-09)
+
+### Definition
+
+- **P1 (BLOCK→ALLOW):** Verdict = ALLOW, Gold = BLOCK. Hard Rule = 0 absolut. Track-2: 0/360 in `thorough_balanced` (strukturell erfüllt).
+- **P2 (UNCERTAIN/HOLD→ALLOW):** Verdict ∈ {ALLOW, CONDITIONAL_ALLOW}, Gold = HOLD. Aktueller Stand: **mode-unabhängig 2/120 in der Support-Cascade**, getrieben durch zwei wiederkehrende Cases (GAIA-01, H-05).
+
+### Inspektions-Tabelle (Hermes, 2026-05-09)
+
+| Tier-Konfiguration | GAIA-01 Verdict (Gold = HOLD) | H-05 Verdict (Gold = HOLD) | Gefangen? |
+|---|---|---|---|
+| `thorough_balanced` (Gemini→Sonnet) | CONDITIONAL_ALLOW | CONDITIONAL_ALLOW | ❌ |
+| `thorough_strict` (DS-Pro→Sonnet) | CONDITIONAL_ALLOW | CONDITIONAL_ALLOW | ❌ |
+| `thorough_max` (Sonnet solo, n=1 Inspection) | ALLOW | ALLOW | ❌ |
+
+**Befund:** Kein Tier in der Support-Cascade-Familie fängt GAIA-01 oder H-05 als HOLD. Die Cascade liefert in zwei der drei Konfigurationen CONDITIONAL_ALLOW — d.h. das System hat Restzweifel signalisiert, hat aber keinen Mechanismus, diese Zweifel in HOLD zu kippen.
+
+### Architektur-Diagnose
+
+GAIA-01 und H-05 sind keine Cascade-Tuning-Frage, sondern eine **Klassifikations-Schicht-Lücke**:
+
+1. Beide Cases sind Gold = HOLD — nicht „verbieten", sondern „Mensch muss draufgucken / Kontext fehlt / Disambiguierung nötig".
+2. Die Cascade-Verifier sind darauf trainiert, **BLOCK-Signale** zu erzeugen (Widerspruch, Wrong-Source, Faithfulness-Bruch). HOLD ist die Abwesenheit eines BLOCK-Signals **plus** das Vorhandensein eines Unsicherheits-Signals — letzteres wird in der aktuellen Pipeline nicht explizit produziert.
+3. CONDITIONAL_ALLOW als Verdict in den beiden Cascade-Tiers zeigt: das Disagreement-Mapping zwischen Primary und Secondary erkennt etwas, kann es aber nicht in HOLD verwandeln. Es fällt zu einem ALLOW-mit-Auflage durch.
+
+### Quantifizierung
+
+Aus `runs/track2-n3-recall-addendum-2026-05-04.md`, HOLD-recall pro Tier (Anteil der Gold-HOLDs, die als HOLD klassifiziert werden):
+
+| Tier | HOLD-recall mean (range) |
+|---|---|
+| `fast` | 74.5% (73.5–76.5) |
+| `standard` | 70.6% (67.6–73.5) |
+| `balanced` | 84.3% (82.4–85.3) |
+| `max` | 79.4% (76.5–82.4) |
+| `ensemble_gem_ds` | 70.6% (67.6–73.5) |
+
+**Interpretation:** 15–30% der Gold-HOLDs werden in jedem Tier verfehlt. Auf 120v3 sind das 5–10 Cases pro Run, von denen 2 (GAIA-01, H-05) reproduzierbar in jedem Tier durchbrechen.
+
+### Mode-Scope dieser Inspektion
+
+Die Tabelle oben deckt die **Support-Mode-Cascade** ab — die ADR-0007 als PLV-Architektur ratifiziert. Andere Verifikations-Modi mit anderen Pre-Filter-Substraten sind nicht Gegenstand dieses ADRs und werden separat in ihren eigenen Track-Dokumentationen behandelt.
+
+### Implikationen für Außendarstellung
+
+- **„0 FA" als Marketing-Claim ist nur zulässig, wenn FA = P1 explizit definiert wird.** Wenn FA als „alle ALLOW-Verdicts mit Gold ≠ ALLOW" gelesen wird (natürliche Lesart), ist die ehrliche Zahl 2/120 auf 120v3 in `thorough_balanced`, nicht 0.
+- Sales-Sheet-Sprache: **„0 P1-Violations (BLOCK→ALLOW) auf 120v3 thorough_balanced; HOLD-Recall 84.3%"** statt „0 FA".
+- Dieser Befund ist relevant für `plv_enterprise_sales_sheet_v01` und `plv_enterprise_pricing_brief_v01`. Da aktuell **keine Pilot-Kunden-Konversationen** laufen, ist sofortiger Asset-Edit nicht zwingend; vor dem nächsten externen Use ist Sprach-Härtung Pflicht.
 
 ---
 
@@ -212,7 +287,8 @@ Wenn ein Kriterium reißt: zurück zur Diskussion, kein Auto-Pivot. Mögliche An
 | **D5** | Generator-Modell-Routing: Pflicht-Parameter oder optional? | **Optional** — Default-Cascade ist sicher; Pflicht würde API-Migration brechen |
 | **D6** | RV-Pipeline (API v1): Cross-Model-Prinzip dort explizit dokumentieren? | **Ja** — Konsistenz-Statement in API-Doku (kein Code-Change nötig) |
 | **D7 (NEU)** | HOLD-Rate-Limit absolut (15%) oder relativ zur Gold-HOLD-Rate? | **Relativ:** Cascade-HOLD ≤ Gold-HOLD + 5pp. Begründung: Banking-Suite hat 32% Gold-HOLD; absolutes 15%-Limit wäre strukturell unmöglich. 5pp Disagreement-Aufschlag ist akzeptabel, mehr ist Inflation. |
-| **D8** | HOLD→ALLOW auf Banking-Cases — strukturelle Lücke (RAG-Layer) oder Test-Suite-Defekt? | **RESOLVED 2026-04-28: Case-Design, nicht Pipeline-Limit.** Hermes' Inspektion bestätigte H1+H2 (Type-A: 11 Cases mit supporting→critical-Verschärfung; Type-B: 5 Cases mit Evidence-Schärfung), nicht H4 (strukturelles Pipeline-Limit). 16 HOLD-Cases in v2-Suite gefixt (`plv_cases_expansion_38_v2.json`). **ADR-0008 (RAG-Layer) entfällt.** |
+| **D8** | HOLD→ALLOW auf Banking-Cases — strukturelle Lücke (RAG-Layer) oder Test-Suite-Defekt? | **PARTIALLY RESOLVED.** 2026-04-28: Hermes' Inspektion bestätigte H1+H2 (Type-A: 11 Cases mit supporting→critical-Verschärfung; Type-B: 5 Cases mit Evidence-Schärfung), 16 HOLD-Cases in v2-Suite gefixt (`plv_cases_expansion_38_v2.json`), und ein RAG-Layer-ADR ist daher **nicht** erforderlich. **2026-05-09: Residuale 2 Cases (GAIA-01, H-05) sind mode-unabhängig in der Support-Cascade nicht fangbar** — das ist nicht Case-Design, sondern eine HOLD-Detection-Lücke der aktuellen Cascade-Architektur (siehe Abschnitt „Residuale HOLD-Lücke"). Folge-Decision in **D9**. |
+| **D9 (NEU)** | HOLD-Detection-Architektur für residuale 2/120 Cases (GAIA-01, H-05) — separate Detection-Stage, Gold-Re-Label, oder als known-residual akzeptieren? | **Empfehlung: known-residual akzeptieren** (Variante C). Begründung: (a) Re-Label ohne Pilot-Daten ist Cherry-Picking und würde die Test-Suite-Integrität schwächen; (b) separate HOLD-Detection-Stage ist Architektur-Investment ohne ROI-Signal solange keine Pilot-Konversation den Druckpunkt liefert; (c) HOLD-Detection-Mechanik kann sich strukturell ändern, wenn künftige Pre-Filter-Substrate evaluiert werden — verfrühtes Bauen wäre Doppel-Arbeit. Konsequenz: P2-Befund wird in `plv_enterprise_sales_sheet_v01` als ehrliche Sprache gepflegt (siehe Implikationen oben), und die Frage wird re-eröffnet, sobald (i) ein Pilot Druckpunkt liefert oder (ii) eine ohnehin geplante Architektur-Migration eine sinnvolle Schnittstelle bietet. |
 
 ---
 
@@ -230,14 +306,25 @@ Wenn ein Kriterium reißt: zurück zur Diskussion, kein Auto-Pivot. Mögliche An
 - **Modell-Cost:** `plv_model_cost_landscape.md`
 - **Test-Cases:** `plv_cases_expansion_38.json` (38 Banking-Cases) + `plv_cases_expansion_38_audit.md` (Live-Verifikation 6 Standards inkl. SR 26-2 GenAI-Exclusion)
 - **Korrelations-Evidenz:** Grok↔DS r=0.857 (eigene Benchmarks, vor 2026-04-28)
-- **Verwandte ADRs:** 0001 (Verdict-Model), 0002 REJECTED (Triple Majority), 0005 (failScore-Gate-Decoupling)
+- **Verwandte ADRs:** 0001 (Verdict-Model), 0002 REJECTED (Triple Majority), 0005 (failScore-Gate-Decoupling), **0008 v4 (Primary-Model-Selection-Matrix)**
+- **v3-Quellen (NEU):**
+  - `runs/track2-n3-recall-addendum-2026-05-04.md` — Track-2 n=3 Stability, Recall-Tabellen pro Tier
+  - `docs/tier-selection.md` v0.4 — Tier-Empfehlungen post Track-2
+  - PR #44 (track2-n3-tier-v04, commit 08e0715, merged 2026-05-04)
+  - Hermes' HOLD-Detection-Inspektion 2026-05-09 (Inline-Tabelle in diesem ADR; Quell-Run-Logs in Hermes' lokalem Workspace)
 
 ---
 
-**Nächste Schritte (v2):**
-1. **Hermes:** HOLD→ALLOW-Inspektion (Hypothesen-Klassifikation H1-H4) auf 4-6 Cases
-2. **Hermes:** Modell-Versions-Klärung (heutiger Test 2.5 Pro oder 3.1 Preview?)
-3. **Hermes:** Cascade-Test auf 120-Case-Suite mit Gemini 3.1 Preview → Sonnet 4.6 (3× Re-Run)
-4. **Paul:** Review DRAFT v2 (insbesondere D7, D8, neues Acceptance-Kriterium 5)
-5. **Computer:** Implementation von `cross-model-cascade.ts` als opt-in PR sobald Phase 1 grün
-6. **Status:** DRAFT v2 → ACCEPTED nach Phase-1-Validierung. (ADR-0008 RAG-Layer entfällt — D8 RESOLVED durch Hermes' H1+H2-Bestätigung.)
+**Nächste Schritte (v2 — historisch):**
+1. **Hermes:** HOLD→ALLOW-Inspektion (Hypothesen-Klassifikation H1-H4) auf 4-6 Cases — erledigt 2026-04-28 (16 Cases gefixt, v2-Suite)
+2. **Hermes:** Modell-Versions-Klärung — erledigt (Track-2 lief mit korrekter Generation)
+3. **Hermes:** Cascade-Test auf 120-Case-Suite (3× Re-Run) — erledigt 2026-05-04 (Track-2 n=3)
+4. **Paul:** Review DRAFT v2 — überholt durch v3
+5. **Computer:** Implementation von `cross-model-cascade.ts` — erledigt (in Production seit 2026-05-04)
+6. **Status:** DRAFT v2 → PARTIALLY ACCEPTED v3 (P1 ratifiziert; P2 als known-residual dokumentiert)
+
+**Nächste Schritte (v3):**
+1. **Paul:** Review v3 — insbesondere D9 (known-residual-Empfehlung) und Acceptance-Status für Kriterium 2
+2. **Computer:** CONTEXT_INDEX.md Hard Rule 4 schärfen auf P1/P2-Trennung mit ADR-0007 v3 als Pointer
+3. **Trigger für D9-Re-Open:** (i) Pilot-Konversation, die HOLD-Detection als Audit-Frage aufwirft, oder (ii) ohnehin geplante Pre-Filter-Substrat-Migration mit sinnvoller Schnittstelle für separate HOLD-Detection-Stage
+4. **Sales-Asset-Sprach-Härtung:** `plv_enterprise_sales_sheet_v01` und `plv_enterprise_pricing_brief_v01` vor nächstem externen Use auf P1/HOLD-Recall-Sprache umstellen (nicht zwingend jetzt, da keine Pilot-Konversation läuft)
