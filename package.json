@@ -1,6 +1,6 @@
 {
   "name": "pot-cli",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "Multi-model AI verification with adversarial critique. No AI can verify itself — so they verify each other.",
   "main": "dist/index.js",
   "bin": {
@@ -53,6 +53,7 @@
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
     "test": "node dist/index.js ask 'Test question' --dry-run",
+    "test:rv": "npm run build && node --test tests/rv-pipeline.test.mjs",
     "test:plan": "node --test dist/plan/test-*.js dist/plan/probes/test-*.js",
     "check:boundaries": "node scripts/check-product-boundaries.mjs",
     "smoke:v1": "bash scripts/smoke-v1.sh"

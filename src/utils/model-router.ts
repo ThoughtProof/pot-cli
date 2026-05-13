@@ -37,6 +37,7 @@ const MODELS: Record<string, ProviderConfig> = {
 
   // xAI
   'grok': { baseUrl: 'https://api.x.ai/v1', apiKeyEnv: 'XAI_API_KEY', model: 'grok-4-1-fast', type: 'openai' },
+  'grok-4.3': { baseUrl: 'https://api.x.ai/v1', apiKeyEnv: 'XAI_API_KEY', model: 'grok-4.3', type: 'openai' },
 
   // Google Gemini (direct API — OpenAI-compatible endpoint)
   // Gemini (direct Google API — OpenAI-compatible endpoint)
@@ -53,6 +54,15 @@ const MODELS: Record<string, ProviderConfig> = {
 
   // Moonshot (Kimi)
   'kimi': { baseUrl: 'https://api.moonshot.ai/v1', apiKeyEnv: 'MOONSHOT_API_KEY', model: 'kimi-k2.6', type: 'openai' },
+
+  // OpenServ SERV Reasoning (private beta, OpenAI-compatible)
+  'gpt-5.4': { baseUrl: 'https://api.openai.com/v1', apiKeyEnv: 'OPENAI_API_KEY', model: 'gpt-5.4', type: 'openai' },
+  'gpt-5.4-mini': { baseUrl: 'https://api.openai.com/v1', apiKeyEnv: 'OPENAI_API_KEY', model: 'gpt-5.4-mini', type: 'openai' },
+  'serv-nano': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-nano', type: 'openai' },
+  'serv-mini': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-mini', type: 'openai' },
+  'serv-standard': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-standard', type: 'openai' },
+  'serv-pro': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-pro', type: 'openai' },
+  'serv-ultra': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-ultra', type: 'openai' },
 };
 
 // Allow full model strings like "anthropic/claude-sonnet-4-5" or "xai/grok-4-1-fast"
@@ -155,7 +165,10 @@ async function callOpenAICompat(
     },
     body: JSON.stringify({
       model: config.model,
-      max_tokens: maxTokens,
+      // OpenAI GPT-5.x and OpenServ SERV beta models require max_completion_tokens.
+      ...(config.baseUrl.includes('openai.com') || config.baseUrl.includes('openserv.ai')
+        ? { max_completion_tokens: maxTokens }
+        : { max_tokens: maxTokens }),
       // Moonshot/Kimi rejects non-default temperature (400 error). Filter it out.
       ...(temperature !== undefined && !config.baseUrl.includes('moonshot') ? { temperature } : {}),
       // Gemini's OpenAI-compatible endpoint rejects `seed` (returns 400);

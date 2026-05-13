@@ -6,6 +6,7 @@ security-audit-*.json
 # Dev files
 *.test.ts
 *.spec.ts
+tests/
 truthfulqa-*.json
 truthfulqa-*.sh
 system-context.md
