@@ -43,7 +43,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { verifyProvenance, evaluateBatch, type StepEvaluation, type EvalInput } from '../plan/graded-support-evaluator.js';
+import { verifyProvenance, evaluateBatch, type StepEvaluation, type EvalInput, type EvalRunResult } from '../plan/graded-support-evaluator.js';
 
 // ─── Local replica of the BEFORE matcher (3 paths) ────────────────────────────
 // Mirrors the matcher BEFORE the Mode-1/Mode-3 fixes were added. Replicates the
@@ -373,7 +373,7 @@ async function runOnce(cases: Case[], label: string): Promise<Map<string, { verd
     onProgress: (done: number, total: number, id: string) => {
       console.log(`  [${label}] ${done}/${total} done (${id})`);
     },
-  });
+  }) as EvalRunResult;
   console.log(`[${label}] finished in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 
   const out = new Map<string, { verdict: Verdict; violations: string[] }>();

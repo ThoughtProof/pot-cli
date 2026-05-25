@@ -99,7 +99,7 @@ export const QUOTE_TOO_SHORT_FLOOR = 0.40;
 export type SupportTier = 'none' | 'weak' | 'partial' | 'strong' | 'verbatim';
 export type GradedPredicate = 'supported' | 'partial' | 'unsupported' | 'skipped';
 export type FaithfulnessPredicate = 'faithful' | 'partially_faithful' | 'weakly_faithful' | 'unfaithful';
-export type EvalMode = 'support' | 'faithfulness';
+export type EvalMode = 'support' | 'faithfulness' | 'combined';
 
 export interface QuoteLocation {
   line_start: number | null;
@@ -220,6 +220,123 @@ export interface EvalRunResult {
   eval_mode: EvalMode;
   evaluated_at: string;
   items: Record<string, ItemResult>;
+}
+
+/**
+ * Batch result for combined mode (ADR-0016).
+ * Separate type from EvalRunResult to avoid polluting the standard pipeline
+ * with union types that break existing consumers.
+ */
+export interface CombinedEvalRunResult {
+  evaluator_model: string;
+  schema_version: 'plv-combined-v1.0';
+  eval_mode: 'combined';
+  evaluated_at: string;
+  items: Record<string, CombinedItemResult>;
+}
+
+// ─── Combined Evaluation Mode (ADR-0016) ──────────────────────────────────────
+
+/**
+ * Verdict ordering for conservative merge.
+ * BLOCK (0) < HOLD (1) < CONDITIONAL_ALLOW (2) < ALLOW (3)
+ * Lower = more restrictive. min(a, b) always picks the stricter verdict.
+ */
+const VERDICT_ORDER: Record<EvaluatorVerdict, number> = {
+  BLOCK: 0,
+  HOLD: 1,
+  CONDITIONAL_ALLOW: 2,
+  ALLOW: 3,
+};
+
+/**
+ * Result of a combined (faithfulness + support) evaluation.
+ * Preserves both individual reports for audit trail purposes.
+ */
+export interface CombinedItemResult {
+  id: string;
+  verdict: EvaluatorVerdict;
+  verdictSource: 'faithfulness' | 'support' | 'unanimous';
+  faithfulness: ItemResult;
+  support: ItemResult;
+  disagreement: {
+    detected: boolean;
+    summary: string;
+    restrictingMode: 'faithfulness' | 'support' | 'none';
+  };
+}
+
+/**
+ * Conservative merge: takes min(faith.verdict, support.verdict).
+ *
+ * Both evaluators emit from the same {BLOCK, HOLD, CONDITIONAL_ALLOW, ALLOW}
+ * set. The merge picks the more restrictive verdict. ALLOW requires unanimity.
+ *
+ * See ADR-0016 for the full 4×4 merge matrix.
+ */
+export function mergeConservative(faith: ItemResult, support: ItemResult): CombinedItemResult {
+  const fOrd = VERDICT_ORDER[faith.verdict];
+  const sOrd = VERDICT_ORDER[support.verdict];
+  const minOrd = Math.min(fOrd, sOrd);
+  const finalVerdict = (Object.entries(VERDICT_ORDER) as [EvaluatorVerdict, number][])
+    .find(([, ord]) => ord === minOrd)![0];
+
+  const disagreementDetected = faith.verdict !== support.verdict;
+  let verdictSource: CombinedItemResult['verdictSource'];
+  let restrictingMode: CombinedItemResult['disagreement']['restrictingMode'];
+
+  if (!disagreementDetected) {
+    verdictSource = 'unanimous';
+    restrictingMode = 'none';
+  } else if (fOrd < sOrd) {
+    verdictSource = 'faithfulness';
+    restrictingMode = 'faithfulness';
+  } else {
+    verdictSource = 'support';
+    restrictingMode = 'support';
+  }
+
+  const summary = disagreementDetected
+    ? `Faithfulness=${faith.verdict}, Support=${support.verdict} → ${finalVerdict} (restricted by ${restrictingMode})`
+    : `Both evaluators: ${finalVerdict}`;
+
+  return {
+    id: faith.id,
+    verdict: finalVerdict,
+    verdictSource,
+    faithfulness: faith,
+    support: support,
+    disagreement: {
+      detected: disagreementDetected,
+      summary,
+      restrictingMode,
+    },
+  };
+}
+
+/**
+ * Run combined evaluation: faithfulness + support in parallel, conservative merge.
+ *
+ * ADR-0016: Banking/compliance use cases need both reasoning faithfulness AND
+ * source provenance. Neither mode alone is sufficient. This function runs both
+ * and takes the stricter verdict.
+ *
+ * @param item — the evaluation input (plan, trace, answer)
+ * @param model — which LLM to use (e.g. 'gemini', 'sonnet')
+ * @param options — evaluation options (maxTokens, tier1 config)
+ * @returns CombinedItemResult with both reports and conservative verdict
+ */
+export async function evaluateCombined(
+  item: EvalInput,
+  model: string = 'grok',
+  options: Omit<EvalOptions, 'mode'> = {},
+): Promise<CombinedItemResult> {
+  const [faith, support] = await Promise.all([
+    evaluateItem(item, model, { ...options, mode: 'faithfulness' }),
+    evaluateItem(item, model, { ...options, mode: 'support' }),
+  ]);
+
+  return mergeConservative(faith, support);
 }
 
 // ─── Unicode Normalization for Quote Matching ─────────────────────────────────
@@ -1054,6 +1171,12 @@ export async function evaluateItem(
   options: EvalOptions = {},
 ): Promise<ItemResult> {
   const mode = options.mode ?? 'support';
+  if (mode === 'combined') {
+    throw new Error(
+      '[evaluateItem] mode=combined is not supported here. Use evaluateCombined() directly, ' +
+      'or evaluateBatch() with mode=combined which handles the routing automatically.',
+    );
+  }
   const tier1Config = mode === 'faithfulness' ? undefined : options.tier1;  // Tier-1 disabled in faithfulness mode
   const allSteps = item.gold_plan_steps;
   const allStepIds = allSteps.map(s => `step_${s.index}`);
@@ -1188,12 +1311,37 @@ export async function evaluateBatch(
   items: EvalInput[],
   model: string = 'grok',
   options: { concurrency?: number; maxTokens?: number; tier1?: Tier1Config; mode?: EvalMode; onProgress?: (done: number, total: number, id: string) => void } = {},
-): Promise<EvalRunResult> {
+): Promise<EvalRunResult | CombinedEvalRunResult> {
   const mode = options.mode ?? 'support';
-  const results: Record<string, ItemResult> = {};
   const concurrency = options.concurrency ?? 3;
 
-  // Process in batches to avoid rate limits
+  // Combined mode: route to evaluateCombined, return CombinedEvalRunResult
+  if (mode === 'combined') {
+    const results: Record<string, CombinedItemResult> = {};
+    for (let i = 0; i < items.length; i += concurrency) {
+      const batch = items.slice(i, i + concurrency);
+      const batchResults = await Promise.all(
+        batch.map(async (item) => {
+          const result = await evaluateCombined(item, model, { maxTokens: options.maxTokens, tier1: options.tier1 });
+          options.onProgress?.(Object.keys(results).length + 1, items.length, item.id);
+          return result;
+        }),
+      );
+      for (const result of batchResults) {
+        results[result.id] = result;
+      }
+    }
+    return {
+      evaluator_model: model,
+      schema_version: 'plv-combined-v1.0',
+      eval_mode: 'combined',
+      evaluated_at: new Date().toISOString(),
+      items: results,
+    };
+  }
+
+  // Standard mode: faithfulness or support
+  const results: Record<string, ItemResult> = {};
   for (let i = 0; i < items.length; i += concurrency) {
     const batch = items.slice(i, i + concurrency);
     const batchResults = await Promise.all(
@@ -1203,7 +1351,6 @@ export async function evaluateBatch(
         return result;
       }),
     );
-
     for (const result of batchResults) {
       results[result.id] = result;
     }

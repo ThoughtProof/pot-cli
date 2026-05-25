@@ -186,6 +186,11 @@ export async function runGradedEval(args: string[]): Promise<void> {
 
   if (!cascadeEnabled) {
     // Solo path — unchanged.
+    // Note: evalMode 'combined' is not supported in the CLI solo path yet.
+    // Combined mode returns CombinedEvalRunResult which has different item shapes.
+    // For now, combined mode is only available via evaluateCombined() directly
+    // or the benchmark runner. This cast is safe because evalMode comes from
+    // CLI --mode which only accepts 'support' | 'faithfulness'.
     result = await evaluateBatch(items, model, {
       concurrency: 1,
       maxTokens: 4096,
@@ -194,20 +199,22 @@ export async function runGradedEval(args: string[]): Promise<void> {
       onProgress: (done, total, id) => {
         console.log(`  [${done}/${total}] ${id} — evaluated`);
       },
-    });
+    }) as EvalRunResult;
   } else {
     // Cascade path — per-item primary/secondary with early-exit.
     //
     // Per-item evaluator closure: returns the ItemResult for a single item
     // by running evaluateBatch with concurrency=1 and a single-element list.
     // This re-uses the full Tier-1 + Tier-2 pipeline unmodified.
-    const evaluateForCascade = async (modelAlias: string, item: EvalInput) => {
+    const evaluateForCascade = async (modelAlias: string, item: EvalInput): Promise<ItemResult> => {
+      // Cascade always runs in single-mode (support or faithfulness), never combined.
+      // Combined mode orchestrates its own parallel calls via evaluateCombined().
       const sub = await evaluateBatch([item], modelAlias, {
         concurrency: 1,
         maxTokens: 4096,
         tier1: tier1Config,
-        mode: evalMode,
-      });
+        mode: evalMode === 'combined' ? 'faithfulness' : evalMode,
+      }) as EvalRunResult;
       const itemResult = sub.items[item.id];
       if (!itemResult) {
         throw new Error(`[cascade] evaluator ${modelAlias} returned no result for ${item.id}`);
