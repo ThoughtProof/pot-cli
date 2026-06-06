@@ -2,7 +2,7 @@
 export interface GeneratorConfig {
   name: string;
   model: string;
-  provider?: 'anthropic'; // If set, use Anthropic Messages API (not OpenAI-compatible)
+  provider?: 'anthropic' | 'openai-compatible'; // 'anthropic' = Anthropic Messages API; 'openai-compatible' = force OpenAI-compatible even for claude-* model names
   baseUrl?: string; // OpenAI-compatible endpoint (optional, defaults based on provider name)
   apiKey: string;
 }
