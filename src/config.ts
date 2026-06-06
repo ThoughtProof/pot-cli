@@ -138,6 +138,30 @@ function migrateConfig(config: PotConfig): PotConfig {
 }
 
 /**
+ * Normalize base URL to ensure correct endpoint format for OpenAI-compatible APIs.
+ *
+ * - URLs ending in `/v1` or `/v1/` → appends `/chat/completions`
+ * - URLs already ending in `/chat/completions` → returned as-is
+ * - All other URLs → returned as-is (user knows what they're doing)
+ *
+ * @example
+ * normalizeBaseUrl('https://compute.virtuals.io/v1')
+ * // → 'https://compute.virtuals.io/v1/chat/completions'
+ *
+ * normalizeBaseUrl('https://api.openai.com/v1/chat/completions')
+ * // → 'https://api.openai.com/v1/chat/completions' (unchanged)
+ */
+export function normalizeBaseUrl(url: string): string {
+  // If the URL already ends with /chat/completions, use as-is
+  if (url.endsWith('/chat/completions')) return url;
+  // If it ends with /v1 or /v1/, append /chat/completions
+  const cleaned = url.replace(/\/+$/, '');
+  if (cleaned.endsWith('/v1')) return cleaned + '/chat/completions';
+  // Otherwise use as-is (user knows what they're doing)
+  return url;
+}
+
+/**
  * Detect base URL from provider name or model name if not explicitly set
  */
 function detectBaseUrl(providerName: string, model: string): string {
@@ -146,31 +170,51 @@ function detectBaseUrl(providerName: string, model: string): string {
 
   // Try exact name match first
   if (DEFAULT_BASE_URLS[nameLower]) {
-    return DEFAULT_BASE_URLS[nameLower];
+    return normalizeBaseUrl(DEFAULT_BASE_URLS[nameLower]);
   }
 
   // Try model name patterns
   for (const [key, url] of Object.entries(DEFAULT_BASE_URLS)) {
     if (modelLower.includes(key)) {
-      return url;
+      return normalizeBaseUrl(url);
     }
   }
 
   // Fallback to OpenAI
-  return DEFAULT_BASE_URLS['openai'];
+  return normalizeBaseUrl(DEFAULT_BASE_URLS['openai']);
 }
 
 /**
  * Create a Provider instance from GeneratorConfig
  */
 export function createProvider(config: GeneratorConfig): Provider {
-  // Anthropic uses Messages API (not OpenAI-compatible)
+  // Explicit provider override: 'openai-compatible' forces OpenAI path regardless of model name
+  if (config.provider === 'openai-compatible') {
+    const baseUrl = config.baseUrl ? normalizeBaseUrl(config.baseUrl) : 'https://api.openai.com/v1/chat/completions';
+    return new OpenAIProvider(config.apiKey, baseUrl, config.name);
+  }
+  
+  // If baseUrl is explicitly set but no provider field, always use OpenAI-compatible.
+  // This prevents auto-detection from routing "claude-*" models to Anthropic API
+  // when the user wants them served via a proxy (e.g., Virtuals, Together, local).
+  if (config.baseUrl && config.provider !== 'anthropic') {
+    return new OpenAIProvider(config.apiKey, normalizeBaseUrl(config.baseUrl), config.name);
+  }
+  
+  // Standard Anthropic path (no custom baseUrl)
   if (config.provider === 'anthropic') {
     return new AnthropicProvider(config.apiKey, config.name);
   }
 
-  // Everyone else is OpenAI-compatible
-  const baseUrl = config.baseUrl || detectBaseUrl(config.name, config.model);
+  // Auto-detect: check if model name suggests Anthropic
+  const modelLower = config.model.toLowerCase();
+  if (modelLower.includes('claude') || modelLower.includes('opus') || modelLower.includes('sonnet') || modelLower.includes('haiku')) {
+    if (config.apiKey && !config.baseUrl) {
+      return new AnthropicProvider(config.apiKey, config.name);
+    }
+  }
+
+  const baseUrl = config.baseUrl ? normalizeBaseUrl(config.baseUrl) : detectBaseUrl(config.name, config.model);
   return new OpenAIProvider(config.apiKey, baseUrl, config.name);
 }
 
