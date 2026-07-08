@@ -62,7 +62,7 @@ const MODELS: Record<string, ProviderConfig> = {
   'serv-mini': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-mini', type: 'openai' },
   'serv-standard': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-standard', type: 'openai' },
   'serv-pro': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-pro', type: 'openai' },
-  'serv-swift': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-mini', type: 'openai' },
+  'serv-swift': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-swift', type: 'openai' },
   'serv-ultra': { baseUrl: process.env.SERV_BASE_URL ?? 'https://inference-api.openserv.ai/v1', apiKeyEnv: 'SERV_API_KEY', model: 'serv-ultra', type: 'openai' },
 };
 

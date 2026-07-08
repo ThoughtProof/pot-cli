@@ -153,6 +153,19 @@ export interface CascadeConfig {
    * 'allow': accept primary's ALLOW and flag degraded_mode (less safe).
    */
   secondaryErrorFallback?: 'hold' | 'allow';
+  /**
+   * Enable secondary confirmation for primary BLOCK verdicts. Default: false.
+   * 
+   * When true, primary BLOCK verdicts invoke the secondary evaluator for 
+   * confirmation instead of early-exit. This addresses non-deterministic
+   * primary verdicts oscillating between BLOCK and HOLD at decision boundaries.
+   * 
+   * - Secondary BLOCK/HOLD → final BLOCK (confirmed_block)
+   * - Secondary ALLOW/CONDITIONAL_ALLOW → final HOLD (conservative fallback)
+   * 
+   * Default false preserves existing early-exit behavior for backward compatibility.
+   */
+  confirmBlocks?: boolean;
 }
 
 export const CASCADE_DEFAULTS: Required<Omit<CascadeConfig, 'generatorModel'>> & { generatorModel?: string } = {
@@ -161,13 +174,16 @@ export const CASCADE_DEFAULTS: Required<Omit<CascadeConfig, 'generatorModel'>> &
   disabled: false,
   perCallTimeoutMs: 60_000,
   secondaryErrorFallback: 'hold',
+  confirmBlocks: false,
 };
 
 // ─── Result Schema ────────────────────────────────────────────────────────────
 
 /** Why a cascade reached its final verdict. Used in audit trails. */
 export type CascadeReason =
-  | 'primary_block'                       // primary=BLOCK → final BLOCK
+  | 'primary_block'                       // primary=BLOCK → final BLOCK (early exit)
+  | 'confirmed_block'                     // primary=BLOCK + secondary=BLOCK/HOLD → final BLOCK
+  | 'primary_block_rejected'              // primary=BLOCK + secondary=ALLOW/COND_ALLOW → final HOLD
   | 'primary_hold'                        // primary=HOLD → final HOLD
   | 'agreement_allow'                     // primary=ALLOW + secondary=ALLOW → ALLOW
   | 'agreement_conditional_allow'         // primary=COND_ALLOW + secondary=ALLOW/COND_ALLOW → COND_ALLOW
@@ -364,18 +380,79 @@ export async function runCascade<TInput>(
 
   // ── Early-Exit branches (primary verdict not ALLOW) ──
   if (primary.verdict === 'BLOCK') {
-    return {
-      verdict: 'BLOCK',
-      reason: 'primary_block',
-      primary,
-      primaryModel,
-      secondaryModel,
-      secondaryInvoked: false,
-      degradedMode: false,
-      errors,
-      primaryLatencyMs,
-      totalLatencyMs: Date.now() - startedAt,
-    };
+    // If confirmBlocks is disabled (default), use early-exit behavior (backward compatibility)
+    if (!cfg.confirmBlocks) {
+      return {
+        verdict: 'BLOCK',
+        reason: 'primary_block',
+        primary,
+        primaryModel,
+        secondaryModel,
+        secondaryInvoked: false,
+        degradedMode: false,
+        errors,
+        primaryLatencyMs,
+        totalLatencyMs: Date.now() - startedAt,
+      };
+    }
+    
+    // confirmBlocks enabled: get secondary confirmation for BLOCK verdicts
+    const tSB = Date.now();
+    let secondaryForBlock: EvaluatorResult | undefined;
+    try {
+      secondaryForBlock = await evaluate(secondaryModel, input);
+    } catch (err) {
+      errors.push(`secondary(${secondaryModel}): ${err instanceof Error ? err.message : String(err)}`);
+      // Secondary failed → fall back to primary BLOCK (safe default)
+      return {
+        verdict: 'BLOCK',
+        reason: 'secondary_error_fallback',
+        primary,
+        primaryModel,
+        secondaryModel,
+        secondaryInvoked: true,
+        degradedMode: true,
+        errors,
+        primaryLatencyMs,
+        totalLatencyMs: Date.now() - startedAt,
+      };
+    }
+    const blockLatency = Date.now() - tSB;
+    
+    // Check secondary's verdict for BLOCK confirmation
+    if (secondaryForBlock.verdict === 'BLOCK' || secondaryForBlock.verdict === 'HOLD') {
+      // Secondary confirms or supports restriction → confirmed BLOCK
+      return {
+        verdict: 'BLOCK',
+        reason: 'confirmed_block',
+        primary,
+        secondary: secondaryForBlock,
+        primaryModel,
+        secondaryModel,
+        secondaryInvoked: true,
+        degradedMode: false,
+        errors,
+        primaryLatencyMs,
+        secondaryLatencyMs: blockLatency,
+        totalLatencyMs: Date.now() - startedAt,
+      };
+    } else {
+      // Secondary disagrees (ALLOW/CONDITIONAL_ALLOW) → conservative HOLD fallback
+      return {
+        verdict: 'HOLD',
+        reason: 'primary_block_rejected',
+        primary,
+        secondary: secondaryForBlock,
+        primaryModel,
+        secondaryModel,
+        secondaryInvoked: true,
+        degradedMode: false,
+        errors,
+        primaryLatencyMs,
+        secondaryLatencyMs: blockLatency,
+        totalLatencyMs: Date.now() - startedAt,
+      };
+    }
   }
   if (primary.verdict === 'HOLD') {
     // Strategy C2: trust Gemini HOLD, but if Sonnet would say BLOCK,
@@ -565,7 +642,7 @@ export function aggregateBatchStats(results: CascadeResult[]): CascadeBatchStats
     else cascaded++;
     if (r.reason === 'agreement_allow') agreements++;
     if (r.reason === 'agreement_conditional_allow') conditionalAgreements++;
-    if (r.reason === 'disagreement_hold' || r.reason === 'disagreement_conditional_hold') {
+    if (r.reason === 'disagreement_hold' || r.reason === 'disagreement_conditional_hold' || r.reason === 'primary_block_rejected') {
       disagreements++;
     }
     if (r.degradedMode) degraded++;

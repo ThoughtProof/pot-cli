@@ -489,3 +489,137 @@ test('aggregateBatchStats: all-primary-only dataset → earlyExitRate=1', () => 
   assert.equal(s.earlyExitRate, 1);
   assert.equal(s.cascaded, 0);
 });
+
+// ─── BLOCK Confirmation Tests (Feature Flag) ─────────────────────────────────
+
+test('runCascade: BLOCK early-exit behavior when confirmBlocks=false (default)', async () => {
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',
+    sonnet: 'ALLOW', // Should NOT be called due to early exit
+  });
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: false });
+
+  assert.equal(result.verdict, 'BLOCK');
+  assert.equal(result.reason, 'primary_block');
+  assert.equal(result.secondaryInvoked, false);
+  assert.equal(result.secondary, undefined);
+  assert.equal(result.degradedMode, false);
+});
+
+test('runCascade: BLOCK confirmation when confirmBlocks=true and secondary confirms', async () => {
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',
+    sonnet: 'BLOCK', // Secondary confirms the block
+  });
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: true });
+
+  assert.equal(result.verdict, 'BLOCK');
+  assert.equal(result.reason, 'confirmed_block');
+  assert.equal(result.secondaryInvoked, true);
+  assert.notEqual(result.secondary, undefined);
+  assert.equal(result.secondary?.verdict, 'BLOCK');
+  assert.equal(result.degradedMode, false);
+});
+
+test('runCascade: BLOCK confirmation when confirmBlocks=true and secondary supports with HOLD', async () => {
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',
+    sonnet: 'HOLD', // Secondary supports restriction with HOLD
+  });
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: true });
+
+  assert.equal(result.verdict, 'BLOCK');
+  assert.equal(result.reason, 'confirmed_block');
+  assert.equal(result.secondaryInvoked, true);
+  assert.notEqual(result.secondary, undefined);
+  assert.equal(result.secondary?.verdict, 'HOLD');
+  assert.equal(result.degradedMode, false);
+});
+
+test('runCascade: BLOCK rejection when confirmBlocks=true and secondary disagrees with ALLOW', async () => {
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',
+    sonnet: 'ALLOW', // Secondary disagrees → conservative HOLD fallback
+  });
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: true });
+
+  assert.equal(result.verdict, 'HOLD');
+  assert.equal(result.reason, 'primary_block_rejected');
+  assert.equal(result.secondaryInvoked, true);
+  assert.notEqual(result.secondary, undefined);
+  assert.equal(result.secondary?.verdict, 'ALLOW');
+  assert.equal(result.degradedMode, false);
+});
+
+test('runCascade: BLOCK rejection when confirmBlocks=true and secondary disagrees with CONDITIONAL_ALLOW', async () => {
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',
+    sonnet: 'CONDITIONAL_ALLOW', // Secondary disagrees → conservative HOLD fallback
+  });
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: true });
+
+  assert.equal(result.verdict, 'HOLD');
+  assert.equal(result.reason, 'primary_block_rejected');
+  assert.equal(result.secondaryInvoked, true);
+  assert.notEqual(result.secondary, undefined);
+  assert.equal(result.secondary?.verdict, 'CONDITIONAL_ALLOW');
+  assert.equal(result.degradedMode, false);
+});
+
+test('runCascade: BLOCK confirmation with secondary failure fallback', async () => {
+  const evaluate = throwingEvaluator(
+    new Set(['sonnet']), // sonnet throws
+    { gemini: 'BLOCK' }
+  );
+
+  const result = await runCascade('input', evaluate, { confirmBlocks: true });
+
+  assert.equal(result.verdict, 'BLOCK');
+  assert.equal(result.reason, 'secondary_error_fallback');
+  assert.equal(result.secondaryInvoked, true);
+  assert.equal(result.secondary, undefined);
+  assert.equal(result.degradedMode, true);
+  assert.equal(result.errors.length, 1);
+  assert.match(result.errors[0], /secondary\(sonnet\)/);
+});
+
+/**
+ * DISCRIMINATING REGRESSION TEST for cycle-627-flip behavior:
+ * Tests that the feature flag actually changes behavior and is not always-on.
+ * This test MUST be able to detect the difference between flag ON vs OFF.
+ */
+test('discriminating test: confirmBlocks flag actually changes behavior (cycle-627 regression)', async () => {
+  // Mock scenario: primary oscillates BLOCK, secondary would say ALLOW
+  const evaluate = stubEvaluator({
+    gemini: 'BLOCK',  // Simulates nano oscillation at BLOCK/HOLD boundary
+    sonnet: 'ALLOW',   // Secondary would disagree
+  });
+
+  // Test 1: Flag OFF (default) → early exit, no secondary call
+  const resultOff = await runCascade('input', evaluate, { confirmBlocks: false });
+  
+  assert.equal(resultOff.verdict, 'BLOCK', 'Flag OFF should early-exit with BLOCK');
+  assert.equal(resultOff.reason, 'primary_block', 'Flag OFF should have primary_block reason');
+  assert.equal(resultOff.secondaryInvoked, false, 'Flag OFF should NOT invoke secondary');
+  assert.equal(resultOff.secondary, undefined, 'Flag OFF should have no secondary result');
+  
+  // Test 2: Flag ON → secondary called, disagreement → HOLD
+  const resultOn = await runCascade('input', evaluate, { confirmBlocks: true });
+  
+  assert.equal(resultOn.verdict, 'HOLD', 'Flag ON should result in conservative HOLD when secondary disagrees');
+  assert.equal(resultOn.reason, 'primary_block_rejected', 'Flag ON should have primary_block_rejected reason');
+  assert.equal(resultOn.secondaryInvoked, true, 'Flag ON should invoke secondary');
+  assert.notEqual(resultOn.secondary, undefined, 'Flag ON should have secondary result');
+  assert.equal(resultOn.secondary?.verdict, 'ALLOW', 'Secondary should have ALLOW verdict');
+
+  // CRITICAL: Verify the flag actually discriminates (different verdicts)
+  assert.notEqual(resultOff.verdict, resultOn.verdict, 
+    'DISCRIMINATING TEST FAILURE: Flag ON vs OFF must produce different verdicts');
+  assert.notEqual(resultOff.secondaryInvoked, resultOn.secondaryInvoked,
+    'DISCRIMINATING TEST FAILURE: Flag ON vs OFF must have different secondary invocation');
+});
