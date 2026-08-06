@@ -5,6 +5,7 @@ import {
   applyRvConfidenceCorrection,
   applyRvGuardrails,
   loadEnvText,
+  normalizeConfidence,
   parseModelJson,
   runReasoningVerification,
 } from '../dist/rv/index.js';
@@ -132,6 +133,18 @@ test('applyRvConfidenceCorrection: deflation inside the 0.30 band is left alone'
 test('applyRvConfidenceCorrection: no usable judge confidences → stated unchanged', () => {
   assert.deepEqual(applyRvConfidenceCorrection(0.62, []), { confidence: 0.62 });
   assert.deepEqual(applyRvConfidenceCorrection(0.62, [NaN]), { confidence: 0.62 });
+});
+
+test('normalizeConfidence coerces labels, percents, and clamps', () => {
+  assert.equal(normalizeConfidence(0.87), 0.87);
+  assert.equal(normalizeConfidence(87), 0.87);
+  assert.equal(normalizeConfidence('HIGH'), 0.9);
+  assert.equal(normalizeConfidence('medium'), 0.6);
+  assert.equal(normalizeConfidence('0.75'), 0.75);
+  assert.equal(Number.isNaN(normalizeConfidence('nope')), true);
+  assert.equal(Number.isNaN(normalizeConfidence(undefined)), true);
+  assert.equal(normalizeConfidence(1.5), 1);
+  assert.equal(normalizeConfidence(-0.2), 0);
 });
 
 test('guardrails apply deflation dampening when synthesizer under-states vs judges', () => {

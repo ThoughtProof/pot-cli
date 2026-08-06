@@ -89,6 +89,32 @@ export function parseModelJson<T = any>(content: string): T {
   throw new Error(`Could not parse JSON from model content: ${text.slice(0, 120)}`);
 }
 
+/**
+ * Coerce model confidence into a finite 0..1 number.
+ * Live judges (esp. kimi) sometimes emit ordinal labels ("high"/"HIGH")
+ * or percent-scale values; leave unusable values as NaN so callers can drop them.
+ */
+export function normalizeConfidence(raw: unknown): number {
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    // Percent-scale only when clearly 2..100 (avoid treating 1.2/1.5 as 1.2%).
+    if (raw >= 2 && raw <= 100) return parseFloat((raw / 100).toFixed(3));
+    return Math.max(0, Math.min(1, raw));
+  }
+  if (typeof raw === 'string') {
+    const t = raw.trim().toLowerCase();
+    const labeled: Record<string, number> = {
+      very_high: 0.95, veryhigh: 0.95, 'very high': 0.95,
+      high: 0.9, medium_high: 0.8, 'medium-high': 0.8,
+      medium: 0.6, moderate: 0.6, med: 0.6,
+      low: 0.3, very_low: 0.15, verylow: 0.15, 'very low': 0.15,
+    };
+    if (t in labeled) return labeled[t];
+    const n = Number(t);
+    if (Number.isFinite(n)) return normalizeConfidence(n);
+  }
+  return Number.NaN;
+}
+
 function joinedText(parts: Array<string | string[] | undefined>): string {
   return parts.flatMap(part => Array.isArray(part) ? part : (part ? [part] : [])).join(' ').toLowerCase();
 }
@@ -202,7 +228,7 @@ export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
   };
 }
 
-const JUDGE_SYSTEM = `You are a Proof-of-Thought / Reasoning Verification judge. Evaluate claim + rationale + evidence. Return JSON only with verdict, confidence, reasoning, risk_flags, evidence_gaps.`;
+const JUDGE_SYSTEM = `You are a Proof-of-Thought / Reasoning Verification judge. Evaluate claim + rationale + evidence. Return JSON only with verdict, confidence, reasoning, risk_flags, evidence_gaps. confidence MUST be a numeric float in [0,1] (never a label like "high").`;
 const CRITIC_SYSTEM = `You are an adversarial Reasoning Verification critic. Find material flaws, missing controls, overclaims, contradictions, and critical-risk dismissals. Return JSON only with objections, severity_scores, survival_assessment, overall_risk_level.`;
 const SYNTH_SYSTEM = `You are the final Reasoning Verification synthesizer. Preserve dissent, apply materiality, respect stated-claim boundaries, and return JSON only with final_verdict, confidence, synthesis_reasoning, dissent_preserved, calibration_notes.
 
@@ -235,7 +261,7 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
     judges.push({
       model,
       verdict: parsed.verdict,
-      confidence: parsed.confidence,
+      confidence: normalizeConfidence(parsed.confidence),
       rationale: parsed.reasoning ?? parsed.rationale ?? '',
       risk_flags: parsed.risk_flags ?? [],
       evidence_gaps: parsed.evidence_gaps ?? [],
@@ -263,6 +289,8 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
     ],
   });
   const synthesis = parseModelJson<RvSynthesisResult>(synthResponse.content);
+  synthesis.confidence = normalizeConfidence(synthesis.confidence);
+  if (Number.isNaN(synthesis.confidence)) synthesis.confidence = 0.5;
 
   return applyRvGuardrails({ input, judges, critic, synthesis });
 }
