@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  applyRvConfidenceCorrection,
   applyRvGuardrails,
   loadEnvText,
   parseModelJson,
@@ -99,5 +100,64 @@ test('runReasoningVerification executes judges, critic, synthesizer, and guardra
   ]);
   assert.equal(result.verdict, 'UNCERTAIN');
   assert.equal(result.critics.length, 3);
+  // Synthesizer stated 0.9 vs judge mean 0.7 (gap > 0.20) → inflation override
+  // pulls confidence to the judge mean before the missing-controls cap.
+  assert.equal(result.confidence, 0.7);
+  assert.equal(result.guardrail_actions.includes('judge_inflation_override'), true);
   assert.equal(result.guardrail_actions.includes('missing_controls_block_capped_to_uncertain'), true);
+});
+
+// ─── Bidirectional confidence correction (pot-sdk ebd1f2a port) ──────────────
+
+test('applyRvConfidenceCorrection: inflation above 0.20 gap fully overrides with judge mean', () => {
+  const r = applyRvConfidenceCorrection(0.9, [0.5, 0.55, 0.45]);
+  assert.equal(r.confidence, 0.5);
+  assert.equal(r.action, 'judge_inflation_override');
+});
+
+test('applyRvConfidenceCorrection: deflation above 0.30 gap is dampened by 0.6', () => {
+  // stated 0.4, judge mean 0.8 → 0.4 + 0.6 * 0.4 = 0.64
+  const r = applyRvConfidenceCorrection(0.4, [0.8, 0.8, 0.8]);
+  assert.equal(r.confidence, 0.64);
+  assert.equal(r.action, 'judge_deflation_dampened');
+});
+
+test('applyRvConfidenceCorrection: deflation inside the 0.30 band is left alone', () => {
+  // stated 0.5, judge mean 0.75 → gap 0.25 < 0.30 → unchanged
+  const r = applyRvConfidenceCorrection(0.5, [0.75, 0.75]);
+  assert.equal(r.confidence, 0.5);
+  assert.equal(r.action, undefined);
+});
+
+test('applyRvConfidenceCorrection: no usable judge confidences → stated unchanged', () => {
+  assert.deepEqual(applyRvConfidenceCorrection(0.62, []), { confidence: 0.62 });
+  assert.deepEqual(applyRvConfidenceCorrection(0.62, [NaN]), { confidence: 0.62 });
+});
+
+test('guardrails apply deflation dampening when synthesizer under-states vs judges', () => {
+  const result = applyRvGuardrails({
+    input: { ...input, claim: 'Two plus two equals four.', rationale: 'Arithmetic.', evidence: 'Standard arithmetic.' },
+    synthesis: {
+      final_verdict: 'ALLOW',
+      confidence: 0.35,
+      synthesis_reasoning: 'All judges agree the claim is true.',
+      dissent_preserved: [],
+      calibration_notes: 'over-cautious',
+    },
+    critic: {
+      objections: [],
+      severity_scores: [],
+      survival_assessment: 'survives',
+      overall_risk_level: 'low',
+    },
+    judges: [
+      { model: 'deepseek', verdict: 'ALLOW', confidence: 0.9, rationale: 'clear', risk_flags: [], evidence_gaps: [] },
+      { model: 'grok', verdict: 'ALLOW', confidence: 0.85, rationale: 'clear', risk_flags: [], evidence_gaps: [] },
+      { model: 'serv-nano', verdict: 'ALLOW', confidence: 0.9, rationale: 'clear', risk_flags: [], evidence_gaps: [] },
+    ],
+  });
+
+  // judge mean = 0.883; stated 0.35 → 0.35 + 0.6 * 0.533 = 0.67
+  assert.equal(result.confidence, 0.67);
+  assert.equal(result.guardrail_actions.includes('judge_deflation_dampened'), true);
 });
