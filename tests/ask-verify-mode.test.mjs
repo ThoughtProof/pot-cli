@@ -69,3 +69,28 @@ test('runDualSynthesizer default stays epistemic on both runs', async () => {
   assert.equal(captured.length, 2);
   for (const c of captured) assert.match(c.prompt, /85% maximum/);
 });
+
+// Formatting guards (PR #50 review): the proposal assembly and dry-run content
+// must contain REAL newlines, never literal backslash-n text. An over-escaped
+// template once turned the synthesizer prompt into a one-liner with visible
+// \n characters — cap-text-only tests did not catch it.
+
+test('synthesizer prompt assembles proposals with real newlines', async () => {
+  const captured = [];
+  await runSynthesizer(stubProvider(captured), 'sonnet', proposals, critique, 'en', false);
+  assert.match(captured[0].prompt, /\n=== PROPOSAL 1 \(g1\) ===\n/);
+  assert.doesNotMatch(captured[0].prompt, /\\n=== PROPOSAL/);
+});
+
+test('synthesizer prompt newlines survive verification-mode swap', async () => {
+  const captured = [];
+  await runSynthesizer(stubProvider(captured), 'sonnet', proposals, critique, 'en', false, undefined, true);
+  assert.match(captured[0].prompt, /\n=== PROPOSAL 1 \(g1\) ===\n/);
+  assert.doesNotMatch(captured[0].prompt, /\\n=== PROPOSAL/);
+});
+
+test('dry-run content uses real newlines', async () => {
+  const result = await runSynthesizer(stubProvider([]), 'sonnet', proposals, critique, 'en', true);
+  assert.match(result.content, /\n\nCombining insights/);
+  assert.doesNotMatch(result.content, /\\n/);
+});

@@ -234,13 +234,13 @@ export async function runSynthesizer(
     return {
       model: model.split('/').pop() || model,
       role: 'synthesizer',
-      content: `[DRY-RUN] Simulated synthesis from ${model}\\n\\nCombining insights from all three proposals...\\nAddressing critique points...\\n\\nFinal recommendation: [placeholder]\\nConfidence: 85%`,
+      content: `[DRY-RUN] Simulated synthesis from ${model}\n\nCombining insights from all three proposals...\nAddressing critique points...\n\nFinal recommendation: [placeholder]\nConfidence: 85%`,
     };
   }
 
   const proposalsText = proposals
-    .map((p, i) => `\\n=== PROPOSAL ${i + 1} (${p.model}) ===\\n${p.content}`)
-    .join('\\n\\n');
+    .map((p, i) => `\n=== PROPOSAL ${i + 1} (${p.model}) ===\n${p.content}`)
+    .join('\n\n');
 
   let template = language === 'de' ? SYNTHESIZER_PROMPT_DE : SYNTHESIZER_PROMPT_EN;
   if (verificationMode) {
