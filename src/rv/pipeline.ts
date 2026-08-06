@@ -103,6 +103,56 @@ function hasMissingControlsBoundary(text: string): boolean {
     && /control|rollback|monitor|staged|screening|duplicate|execution|liquidity|slippage|readiness|approval/.test(text);
 }
 
+// ─── Bidirectional confidence correction (ported from pot-sdk ebd1f2a) ───────
+
+/**
+ * pot-sdk v2.1 asymmetric override policy, re-implemented for the RV pipeline.
+ *
+ * RV is claim-check shaped: judges produce independent confidences, the
+ * synthesizer states a final one. Pre-fix pot-sdk only corrected DOWNWARD
+ * (inflation), so conservative synthesizer caps collapsed confidence on clear
+ * factual claims. This ports the bidirectional fix:
+ *
+ * DOWNWARD (inflation): stated − mean(judges) > 0.20 → FULL replace with
+ *   judge mean. Catches synthesizer inflation / prompt injection.
+ * UPWARD (deflation): mean(judges) − stated > 0.30 → DAMPENED correction:
+ *   final = stated + 0.6 * (mean − stated). Higher threshold + dampening
+ *   because the judge mean is a crude signal and the synthesizer may have
+ *   detected subtle issues judges missed.
+ *
+ * See pot-sdk src/pipeline/aggregator.ts (applyAggregatedConfidence) and
+ * DRAFTS/2026-08-03-POT-SDK-TO-CLI-RV-TRANSFER.md.
+ */
+export const RV_INFLATION_GAP_THRESHOLD = 0.20;
+export const RV_DEFLATION_GAP_THRESHOLD = 0.30;
+export const RV_DEFLATION_DAMPENING = 0.6;
+
+export interface RvConfidenceCorrection {
+  confidence: number;
+  judgeMean?: number;
+  action?: 'judge_inflation_override' | 'judge_deflation_dampened';
+}
+
+export function applyRvConfidenceCorrection(
+  statedConfidence: number,
+  judgeConfidences: number[],
+): RvConfidenceCorrection {
+  const valid = judgeConfidences.filter(c => typeof c === 'number' && !isNaN(c));
+  if (valid.length === 0) return { confidence: statedConfidence };
+
+  const judgeMean = parseFloat((valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(3));
+  const gap = statedConfidence - judgeMean;
+
+  if (gap > RV_INFLATION_GAP_THRESHOLD) {
+    return { confidence: judgeMean, judgeMean, action: 'judge_inflation_override' };
+  }
+  if (-gap > RV_DEFLATION_GAP_THRESHOLD) {
+    const corrected = statedConfidence + RV_DEFLATION_DAMPENING * (judgeMean - statedConfidence);
+    return { confidence: parseFloat(corrected.toFixed(3)), judgeMean, action: 'judge_deflation_dampened' };
+  }
+  return { confidence: statedConfidence, judgeMean };
+}
+
 export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
   const synthesis = args.synthesis;
   const critic = args.critic;
@@ -116,8 +166,15 @@ export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
   ]);
 
   let verdict = synthesis.final_verdict;
-  let confidence = synthesis.confidence;
   const guardrailActions: string[] = [];
+
+  // Bidirectional confidence correction vs independent judge mean (pot-sdk port).
+  const correction = applyRvConfidenceCorrection(
+    synthesis.confidence,
+    args.judges.map(j => j.confidence),
+  );
+  let confidence = correction.confidence;
+  if (correction.action) guardrailActions.push(correction.action);
 
   if (verdict === 'BLOCK' && hasMissingControlsBoundary(text) && !hasCriticalRiskDismissal(text)) {
     verdict = 'UNCERTAIN';
@@ -147,7 +204,14 @@ export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
 
 const JUDGE_SYSTEM = `You are a Proof-of-Thought / Reasoning Verification judge. Evaluate claim + rationale + evidence. Return JSON only with verdict, confidence, reasoning, risk_flags, evidence_gaps.`;
 const CRITIC_SYSTEM = `You are an adversarial Reasoning Verification critic. Find material flaws, missing controls, overclaims, contradictions, and critical-risk dismissals. Return JSON only with objections, severity_scores, survival_assessment, overall_risk_level.`;
-const SYNTH_SYSTEM = `You are the final Reasoning Verification synthesizer. Preserve dissent, apply materiality, respect stated-claim boundaries, and return JSON only with final_verdict, confidence, synthesis_reasoning, dissent_preserved, calibration_notes.`;
+const SYNTH_SYSTEM = `You are the final Reasoning Verification synthesizer. Preserve dissent, apply materiality, respect stated-claim boundaries, and return JSON only with final_verdict, confidence, synthesis_reasoning, dissent_preserved, calibration_notes.
+
+CONFIDENCE CALIBRATION (verification mode — claim checking, not open-ended opinion):
+- Cap confidence at 0.95 maximum — even clear facts retain marginal uncertainty
+- For fact-based claims with clear evidence and no material critic objections: 0.80-0.95 is appropriate
+- For subjective assessments or missing evidence: cap at 0.75
+- When judges agree but the critic found shared bias or unaddressed objections: cap at 0.65
+- IMPORTANT: When all judges clearly support the verdict and the critic raised no material objections, confidence of 0.80+ is warranted — do not collapse to 0.5 out of generic caution`;
 
 export async function runReasoningVerification(options: RvPipelineOptions): Promise<RvPipelineResult> {
   const judgeModels = options.judgeModels ?? ['deepseek', 'grok', 'serv-nano'];
