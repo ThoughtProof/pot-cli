@@ -145,7 +145,7 @@ function parseContextOption(contextOption: string, storage: BlockStorage): { ref
 
 export async function askCommand(
   question: string,
-  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; verifySynthesis?: boolean; calibrate?: boolean }
+  options: { dryRun?: boolean; verbose?: boolean; lang?: string; context?: string; verifySynthesis?: boolean; calibrate?: boolean; verify?: boolean }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -249,7 +249,8 @@ export async function askCommand(
         proposals,
         critique,
         language,
-        contextText
+        contextText,
+        options.verify ?? false
       );
       synthesis = dualResult.primary;
       synthVerification = dualResult.verification;
@@ -262,7 +263,8 @@ export async function askCommand(
         critique,
         language,
         isDryRun,
-        contextText
+        contextText,
+        options.verify ?? false
       );
     }
 

@@ -1,5 +1,42 @@
 import { Provider, Proposal, Critique, Synthesis, SynthesisBalance, SynthesisVerification } from '../types.js';
 
+// ---------- Confidence policy blocks ----------
+// Two interchangeable confidence policies. Epistemic (default) is for
+// open-ended questions; verification mode is for claim-check shaped runs
+// (ported from the pot-sdk ebd1f2a / RV PR #49 verification-mode caps).
+
+const CONFIDENCE_BLOCK_DE = `CONFIDENCE-BEWERTUNG (PFLICHT):
+- Schreibe am Ende "Confidence: X%"
+- Maximum 85% — kein Multi-Modell-System kann Wahrheit garantieren
+- Bei subjektiven/strategischen Fragen: Maximum 70%
+- Bei Fragen wo alle Modelle übereinstimmen aber der Critic Shared Bias fand: Maximum 60%
+- Hoher Dissens zwischen Proposals = NIEDRIGERE Confidence, nicht gemittelt`;
+
+const CONFIDENCE_BLOCK_EN = `CONFIDENCE SCORING (MANDATORY):
+- State "Confidence: X%" at the end
+- Cap confidence at 85% maximum — no multi-model system can guarantee truth
+- For subjective/strategic questions: cap at 70%
+- For questions where all models agree but the critic found shared bias: cap at 60%
+- High disagreement between proposals = LOWER confidence, not averaged confidence`;
+
+const CONFIDENCE_BLOCK_VERIFY_DE = `CONFIDENCE-BEWERTUNG (PFLICHT — VERIFICATION MODE, Claim-Checking):
+- Schreibe am Ende "Confidence: X%"
+- Maximum 95% — selbst klare Fakten behalten marginale Restunsicherheit
+- Bei faktenbasierten Claims mit klarer Evidenz und ohne materielle Critic-Einwände: 80–95% sind angemessen
+- Bei subjektiven Einschätzungen oder fehlender Evidenz: Maximum 75%
+- Wenn alle Modelle übereinstimmen aber der Critic Shared Bias/unadressierte Einwände fand: Maximum 65%
+- Hoher Dissens zwischen Proposals = NIEDRIGERE Confidence, nicht gemittelt
+- WICHTIG: Wenn alle Modelle den Claim klar stützen und der Critic keine materiellen Einwände erhoben hat, ist 80%+ gerechtfertigt — NICHT aus generischer Vorsicht auf ~50% kollabieren`;
+
+const CONFIDENCE_BLOCK_VERIFY_EN = `CONFIDENCE SCORING (MANDATORY — VERIFICATION MODE, claim checking):
+- State "Confidence: X%" at the end
+- Cap confidence at 95% maximum — even clear facts retain marginal uncertainty
+- For fact-based claims with clear evidence and no material critic objections: 80-95% is appropriate
+- For subjective assessments or missing evidence: cap at 75%
+- When all models agree but the critic found shared bias or unaddressed objections: cap at 65%
+- High disagreement between proposals = LOWER confidence, not averaged confidence
+- IMPORTANT: When all models clearly support the claim and the critic raised no material objections, 80%+ is warranted — do NOT collapse to ~50% out of generic caution`;
+
 const SYNTHESIZER_PROMPT_DE = `Du bist der Synthesizer. Kombiniere die Proposals und die Kritik zu einer optimalen Antwort.
 
 {context}
@@ -16,12 +53,7 @@ REGELN:
 - Adressiere die Kritikpunkte explizit — besonders UNVERIFIZIERTE Behauptungen die der Critic markiert hat
 - Gib eine klare Empfehlung
 
-CONFIDENCE-BEWERTUNG (PFLICHT):
-- Schreibe am Ende "Confidence: X%"
-- Maximum 85% — kein Multi-Modell-System kann Wahrheit garantieren
-- Bei subjektiven/strategischen Fragen: Maximum 70%
-- Bei Fragen wo alle Modelle übereinstimmen aber der Critic Shared Bias fand: Maximum 60%
-- Hoher Dissens zwischen Proposals = NIEDRIGERE Confidence, nicht gemittelt
+${CONFIDENCE_BLOCK_DE}
 
 DISSENS-ABSCHNITT (PFLICHT):
 - Füge einen "Wo die Modelle sich widersprechen" Abschnitt ein
@@ -55,12 +87,7 @@ RULES:
 - Address the critique points explicitly — especially any UNVERIFIED claims flagged by the critic
 - Give a clear recommendation
 
-CONFIDENCE SCORING (MANDATORY):
-- State "Confidence: X%" at the end
-- Cap confidence at 85% maximum — no multi-model system can guarantee truth
-- For subjective/strategic questions: cap at 70%
-- For questions where all models agree but the critic found shared bias: cap at 60%
-- High disagreement between proposals = LOWER confidence, not averaged confidence
+${CONFIDENCE_BLOCK_EN}
 
 DISAGREEMENT SECTION (MANDATORY):
 - Include a "Where Models Disagreed" section
@@ -165,13 +192,14 @@ export async function runDualSynthesizer(
   proposals: Proposal[],
   critique: Critique,
   language: 'de' | 'en' = 'de',
-  contextText?: string
+  contextText?: string,
+  verificationMode: boolean = false
 ): Promise<{ primary: Synthesis; verification: SynthesisVerification }> {
   const primary = await runSynthesizer(
-    primaryProvider, primaryModel, proposals, critique, language, false, contextText
+    primaryProvider, primaryModel, proposals, critique, language, false, contextText, verificationMode
   );
   const secondary = await runSynthesizer(
-    secondaryProvider, secondaryModel, proposals, critique, language, false, contextText
+    secondaryProvider, secondaryModel, proposals, critique, language, false, contextText, verificationMode
   );
 
   const similarity = computeSynthesisSimilarity(primary.content, secondary.content);
@@ -199,21 +227,29 @@ export async function runSynthesizer(
   critique: Critique,
   language: 'de' | 'en' = 'de',
   dryRun: boolean = false,
-  contextText?: string
+  contextText?: string,
+  verificationMode: boolean = false
 ): Promise<Synthesis> {
   if (dryRun) {
     return {
       model: model.split('/').pop() || model,
       role: 'synthesizer',
-      content: `[DRY-RUN] Simulated synthesis from ${model}\n\nCombining insights from all three proposals...\nAddressing critique points...\n\nFinal recommendation: [placeholder]\nConfidence: 85%`,
+      content: `[DRY-RUN] Simulated synthesis from ${model}\\n\\nCombining insights from all three proposals...\\nAddressing critique points...\\n\\nFinal recommendation: [placeholder]\\nConfidence: 85%`,
     };
   }
 
   const proposalsText = proposals
-    .map((p, i) => `\n=== PROPOSAL ${i + 1} (${p.model}) ===\n${p.content}`)
-    .join('\n\n');
+    .map((p, i) => `\\n=== PROPOSAL ${i + 1} (${p.model}) ===\\n${p.content}`)
+    .join('\\n\\n');
 
-  const template = language === 'de' ? SYNTHESIZER_PROMPT_DE : SYNTHESIZER_PROMPT_EN;
+  let template = language === 'de' ? SYNTHESIZER_PROMPT_DE : SYNTHESIZER_PROMPT_EN;
+  if (verificationMode) {
+    // Swap the epistemic confidence policy for the verification-mode policy
+    // (claim-check caps: 95 max / 80–95 on clear evidence / no 0.5 collapse).
+    template = language === 'de'
+      ? template.replace(CONFIDENCE_BLOCK_DE, CONFIDENCE_BLOCK_VERIFY_DE)
+      : template.replace(CONFIDENCE_BLOCK_EN, CONFIDENCE_BLOCK_VERIFY_EN);
+  }
   const contextSection = contextText || '';
   const prompt = template
     .replace('{context}', contextSection)

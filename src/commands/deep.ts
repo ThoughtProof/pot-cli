@@ -33,7 +33,7 @@ interface RunResult {
 
 export async function deepCommand(
   question: string,
-  options: { verbose?: boolean; lang?: string; runs?: string }
+  options: { verbose?: boolean; lang?: string; runs?: string; verify?: boolean }
 ): Promise<void> {
   const config = getConfig();
   const storage = new BlockStorage(config.blockStoragePath);
@@ -130,7 +130,8 @@ export async function deepCommand(
         critique,
         pipelineLang,
         false,
-        contextText
+        contextText,
+        options.verify ?? false
       );
 
       if (options.verbose) {

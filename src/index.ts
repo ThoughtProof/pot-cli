@@ -38,6 +38,7 @@ program
   .option('--context <refs>', 'Reference previous blocks (e.g., "5,8,9" or "last" or "all")')
   .option('--verify-synthesis', 'Run synthesis twice with different models and compare results')
   .option('--calibrate', 'Run calibrated normalize step (extra API call — opt-in)')
+  .option('--verify', 'Verification mode: claim-check confidence caps (95 max, 80-95 on clear evidence) instead of epistemic caps')
   .action(async (question: string, options) => {
     await askCommand(question, options);
   });
@@ -48,6 +49,7 @@ program
   .option('--verbose', 'Show detailed progress')
   .option('--lang <language>', 'Language (de|en)', 'de')
   .option('--runs <number>', 'Number of rotation runs (2-5)', '3')
+  .option('--verify', 'Verification mode: claim-check confidence caps (95 max, 80-95 on clear evidence) instead of epistemic caps')
   .action(async (question: string, options) => {
     await deepCommand(question, options);
   });
