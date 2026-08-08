@@ -333,17 +333,37 @@ test('runCascade: disabled flag → primary-only (any verdict pass-through)', as
 
 // ─── 6. runCascade — failover ─────────────────────────────────────────────────
 
-test('runCascade: primary throws → secondary as standalone (degraded)', async () => {
+test('runCascade: primary throws + secondary ALLOW → HOLD fail-closed (degraded)', async () => {
+  // E-4 FA S-IM-003: primary ERR must not fail-open on a lone secondary ALLOW.
   const evaluate = throwingEvaluator(new Set(['gemini']), { sonnet: 'ALLOW' });
   const r = await runCascade('input', evaluate);
-  assert.equal(r.verdict, 'ALLOW');
+  assert.equal(r.verdict, 'HOLD');
   assert.equal(r.reason, 'primary_error_fallback');
   assert.equal(r.secondaryInvoked, true);
   assert.equal(r.degradedMode, true);
   assert.equal(r.primary, undefined);
   assert.ok(r.secondary);
+  assert.equal(r.secondary!.verdict, 'ALLOW');
   assert.equal(r.errors.length, 1);
   assert.match(r.errors[0]!, /primary\(gemini\)/);
+});
+
+test('runCascade: primary throws + secondary BLOCK → BLOCK preserved (degraded)', async () => {
+  const evaluate = throwingEvaluator(new Set(['gemini']), { sonnet: 'BLOCK' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'BLOCK');
+  assert.equal(r.reason, 'primary_error_fallback');
+  assert.equal(r.degradedMode, true);
+  assert.ok(r.secondary);
+  assert.equal(r.secondary!.verdict, 'BLOCK');
+});
+
+test('runCascade: primary throws + secondary CONDITIONAL_ALLOW → HOLD fail-closed', async () => {
+  const evaluate = throwingEvaluator(new Set(['gemini']), { sonnet: 'CONDITIONAL_ALLOW' });
+  const r = await runCascade('input', evaluate);
+  assert.equal(r.verdict, 'HOLD');
+  assert.equal(r.reason, 'primary_error_fallback');
+  assert.equal(r.degradedMode, true);
 });
 
 test('runCascade: primary throws + secondary throws → re-throws aggregate error', async () => {

@@ -351,13 +351,19 @@ export async function runCascade<TInput>(
     errors.push(`primary(${primaryModel}): ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // Primary failure → fall back to secondary as standalone
+  // Primary failure → secondary as degraded path.
+  // E-4 Full80 FA S-IM-003 (2026-08-08): primary ERR + secondary ALLOW was fail-open.
+  // Safety invariant: a missing primary never upgrades a lone secondary ALLOW/
+  // CONDITIONAL_ALLOW into a silent pass. Restrictive secondary (BLOCK/HOLD)
+  // still stands; permissive secondary is clamped to HOLD + degradedMode.
   if (!primary) {
     const tS = Date.now();
     try {
       const secondary = await evaluate(secondaryModel, input);
+      const permissive =
+        secondary.verdict === 'ALLOW' || secondary.verdict === 'CONDITIONAL_ALLOW';
       return {
-        verdict: secondary.verdict,
+        verdict: permissive ? 'HOLD' : secondary.verdict,
         reason: 'primary_error_fallback',
         secondary,
         primaryModel,
