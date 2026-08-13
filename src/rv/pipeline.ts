@@ -25,7 +25,9 @@ export interface RvCriticResult {
 }
 
 export interface RvSynthesisResult {
-  final_verdict: PublicVerdict;
+  /** Raw model output; live models emit free-form labels. Normalized to a
+   *  PublicVerdict by applyRvGuardrails before it reaches the result. */
+  final_verdict: PublicVerdict | string;
   confidence: number;
   synthesis_reasoning: string;
   dissent_preserved: string[];
@@ -115,6 +117,59 @@ export function normalizeConfidence(raw: unknown): number {
   return Number.NaN;
 }
 
+// ─── Verdict vocabulary normalization ────────────────────────────────────────
+
+/**
+ * Live RV models return free-form verdict vocabularies instead of the
+ * PublicVerdict contract. The 2026-08-06 16-run sample showed 0/16 canonical
+ * verdicts: judges/synthesizers emitted "supported", "fully_supported",
+ * "supported_with_rounding_caveat", "PARTIALLY_CORRECT", "TRUE", "false",
+ * "unsupported_false", etc. These strings passed through unnormalized,
+ * violating the ALLOW | BLOCK | UNCERTAIN contract for downstream consumers.
+ *
+ * normalizeRvVerdict coerces them by tokenizing the raw string (lowercase,
+ * split on non-alphanumerics) and matching against three token sets in
+ * precedence order BLOCK → UNCERTAIN → ALLOW:
+ *
+ * - BLOCK wins over everything: "unsupported_false" is a refuted claim,
+ *   not merely an unproven one.
+ * - UNCERTAIN wins over ALLOW: "partially_supported" and
+ *   "conditionally_supported" are not clean support. Caveat decorators
+ *   without a partial/uncertain token ("supported_with_caveat") stay ALLOW;
+ *   the caveat is preserved in the reasoning text.
+ * - "unsupported" alone maps to UNCERTAIN (claim not proven ≠ claim false).
+ *
+ * Unrecognized values fail closed to UNCERTAIN.
+ */
+const RV_BLOCK_TOKENS = new Set([
+  'block', 'blocked', 'false', 'refuted', 'incorrect', 'invalid',
+  'reject', 'rejected', 'fail', 'failed', 'contradicted', 'disproven',
+  'wrong', 'no',
+]);
+const RV_UNCERTAIN_TOKENS = new Set([
+  'uncertain', 'unknown', 'unclear', 'partial', 'partially', 'mixed',
+  'inconclusive', 'insufficient', 'unsupported', 'unverifiable',
+  'unverified', 'hold', 'conditional', 'conditionally',
+]);
+const RV_ALLOW_TOKENS = new Set([
+  'allow', 'allowed', 'true', 'supported', 'support', 'correct', 'valid',
+  'confirmed', 'verified', 'accurate', 'pass', 'passed', 'yes', 'holds',
+  'sound',
+]);
+
+export function normalizeRvVerdict(raw: unknown): PublicVerdict {
+  if (typeof raw !== 'string') return 'UNCERTAIN';
+  const trimmed = raw.trim();
+  const upper = trimmed.toUpperCase();
+  if (upper === 'ALLOW' || upper === 'BLOCK' || upper === 'UNCERTAIN') return upper;
+
+  const tokens = trimmed.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  if (tokens.some(t => RV_BLOCK_TOKENS.has(t))) return 'BLOCK';
+  if (tokens.some(t => RV_UNCERTAIN_TOKENS.has(t))) return 'UNCERTAIN';
+  if (tokens.some(t => RV_ALLOW_TOKENS.has(t))) return 'ALLOW';
+  return 'UNCERTAIN';
+}
+
 function joinedText(parts: Array<string | string[] | undefined>): string {
   return parts.flatMap(part => Array.isArray(part) ? part : (part ? [part] : [])).join(' ').toLowerCase();
 }
@@ -191,8 +246,14 @@ export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
     critic.objections,
   ]);
 
-  let verdict = synthesis.final_verdict;
+  const rawVerdict = synthesis.final_verdict;
+  const normalizedVerdict = normalizeRvVerdict(rawVerdict);
+  let verdict = normalizedVerdict;
   const guardrailActions: string[] = [];
+  if (typeof rawVerdict !== 'string' || rawVerdict.trim() !== normalizedVerdict) {
+    const label = typeof rawVerdict === 'string' ? rawVerdict.trim().slice(0, 60) : String(rawVerdict);
+    guardrailActions.push(`verdict_normalized:${label}->${normalizedVerdict}`);
+  }
 
   // Bidirectional confidence correction vs independent judge mean (pot-sdk port).
   const correction = applyRvConfidenceCorrection(
@@ -224,13 +285,15 @@ export function applyRvGuardrails(args: RvGuardrailInput): RvPipelineResult {
     evidence_gaps: evidenceGaps,
     critics: args.judges,
     guardrail_actions: guardrailActions,
-    synthesis,
+    // Expose the canonical verdict in the echoed synthesis as well; the raw
+    // model string remains auditable via the verdict_normalized action above.
+    synthesis: { ...synthesis, final_verdict: normalizedVerdict },
   };
 }
 
-const JUDGE_SYSTEM = `You are a Proof-of-Thought / Reasoning Verification judge. Evaluate claim + rationale + evidence. Return JSON only with verdict, confidence, reasoning, risk_flags, evidence_gaps. confidence MUST be a numeric float in [0,1] (never a label like "high").`;
+const JUDGE_SYSTEM = `You are a Proof-of-Thought / Reasoning Verification judge. Evaluate claim + rationale + evidence. Return JSON only with verdict, confidence, reasoning, risk_flags, evidence_gaps. verdict MUST be exactly one of ALLOW (claim supported by the evidence), BLOCK (claim is false or refuted), UNCERTAIN (partially supported, insufficient or mixed evidence). confidence MUST be a numeric float in [0,1] (never a label like "high").`;
 const CRITIC_SYSTEM = `You are an adversarial Reasoning Verification critic. Find material flaws, missing controls, overclaims, contradictions, and critical-risk dismissals. Return JSON only with objections, severity_scores, survival_assessment, overall_risk_level.`;
-const SYNTH_SYSTEM = `You are the final Reasoning Verification synthesizer. Preserve dissent, apply materiality, respect stated-claim boundaries, and return JSON only with final_verdict, confidence, synthesis_reasoning, dissent_preserved, calibration_notes.
+const SYNTH_SYSTEM = `You are the final Reasoning Verification synthesizer. Preserve dissent, apply materiality, respect stated-claim boundaries, and return JSON only with final_verdict, confidence, synthesis_reasoning, dissent_preserved, calibration_notes. final_verdict MUST be exactly one of ALLOW (claim supported), BLOCK (claim false or refuted), UNCERTAIN (partially supported, insufficient or mixed evidence) — never free-form labels like "supported" or "partially_supported".
 
 CONFIDENCE CALIBRATION (verification mode — claim checking, not open-ended opinion):
 - Cap confidence at 0.95 maximum — even clear facts retain marginal uncertainty
@@ -260,7 +323,7 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
     const parsed = parseModelJson<{ verdict: PublicVerdict; confidence: number; reasoning?: string; rationale?: string; risk_flags?: string[]; evidence_gaps?: string[] }>(response.content);
     judges.push({
       model,
-      verdict: parsed.verdict,
+      verdict: normalizeRvVerdict(parsed.verdict),
       confidence: normalizeConfidence(parsed.confidence),
       rationale: parsed.reasoning ?? parsed.rationale ?? '',
       risk_flags: parsed.risk_flags ?? [],

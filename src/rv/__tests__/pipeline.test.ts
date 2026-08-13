@@ -6,6 +6,7 @@ import {
   applyRvGuardrails,
   loadEnvText,
   normalizeConfidence,
+  normalizeRvVerdict,
   parseModelJson,
   runReasoningVerification,
   type ModelCaller,
@@ -175,4 +176,117 @@ test('guardrails apply deflation dampening when synthesizer under-states vs judg
   // judge mean = 0.883; stated 0.35 → 0.35 + 0.6 * 0.533 = 0.67
   assert.equal(result.confidence, 0.67);
   assert.equal(result.guardrail_actions.includes('judge_deflation_dampened'), true);
+});
+
+// ─── Verdict vocabulary normalization ───────────────────────────────────────
+
+test('normalizeRvVerdict passes canonical verdicts through case-insensitively', () => {
+  assert.equal(normalizeRvVerdict('ALLOW'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('BLOCK'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('UNCERTAIN'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict(' allow '), 'ALLOW');
+  assert.equal(normalizeRvVerdict('block'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('Uncertain'), 'UNCERTAIN');
+});
+
+test('normalizeRvVerdict maps the free-form vocabulary observed in the 2026-08-06 live sample', () => {
+  // Judge/synth strings actually emitted in rv-confidence-sample.jsonl.
+  assert.equal(normalizeRvVerdict('supported'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('fully_supported'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('supported_with_rounding_caveat'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('supported_with_caveat'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('confirmed'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('correct'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('valid'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('TRUE'), 'ALLOW');
+  assert.equal(normalizeRvVerdict('false'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('FALSE'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('PARTIALLY_CORRECT'), 'UNCERTAIN');
+});
+
+test('normalizeRvVerdict applies BLOCK > UNCERTAIN > ALLOW token precedence', () => {
+  // "false" token wins over "unsupported" — a refuted claim, not an unproven one.
+  assert.equal(normalizeRvVerdict('unsupported_false'), 'BLOCK');
+  // "partially" wins over "supported" — partial support is not clean support.
+  assert.equal(normalizeRvVerdict('partially_supported'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('partially_supported_with_material_caveats'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('conditionally_supported'), 'UNCERTAIN');
+  // "unsupported" alone is token-exact — the "supported" substring must NOT match.
+  assert.equal(normalizeRvVerdict('unsupported'), 'UNCERTAIN');
+});
+
+test('normalizeRvVerdict fails closed to UNCERTAIN on unrecognized input', () => {
+  assert.equal(normalizeRvVerdict('maybe possibly'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict(''), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict(undefined), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict(null), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict(42), 'UNCERTAIN');
+});
+
+test('guardrails normalize a free-form synthesis verdict and audit the coercion', () => {
+  const result = applyRvGuardrails({
+    input,
+    synthesis: {
+      final_verdict: 'supported_with_caveat',
+      confidence: 0.8,
+      synthesis_reasoning: 'Claim is supported with a minor caveat.',
+      dissent_preserved: [],
+      calibration_notes: '',
+    },
+    critic: {
+      objections: [],
+      severity_scores: [],
+      survival_assessment: 'survives',
+      overall_risk_level: 'low',
+    },
+    judges: [],
+  });
+
+  assert.equal(result.verdict, 'ALLOW');
+  assert.equal(result.synthesis.final_verdict, 'ALLOW');
+  assert.equal(
+    result.guardrail_actions.includes('verdict_normalized:supported_with_caveat->ALLOW'),
+    true,
+  );
+});
+
+test('guardrails do not audit verdicts that are already canonical', () => {
+  const result = applyRvGuardrails({
+    input,
+    synthesis: {
+      final_verdict: 'ALLOW',
+      confidence: 0.8,
+      synthesis_reasoning: 'Claim is supported.',
+      dissent_preserved: [],
+      calibration_notes: '',
+    },
+    critic: {
+      objections: [],
+      severity_scores: [],
+      survival_assessment: 'survives',
+      overall_risk_level: 'low',
+    },
+    judges: [],
+  });
+
+  assert.equal(result.verdict, 'ALLOW');
+  assert.equal(result.guardrail_actions.some(a => a.startsWith('verdict_normalized:')), false);
+});
+
+test('runReasoningVerification normalizes free-form judge and synthesizer verdicts', async () => {
+  const caller: ModelCaller = async ({ stage }) => {
+    if (stage === 'judge') return { content: '{"verdict":"supported","confidence":0.8,"reasoning":"clear","risk_flags":[],"evidence_gaps":[]}' };
+    if (stage === 'critic') return { content: '{"objections":[],"severity_scores":[],"survival_assessment":"survives","overall_risk_level":"low"}' };
+    return { content: '{"final_verdict":"partially_supported","confidence":0.8,"synthesis_reasoning":"Some caveats remain.","dissent_preserved":[],"calibration_notes":""}' };
+  };
+
+  const result = await runReasoningVerification({ input, caller });
+
+  assert.equal(result.verdict, 'UNCERTAIN');
+  assert.deepEqual(result.critics?.map(j => j.verdict), ['ALLOW', 'ALLOW', 'ALLOW']);
+  assert.equal(result.synthesis.final_verdict, 'UNCERTAIN');
+  assert.equal(
+    result.guardrail_actions.includes('verdict_normalized:partially_supported->UNCERTAIN'),
+    true,
+  );
 });
