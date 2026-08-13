@@ -221,6 +221,32 @@ test('normalizeRvVerdict fails closed to UNCERTAIN on unrecognized input', () =>
   assert.equal(normalizeRvVerdict(42), 'UNCERTAIN');
 });
 
+test('normalizeRvVerdict treats negated polar labels as UNCERTAIN, not flipped ALLOW/BLOCK', () => {
+  // Negated support must not become ALLOW (false-ALLOW is the dangerous side).
+  assert.equal(normalizeRvVerdict('not_supported'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('not supported'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('does_not_support'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('fails_to_support'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('no_support'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('cannot_support'), 'UNCERTAIN');
+  // Negated refutation must not become BLOCK.
+  assert.equal(normalizeRvVerdict('not_false'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('not_incorrect'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('not_block'), 'UNCERTAIN');
+  // Bare "no …" phrases are not clean BLOCKs either.
+  assert.equal(normalizeRvVerdict('no issues'), 'UNCERTAIN');
+  assert.equal(normalizeRvVerdict('no_material_issues'), 'UNCERTAIN');
+  // Weak support intensity is not clean ALLOW.
+  assert.equal(normalizeRvVerdict('weakly_supported'), 'UNCERTAIN');
+  // Explicit refutation/approval lexicon expansions.
+  assert.equal(normalizeRvVerdict('denied'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('disproved'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('approved'), 'ALLOW');
+  // Bare fail/failed stay BLOCK (negator set must not swallow them).
+  assert.equal(normalizeRvVerdict('failed'), 'BLOCK');
+  assert.equal(normalizeRvVerdict('fail'), 'BLOCK');
+});
+
 test('guardrails normalize a free-form synthesis verdict and audit the coercion', () => {
   const result = applyRvGuardrails({
     input,

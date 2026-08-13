@@ -127,9 +127,12 @@ export function normalizeConfidence(raw: unknown): number {
  * "unsupported_false", etc. These strings passed through unnormalized,
  * violating the ALLOW | BLOCK | UNCERTAIN contract for downstream consumers.
  *
+ * This is a model-output normalizer (free-form → PublicVerdict), not the
+ * engine internal→public mapper in verdict-mapper.ts.
+ *
  * normalizeRvVerdict coerces them by tokenizing the raw string (lowercase,
  * split on non-alphanumerics) and matching against three token sets in
- * precedence order BLOCK → UNCERTAIN → ALLOW:
+ * precedence order BLOCK → UNCERTAIN → ALLOW, with a negation guard:
  *
  * - BLOCK wins over everything: "unsupported_false" is a refuted claim,
  *   not merely an unproven one.
@@ -138,23 +141,40 @@ export function normalizeConfidence(raw: unknown): number {
  *   without a partial/uncertain token ("supported_with_caveat") stay ALLOW;
  *   the caveat is preserved in the reasoning text.
  * - "unsupported" alone maps to UNCERTAIN (claim not proven ≠ claim false).
+ * - Negators (`not`, `no`, `never`, `without`, `fails`, `cannot`, …) flip
+ *   polar matches to UNCERTAIN: `not_supported` must not become ALLOW, and
+ *   `not_false` must not become BLOCK. Bare `no` is intentionally not a
+ *   BLOCK token (too broad: "no issues").
+ * - Weak-support intensity tokens (`weakly`, `weak`, `marginally`) map to
+ *   UNCERTAIN even when paired with an ALLOW token.
  *
  * Unrecognized values fail closed to UNCERTAIN.
  */
 const RV_BLOCK_TOKENS = new Set([
   'block', 'blocked', 'false', 'refuted', 'incorrect', 'invalid',
   'reject', 'rejected', 'fail', 'failed', 'contradicted', 'disproven',
-  'wrong', 'no',
+  'disprove', 'disproved', 'deny', 'denied', 'refuse', 'refused',
+  'decline', 'declined', 'wrong',
 ]);
 const RV_UNCERTAIN_TOKENS = new Set([
   'uncertain', 'unknown', 'unclear', 'partial', 'partially', 'mixed',
   'inconclusive', 'insufficient', 'unsupported', 'unverifiable',
   'unverified', 'hold', 'conditional', 'conditionally',
+  'weakly', 'weak', 'marginally', 'marginal',
 ]);
 const RV_ALLOW_TOKENS = new Set([
   'allow', 'allowed', 'true', 'supported', 'support', 'correct', 'valid',
   'confirmed', 'verified', 'accurate', 'pass', 'passed', 'yes', 'holds',
-  'sound',
+  'sound', 'approve', 'approved', 'accept', 'accepted',
+]);
+// Polar negation: presence of any of these prevents a clean ALLOW/BLOCK
+// match from the remaining tokens (fail closed to UNCERTAIN).
+// Note: do not put bare BLOCK tokens here (e.g. 'failed'/'fail') — those must
+// still resolve to BLOCK when they appear alone. Negators only flip when they
+// co-occur with a polar ALLOW/BLOCK token.
+const RV_NEGATOR_TOKENS = new Set([
+  'not', 'no', 'non', 'never', 'without', 'fails', 'cannot', 'cant',
+  'doesnt', 'dont', 'lacks', 'lack',
 ]);
 
 export function normalizeRvVerdict(raw: unknown): PublicVerdict {
@@ -164,9 +184,18 @@ export function normalizeRvVerdict(raw: unknown): PublicVerdict {
   if (upper === 'ALLOW' || upper === 'BLOCK' || upper === 'UNCERTAIN') return upper;
 
   const tokens = trimmed.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
-  if (tokens.some(t => RV_BLOCK_TOKENS.has(t))) return 'BLOCK';
-  if (tokens.some(t => RV_UNCERTAIN_TOKENS.has(t))) return 'UNCERTAIN';
-  if (tokens.some(t => RV_ALLOW_TOKENS.has(t))) return 'ALLOW';
+  const hasNegator = tokens.some(t => RV_NEGATOR_TOKENS.has(t));
+  const hasBlock = tokens.some(t => RV_BLOCK_TOKENS.has(t));
+  const hasUncertain = tokens.some(t => RV_UNCERTAIN_TOKENS.has(t));
+  const hasAllow = tokens.some(t => RV_ALLOW_TOKENS.has(t));
+
+  // Negated polar labels are not clean support/refutation.
+  // not_supported → UNCERTAIN (not ALLOW); not_false → UNCERTAIN (not BLOCK).
+  if (hasNegator && (hasBlock || hasAllow)) return 'UNCERTAIN';
+
+  if (hasBlock) return 'BLOCK';
+  if (hasUncertain) return 'UNCERTAIN';
+  if (hasAllow) return 'ALLOW';
   return 'UNCERTAIN';
 }
 
