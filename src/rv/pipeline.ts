@@ -52,6 +52,10 @@ export interface RvPipelineOptions {
   judgeModels?: string[];
   criticModel?: string;
   synthesizerModel?: string;
+  /** Per-stage completion caps. Defaults preserve historical behavior. */
+  judgeMaxTokens?: number;
+  criticMaxTokens?: number;
+  synthesizerMaxTokens?: number;
 }
 
 export function loadEnvText(text: string): Record<string, string> {
@@ -335,6 +339,9 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
   const judgeModels = options.judgeModels ?? ['deepseek', 'grok', 'serv-nano'];
   const criticModel = options.criticModel ?? 'serv-nano';
   const synthesizerModel = options.synthesizerModel ?? 'sonnet';
+  const judgeMaxTokens = options.judgeMaxTokens ?? 800;
+  const criticMaxTokens = options.criticMaxTokens ?? 1000;
+  const synthesizerMaxTokens = options.synthesizerMaxTokens ?? 1200;
   const input = options.input;
   const casePrompt = `CLAIM: ${input.claim}\nRATIONALE: ${input.rationale}\nEVIDENCE: ${input.evidence}\nDOMAIN: ${input.domain ?? 'unspecified'}\nCONTEXT: ${input.context ?? ''}`;
 
@@ -343,7 +350,7 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
     const response = await options.caller({
       model,
       stage: 'judge',
-      maxTokens: 800,
+      maxTokens: judgeMaxTokens,
       messages: [
         { role: 'system', content: JUDGE_SYSTEM },
         { role: 'user', content: casePrompt },
@@ -363,7 +370,7 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
   const criticResponse = await options.caller({
     model: criticModel,
     stage: 'critic',
-    maxTokens: 1000,
+    maxTokens: criticMaxTokens,
     messages: [
       { role: 'system', content: CRITIC_SYSTEM },
       { role: 'user', content: `${casePrompt}\n\nJUDGES:\n${JSON.stringify(judges)}` },
@@ -374,7 +381,7 @@ export async function runReasoningVerification(options: RvPipelineOptions): Prom
   const synthResponse = await options.caller({
     model: synthesizerModel,
     stage: 'synthesizer',
-    maxTokens: 1200,
+    maxTokens: synthesizerMaxTokens,
     messages: [
       { role: 'system', content: SYNTH_SYSTEM },
       { role: 'user', content: `${casePrompt}\n\nJUDGES:\n${JSON.stringify(judges)}\n\nCRITIC:\n${JSON.stringify(critic)}` },

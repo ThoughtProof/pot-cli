@@ -314,3 +314,28 @@ test('runReasoningVerification normalizes free-form judge and synthesizer verdic
     true,
   );
 });
+
+test('runReasoningVerification honors per-stage maxTokens overrides', async () => {
+  const caps = [];
+  const caller = async ({ stage, maxTokens }) => {
+    caps.push({ stage, maxTokens });
+    if (stage === 'judge') return { content: '{"verdict":"ALLOW","confidence":0.8,"reasoning":"ok","risk_flags":[],"evidence_gaps":[]}' };
+    if (stage === 'critic') return { content: '{"objections":[],"severity_scores":[],"survival_assessment":"survives","overall_risk_level":"low"}' };
+    return { content: '{"final_verdict":"ALLOW","confidence":0.8,"synthesis_reasoning":"ok","dissent_preserved":[],"calibration_notes":""}' };
+  };
+
+  await runReasoningVerification({
+    input,
+    caller,
+    judgeModels: ['deepseek'],
+    judgeMaxTokens: 1600,
+    criticMaxTokens: 2400,
+    synthesizerMaxTokens: 3200,
+  });
+
+  assert.deepEqual(caps, [
+    { stage: 'judge', maxTokens: 1600 },
+    { stage: 'critic', maxTokens: 2400 },
+    { stage: 'synthesizer', maxTokens: 3200 },
+  ]);
+});
