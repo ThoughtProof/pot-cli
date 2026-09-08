@@ -454,3 +454,56 @@ test('UNICODE — CRLF vs LF newlines inside multi-line quote (regression guard,
     `Unicode CRLF: expected match after newline normalization. Violations: ${violations.join(' | ')}`,
   );
 });
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CB4A live failure 2026-09-07/08 — undefined quote .replace crash
+// ═══════════════════════════════════════════════════════════════════════════════
+
+test('verifyProvenance: undefined quote must not throw (CB4A replace crash)', () => {
+  // LLM omitted quote field → undefined. Historical `quote !== null` let it
+  // through and crashed on quote.replace(...).
+  const ev = makeEval({
+    step_id: 'step_undef_quote',
+    score: 0.9,
+    quote: undefined as unknown as string | null,
+  });
+  const violations = verifyProvenance(ev, 'some evidence with numbers and direction');
+  assert.ok(Array.isArray(violations));
+  assert.ok(
+    violations.some(v => v.startsWith('PROV_FAIL_01')),
+    `expected PROV_FAIL_01 for missing quote at high score, got: ${violations.join(' | ')}`,
+  );
+});
+
+test('verifyProvenance: null quote still PROV_FAIL_01 at high score', () => {
+  const ev = makeEval({ step_id: 'step_null_quote', score: 0.9, quote: null });
+  const violations = verifyProvenance(ev, 'evidence');
+  assert.ok(violations.some(v => v.startsWith('PROV_FAIL_01')));
+});
+
+test('applyScoreFloors: undefined quote must not throw on .trim', () => {
+  const ev = makeEval({
+    step_id: 'step_floor_undef',
+    score: 0.9,
+    quote: undefined as unknown as string | null,
+    reasoning: 'ok',
+  });
+  // Avoid "tool call" phrasing so R3 fetch-without-extraction does not fire first.
+  const out = applyScoreFloors(ev, 'market evidence with plenty of content here');
+  assert.equal(out.quote, null);
+  // High score without quote → R1 floor
+  assert.ok(out.score <= 0.25, `expected R1 no-quote floor, got score=${out.score}`);
+  assert.ok(
+    out.reasoning.includes('R1 no-quote'),
+    `expected R1 marker in reasoning, got: ${out.reasoning}`,
+  );
+});
+
+test('coerceQuote: nullish and non-string', async () => {
+  const { coerceQuote } = await import('./graded-support-evaluator.js');
+  assert.equal(coerceQuote(undefined), null);
+  assert.equal(coerceQuote(null), null);
+  assert.equal(coerceQuote('abc'), 'abc');
+  assert.equal(coerceQuote(42), '42');
+});
+

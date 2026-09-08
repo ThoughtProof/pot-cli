@@ -359,13 +359,34 @@ export async function evaluateCombined(
  * CODE-05 step_3 paraphrase rejection).
  */
 export function normalizeUnicodeForMatch(s: string): string {
-  return s
+  // Nullish guard: callers may pass undefined when LLM omits quote fields.
+  if (s == null) return '';
+  return String(s)
     .normalize('NFKC')
     .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
     .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
     .replace(/[\u2013\u2014]/g, '-')
     .replace(/\u2026/g, '...')
     .replace(/[\u200B-\u200D\uFEFF]/g, '');
+}
+
+/**
+ * Coerce LLM-emitted quote fields to `string | null`.
+ *
+ * Models often omit `quote` (→ undefined) or emit non-strings. The historical
+ * checks used `quote !== null`, which lets `undefined` through and then crashes
+ * on `quote.replace(...)` — the CB4A live failure mode 2026-09-07/08:
+ *   Cannot read properties of undefined (reading 'replace')
+ */
+export function coerceQuote(quote: unknown): string | null {
+  if (quote == null) return null;
+  if (typeof quote === 'string') return quote;
+  // Rare: model returns a number/boolean/object as "quote".
+  try {
+    return String(quote);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -439,10 +460,14 @@ export function verifyProvenance(
   traceExcerpt: string,
 ): string[] {
   const violations: string[] = [];
-  const { quote, score } = evalResult;
+  // Coerce first — LLM JSON often omits `quote` (undefined) or emits non-strings.
+  // Historical `quote !== null` let undefined through → crash on .replace.
+  const quote = coerceQuote(evalResult.quote);
+  const score = evalResult.score;
   const loc = evalResult.quote_location ?? null;
+  const safeTrace = traceExcerpt == null ? '' : String(traceExcerpt);
 
-  // CHECK 1: Score ≥ 0.75 requires a non-null quote
+  // CHECK 1: Score ≥ 0.75 requires a non-null quote (nullish counts as missing)
   if (score >= 0.75 && quote === null) {
     violations.push(`PROV_FAIL_01: score=${score} but quote is null`);
   }
@@ -452,12 +477,12 @@ export function verifyProvenance(
     const cleanQuote = quote.replace(/\.{2,}\s*$/, '').replace(/…\s*$/, '').trim();
 
     // CHECK 2: Substring match (with truncation + whitespace tolerance)
-    const isSubstring = traceExcerpt.includes(cleanQuote) || traceExcerpt.includes(quote);
+    const isSubstring = safeTrace.includes(cleanQuote) || safeTrace.includes(quote);
     // Normalize: strip leading whitespace per line
-    const normTrace = traceExcerpt.replace(/^[ \t]+/gm, '');
+    const normTrace = safeTrace.replace(/^[ \t]+/gm, '');
     const normQuote = cleanQuote.replace(/^[ \t]+/gm, '');
     const isNormalizedMatch = !isSubstring && normTrace.includes(normQuote);
-    const isFuzzyMatch = !isSubstring && !isNormalizedMatch && checkTruncatedQuote(cleanQuote, traceExcerpt);
+    const isFuzzyMatch = !isSubstring && !isNormalizedMatch && checkTruncatedQuote(cleanQuote, safeTrace);
 
     // Mode 1 fix — Unicode-folded substring match. Catches smart quotes, em-dash,
     // ellipsis char, zero-width chars, ligatures. Pure punctuation-level fold;
@@ -469,7 +494,7 @@ export function verifyProvenance(
     // checking out a different commit.
     const disableNewPaths = process.env.PLV_DISABLE_NEW_MATCH_PATHS === '1';
     const uniQuote = normalizeUnicodeForMatch(cleanQuote);
-    const uniTrace = normalizeUnicodeForMatch(traceExcerpt);
+    const uniTrace = normalizeUnicodeForMatch(safeTrace);
     const isUnicodeNormalizedMatch =
       !disableNewPaths &&
       !isSubstring && !isNormalizedMatch && !isFuzzyMatch && uniTrace.includes(uniQuote);
@@ -523,7 +548,7 @@ export function verifyProvenance(
     // an additional PROV_TRACE audit line for downstream classification.
     // See src/plan/probes/mode5-truncation-detection.ts for design.
     if (matchPath === 'no-match') {
-      const m5 = detectMode5(quote, traceExcerpt);
+      const m5 = detectMode5(quote, safeTrace);
       if (m5.signals.length > 0) {
         violations.push(`PROV_TRACE: mode_5_signals=${m5.signals.join(',')}`);
       }
@@ -536,7 +561,7 @@ export function verifyProvenance(
 
     // CHECK 4: Line bounds consistency
     if (loc !== null && loc.line_start !== null && loc.line_end !== null) {
-      const lines = traceExcerpt.split('\n');
+      const lines = safeTrace.split('\n');
       if (loc.line_start < 1 || loc.line_end > lines.length) {
         violations.push(`PROV_FAIL_03: line bounds (${loc.line_start},${loc.line_end}) out of range`);
       }
@@ -554,8 +579,11 @@ export function applyScoreFloors(
   mode: EvalMode = 'support',
 ): StepEvaluation {
   const result = { ...evalResult };
-  const hasToolCall = /tool.?call|web_search|web_fetch|\[search\]|\[TOOL/i.test(traceExcerpt);
-  const hasResponse = /tool.?result|\[observe\]|\[EXTRACTED/i.test(traceExcerpt) || traceExcerpt.length > 500;
+  // Normalize quote first so later !== null / .trim() never see undefined.
+  result.quote = coerceQuote(result.quote);
+  const safeTrace = traceExcerpt == null ? '' : String(traceExcerpt);
+  const hasToolCall = /tool.?call|web_search|web_fetch|\[search\]|\[TOOL/i.test(safeTrace);
+  const hasResponse = /tool.?result|\[observe\]|\[EXTRACTED/i.test(safeTrace) || safeTrace.length > 500;
 
   // R3: fetch-without-extraction cap
   if (hasToolCall && !hasResponse && result.score > 0.25) {
@@ -601,6 +629,7 @@ export function applyScoreFloors(
   // R1: quote required for supported predicate. Trigger range (>= SUPPORTED_THRESHOLD)
   // mirrors the band shift: any score that would otherwise map to supported but
   // lacks a quote gets pulled to R1_NO_QUOTE_FLOOR (0.25). See ADR-0003 §Decision.2.
+  // Nullish quote (undefined from LLM omit) counts as missing.
   if (result.score >= SUPPORTED_THRESHOLD && result.quote === null) {
     result.score = R1_NO_QUOTE_FLOOR;
     result.tier = 'partial';
@@ -1103,8 +1132,11 @@ Return a JSON array with one evaluation object per step. ONLY JSON, no prose.`;
     messages,
     {
       parse: (text: string) => {
-        // Strip markdown code fences (models often wrap JSON in ```json...```)
-        const stripped = text.replace(/```(?:json)?\s*/g, '').replace(/```/g, '');
+        // Strip markdown code fences (models often wrap JSON in ```json...```).
+        // Guard nullish text — empty/undefined provider content must not throw
+        // on .replace (same failure class as omitted quote fields).
+        const safeText = text == null ? '' : String(text);
+        const stripped = safeText.replace(/```(?:json)?\s*/g, '').replace(/```/g, '');
         // Target [{ ... }] — the JSON-array-of-objects pattern.
         // This avoids false matches on prose brackets like [step 1] or [note: ...]
         // which cause greedy /\[[\s\S]*\]/ to grab prose+JSON as one blob.
@@ -1241,7 +1273,9 @@ export async function evaluateItem(
     const rawEvals = await evaluateStepsWithLLM(
       item, stepsForTier2, model, options.maxTokens ?? 4096, mode
     );
-    tier2Evals = rawEvals;
+    // Coerce LLM-emitted quote fields before provenance/floors.
+    // Missing `quote` arrives as undefined and historically crashed on .replace.
+    tier2Evals = rawEvals.map((ev) => ({ ...ev, quote: coerceQuote(ev.quote) }));
   }
 
   // ── Merge: Tier 1 resolved + Tier 2 evaluated ──

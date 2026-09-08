@@ -2,6 +2,29 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.10] - 2026-09-08
+
+### 🐛 Fix: CB4A live cascade crash on omitted LLM `quote`
+
+Root cause of Sentinel 500s:
+`Cannot read properties of undefined (reading 'replace')` on both
+`serv-nano` and `serv-swift`.
+
+Historical checks used `quote !== null`, which lets `undefined` through
+when the model omits the `quote` field in JSON. Then `quote.replace(...)`
+throws inside `verifyProvenance` / `applyScoreFloors` and takes down the
+whole cascade (fail-closed).
+
+#### Added
+- `coerceQuote()` — nullish/non-string → `null`
+- Regression tests in `test-provenance-diagnostics.ts` for undefined quote
+
+#### Fixed
+- `verifyProvenance` / `applyScoreFloors` coerce quote before `.replace`/`.trim`
+- `normalizeUnicodeForMatch` null-safe
+- LLM parse path guards nullish `text` before fence-strip `.replace`
+- tier2 merge coerces quotes before provenance/floors
+
 ## [0.8.3] - 2026-04-26
 
 ### 🔧 PLV: Provenance Matcher — Mode 1 + Mode 3 Fix
