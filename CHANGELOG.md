@@ -2,6 +2,42 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.11] - 2026-10-09
+
+Sentinel had been shipping these fixes only as a hand-patched
+`pot-cli@0.8.10-tp.2` dist (`vendor/pot-cli-0.8.10-tp.2.tgz`,
+`vendor/PATCHES.md`). 0.8.10 is not republished. The same behaviour now
+lives in TypeScript and is built from source.
+
+Source of the implementation: the TypeScript already inside that tarball
+(`package/src/plan/graded-support-evaluator.ts` and
+`package/src/plan/test-provenance-diagnostics.ts` at tp.2; the tp.1
+tarball has the same file without suite-label recovery). It was not on
+any pot-cli branch or pull request. thoughtproof-sentinel
+`src/step-quote-provenance.ts` (PR #31 / #67, commit `8c56003`) is a
+parallel host-side normalizer and was not used as the compiler input.
+
+#### Added
+- `appendReasoningNote()` — floor and provenance notes no longer
+  stringify a missing `reasoning` into an `undefined` / `null` prefix
+- `extractMandateVerbatimQuote()` / `recoverCiteableQuote()` — when the
+  model omits `quote`, recover the MCP
+  `Principal mandate (verbatim quote):` span, else a suite
+  `USER INSTRUCTION:` span, before `PROV_FAIL_01`
+- The next-label cut is any whitespace (`\n` or `\s+`), not only a
+  newline. tp.1 cut on newline only; tp.2 widened it so same-line suite
+  one-liners stop before `WALLET BALANCE:` / `AGENT PROPOSED ACTION:` /
+  `AGENT REASONING:`. `vendor/PATCHES.md` does not mention that widening.
+- `files` allowlist so local scratch (for example
+  `rv-confidence-debug*.jsonl`) is not packed
+
+#### Fixed
+- `coerceQuote()` rejects empty quotes and the literal strings
+  `"undefined"` and `"null"` (including surrounding whitespace)
+- Provenance in `evaluateItem` runs `recoverCiteableQuote` before
+  `verifyProvenance`, and provenance downgrades go through
+  `appendReasoningNote`
+
 ## [0.8.10] - 2026-09-08
 
 ### 🐛 Fix: CB4A live cascade crash on omitted LLM `quote`

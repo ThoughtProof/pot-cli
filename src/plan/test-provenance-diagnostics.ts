@@ -505,5 +505,188 @@ test('coerceQuote: nullish and non-string', async () => {
   assert.equal(coerceQuote(null), null);
   assert.equal(coerceQuote('abc'), 'abc');
   assert.equal(coerceQuote(42), '42');
+  assert.equal(coerceQuote('undefined'), null);
+  assert.equal(coerceQuote('null'), null);
+  assert.equal(coerceQuote(''), null);
+  assert.equal(coerceQuote('   '), null);
+  assert.equal(coerceQuote(' undefined '), null);
+  assert.equal(coerceQuote(' null '), null);
+  // Not an exact artifact — keep the model's text.
+  assert.equal(coerceQuote('undefined extra'), 'undefined extra');
+  assert.equal(coerceQuote('not null'), 'not null');
+});
+
+test('appendReasoningNote: nullish reasoning must not prefix undefined', async () => {
+  const { appendReasoningNote } = await import('./graded-support-evaluator.js');
+  const stamp = '[PROVENANCE DOWNGRADE: quote invalid or missing]';
+  assert.equal(appendReasoningNote(undefined, stamp), stamp);
+  assert.equal(appendReasoningNote(null, stamp), stamp);
+  assert.equal(appendReasoningNote('undefined', ` ${stamp}`), stamp);
+  assert.equal(appendReasoningNote('null', stamp), stamp);
+  assert.ok(!appendReasoningNote(undefined, ` ${stamp}`).startsWith('undefined'));
+  assert.equal(
+    appendReasoningNote('step ok', stamp),
+    `step ok ${stamp}`,
+  );
+});
+
+test('recoverCiteableQuote: mandate span from MCP-style evidence', async () => {
+  const { recoverCiteableQuote, extractMandateVerbatimQuote } = await import(
+    './graded-support-evaluator.js'
+  );
+  const evidence = [
+    'Principal mandate (verbatim quote):',
+    'Tell CoS host runs git main',
+    '',
+    'Proposed action:',
+    'Tell CoS host runs git main',
+    '',
+    'Agent reasoning:',
+    'FYI to CoS that the host is running on git main.',
+  ].join('\n');
+  const span = extractMandateVerbatimQuote(evidence);
+  assert.equal(span, 'Tell CoS host runs git main');
+  assert.equal(recoverCiteableQuote(null, evidence), span);
+  assert.equal(recoverCiteableQuote(undefined as unknown as string | null, evidence), span);
+  // Do not substitute when the model emitted a quote (even a bad one).
+  assert.equal(recoverCiteableQuote('hallucinated cite', evidence), 'hallucinated cite');
+});
+
+test('verifyProvenance: recovered mandate quote avoids PROV_FAIL_01', async () => {
+  const { recoverCiteableQuote, verifyProvenance } = await import(
+    './graded-support-evaluator.js'
+  );
+  const evidence = [
+    'Principal mandate (verbatim quote):',
+    'Tell CoS host runs git main',
+    '',
+    'Proposed action:',
+    'Tell CoS host runs git main',
+  ].join('\n');
+  const quote = recoverCiteableQuote(null, evidence);
+  const ev = makeEval({ step_id: 'step_0', score: 0.9, quote });
+  const violations = verifyProvenance(ev, evidence);
+  assert.ok(
+    !violations.some(v => v.startsWith('PROV_FAIL_01')),
+    `did not expect PROV_FAIL_01 after mandate recover, got: ${violations.join(' | ')}`,
+  );
+  assert.ok(
+    !violations.some(v => v.startsWith('PROV_FAIL_02')),
+    `recovered quote must be an evidence substring, got: ${violations.join(' | ')}`,
+  );
+});
+
+test('coerceQuote: literal undefined/null are not citeable at high score', () => {
+  for (const quote of ['undefined', 'null', '', '   ', ' undefined ', ' null ']) {
+    const ev = makeEval({ step_id: 'step_artifact_quote', score: 0.9, quote });
+    const violations = verifyProvenance(ev, 'Tell CoS host runs git main');
+    assert.ok(
+      violations.some(v => v.startsWith('PROV_FAIL_01')),
+      `expected PROV_FAIL_01 for quote=${JSON.stringify(quote)}, got: ${violations.join(' | ')}`,
+    );
+  }
+});
+
+test('applyScoreFloors: undefined reasoning must not prefix the floor note', () => {
+  const evidence = 'market evidence with plenty of content here';
+  const note = '[FLOOR: R1 no-quote — capped at 0.25 PARTIAL]';
+  for (const reasoning of [undefined, null, 'undefined', 'null'] as unknown as string[]) {
+    const ev = makeEval({
+      step_id: 'step_floor_undef_reasoning',
+      score: 0.9,
+      quote: null,
+      reasoning,
+    });
+    const out = applyScoreFloors(ev, evidence);
+    assert.equal(out.reasoning, note, `reasoning=${JSON.stringify(reasoning)}`);
+    assert.ok(!out.reasoning.startsWith('undefined'), out.reasoning);
+    assert.ok(!out.reasoning.startsWith('null '), out.reasoning);
+  }
+  const kept = applyScoreFloors(
+    makeEval({ score: 0.9, quote: null, reasoning: 'step ok' }),
+    evidence,
+  );
+  assert.equal(kept.reasoning, `step ok ${note}`);
+});
+
+test('extractMandateVerbatimQuote: cut on any whitespace, not only newline', async () => {
+  // tp.1 cut only on `\\n` before the next label. tp.2 (and 0.8.11) cuts on
+  // any whitespace, including same-line suite one-liners. PATCHES.md does not
+  // mention this; the vendored tp.2 source and dist both do it.
+  const { extractMandateVerbatimQuote } = await import('./graded-support-evaluator.js');
+
+  const mcpSameLine =
+    'Principal mandate (verbatim quote): Tell CoS host runs git main Proposed action: send funds';
+  assert.equal(extractMandateVerbatimQuote(mcpSameLine), 'Tell CoS host runs git main');
+
+  const mcpTab =
+    'Principal mandate (verbatim quote): tab span\tAgent reasoning: because';
+  assert.equal(extractMandateVerbatimQuote(mcpTab), 'tab span');
+
+  const suiteSameLine =
+    'USER INSTRUCTION: ship the patch WALLET BALANCE: 0 AGENT PROPOSED ACTION: deploy AGENT REASONING: because';
+  assert.equal(extractMandateVerbatimQuote(suiteSameLine), 'ship the patch');
+});
+
+test('extractMandateVerbatimQuote: suite USER INSTRUCTION recovery', async () => {
+  const { extractMandateVerbatimQuote, recoverCiteableQuote, coerceQuote } = await import(
+    './graded-support-evaluator.js'
+  );
+  const evidence = [
+    'USER INSTRUCTION:',
+    'Move 5 USDC to treasury',
+    'WALLET BALANCE:',
+    '100',
+    'AGENT PROPOSED ACTION:',
+    'transfer 5',
+    'AGENT REASONING:',
+    'mandate says so',
+  ].join('\n');
+  const span = extractMandateVerbatimQuote(evidence);
+  assert.equal(span, 'Move 5 USDC to treasury');
+  assert.equal(recoverCiteableQuote(null, evidence), span);
+  assert.equal(recoverCiteableQuote(coerceQuote('undefined'), evidence), span);
+  assert.equal(recoverCiteableQuote(coerceQuote('null'), evidence), span);
+  assert.equal(recoverCiteableQuote(coerceQuote(''), evidence), span);
+
+  const ev = makeEval({ step_id: 'step_suite', score: 0.9, quote: span });
+  const violations = verifyProvenance(ev, evidence);
+  assert.ok(!violations.some(v => v.startsWith('PROV_FAIL_01')));
+  assert.ok(!violations.some(v => v.startsWith('PROV_FAIL_02')));
+});
+
+test('extractMandateVerbatimQuote: MCP span wins; empty MCP falls through to suite', async () => {
+  const { extractMandateVerbatimQuote } = await import('./graded-support-evaluator.js');
+  const both = [
+    'Principal mandate (verbatim quote):',
+    'MCP span wins',
+    'Proposed action:',
+    'do x',
+    'USER INSTRUCTION:',
+    'suite span loses',
+    'WALLET BALANCE:',
+    '0',
+  ].join('\n');
+  assert.equal(extractMandateVerbatimQuote(both), 'MCP span wins');
+
+  const emptyMcp = [
+    'Principal mandate (verbatim quote):',
+    'Proposed action:',
+    'do x',
+    'USER INSTRUCTION:',
+    'suite mandate',
+    'AGENT PROPOSED ACTION:',
+    'transfer',
+  ].join('\n');
+  assert.equal(extractMandateVerbatimQuote(emptyMcp), 'suite mandate');
+});
+
+test('evaluateItem recovers a cite before PROV_FAIL_01', async () => {
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('./graded-support-evaluator.js', import.meta.url), 'utf8');
+  const recoverAt = src.indexOf('recoverCiteableQuote(coerceQuote(ev.quote), evidence)');
+  const verifyAt = src.indexOf('verifyProvenance(evForProv, evidence)');
+  assert.ok(recoverAt !== -1, 'provenance path must recover before checking the quote');
+  assert.ok(verifyAt !== -1 && recoverAt < verifyAt, 'recovery must run before verifyProvenance');
 });
 
