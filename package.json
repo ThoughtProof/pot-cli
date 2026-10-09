@@ -1,6 +1,6 @@
 {
   "name": "pot-cli",
-  "version": "0.8.10",
+  "version": "0.8.11",
   "description": "Multi-model AI verification with adversarial critique. No AI can verify itself — so they verify each other.",
   "main": "dist/index.js",
   "bin": {
@@ -94,5 +94,30 @@
     "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   },
-  "type": "module"
+  "type": "module",
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/__tests__/**",
+    "docs",
+    "CHANGELOG.md",
+    "examples",
+    "scripts",
+    "adversarial-results",
+    "replay-results-new",
+    "replay-results-old",
+    ".potrc.json.example",
+    ".potrc.v4-pro.json",
+    "MAJORITY-VOTE-TEST.md",
+    "adversarial-benchmark.sh",
+    "adversarial-suite.json",
+    "majority-results.md",
+    "majority-vote.cjs",
+    "majority-vote-test.js",
+    "replay-benchmark.sh",
+    "run-all-benchmarks.sh",
+    "run-majority-test.cjs",
+    "tsconfig.json"
+  ]
 }
