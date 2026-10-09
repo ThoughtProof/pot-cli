@@ -2,7 +2,7 @@
 
 All notable changes to pot-cli will be documented in this file.
 
-## [Unreleased]
+## [0.8.12] - Unreleased
 
 ### Fixed
 - Pin `@pot-sdk2/bridge` to the tested `1.2.0`. Fresh npm installs of
