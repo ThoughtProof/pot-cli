@@ -2,6 +2,20 @@
 
 All notable changes to pot-cli will be documented in this file.
 
+## [0.8.12] - Unreleased
+
+### Fixed
+- Pin `@pot-sdk2/bridge` to the tested `1.2.0`. Fresh npm installs of
+  `0.8.11` selected `1.3.0`, which removed `checkAuthorVerifierSeparation`
+  and caused every CLI command to fail during module loading.
+- Read the CLI `--version` from the installed package instead of the
+  hard-coded `0.5.0`.
+
+### Added
+- `npm run test:package` packs the build, installs it in a clean consumer
+  without the development lockfile, and checks `--version` and
+  `ask --dry-run`. Both checks reproduced the `0.8.11` import failure.
+
 ## [0.8.11] - 2026-10-09
 
 Sentinel had been shipping these fixes only as a hand-patched

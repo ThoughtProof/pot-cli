@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import { readFileSync } from 'node:fs';
 import { askCommand } from './commands/ask.js';
 import { deepCommand } from './commands/deep.js';
 import { debugCommand } from './commands/debug.js';
@@ -23,11 +24,14 @@ import { runAutoGen } from './commands/plan-auto-gen.js';
 import { runLOOCV } from './commands/plan-loocv.js';
 
 const program = new Command();
+const packageVersion = (JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+) as { version: string }).version;
 
 program
   .name('pot')
   .description('ThoughtProof Proof-of-Thought CLI Tool')
-  .version('0.5.0');
+  .version(packageVersion);
 
 program
   .command('ask <question>')
