@@ -4,6 +4,9 @@ All notable changes to pot-cli will be documented in this file.
 
 ## [0.8.12] - Unreleased
 
+### Changed
+- Require Node.js >=22. `better-sqlite3` prebuilt binaries are only published for Node >=22, and Node 20 is EOL.
+
 ### Fixed
 - Pin `@pot-sdk2/bridge` to the tested `1.2.0`. Fresh npm installs of
   `0.8.11` selected `1.3.0`, which removed `checkAuthorVerifierSeparation`
