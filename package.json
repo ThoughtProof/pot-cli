@@ -1,6 +1,9 @@
 {
   "name": "pot-cli",
   "version": "0.8.12",
+  "engines": {
+    "node": ">=22"
+  },
   "description": "Multi-model AI verification with adversarial critique. No AI can verify itself — so they verify each other.",
   "main": "dist/index.js",
   "bin": {
