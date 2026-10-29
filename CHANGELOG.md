@@ -18,6 +18,18 @@ All notable changes to pot-cli will be documented in this file.
 - `npm run test:package` packs the build, installs it in a clean consumer
   without the development lockfile, and checks `--version` and
   `ask --dry-run`. Both checks reproduced the `0.8.11` import failure.
+- `inspectMandateVerbatimQuote()` reports `quote`, `absent`, or `conflict`.
+  `extractMandateVerbatimQuote()` now also accepts structural
+  `Mandate:`, `User mandate:`, `Principal instruction:`, and bare
+  `Principal mandate:` headers (case-insensitive, flexible internal
+  whitespace, optional space before the colon). A label inside quotes,
+  a blockquote, a fenced block, tool output, or the proposed-action body
+  is not a mandate section. Disagreeing sections return no quote.
+  The MCP host-excerpt pair (`User mandate:` containing
+  `Principal mandate (verbatim quote):`) still cites the verbatim span.
+  The two existing labels keep their cascade: a non-empty MCP span wins
+  over `USER INSTRUCTION:`. A model-emitted quote is never replaced by
+  an extracted span. Label recognition does not raise a score or emit ALLOW.
 
 ## [0.8.11] - 2026-10-09
 

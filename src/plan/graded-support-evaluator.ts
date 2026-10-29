@@ -408,8 +408,463 @@ export function appendReasoningNote(reasoning: unknown, note: string): string {
 }
 
 /**
- * Host evidence embeds a citeable mandate span. Prefer MCP
- * `buildSentinelEvidence` labels, then suite `USER INSTRUCTION:`
+ * Result of reading mandate sections out of host evidence.
+ *
+ * `conflict` is fail-closed: callers must not pick one of the spans.
+ * `absent` means no structural mandate section was found. Neither status
+ * is an authorization decision — this module never promotes a verdict.
+ */
+export type MandateQuoteStatus = 'quote' | 'absent' | 'conflict';
+
+export interface MandateQuoteExtraction {
+  status: MandateQuoteStatus;
+  /** Citeable span when `status` is `quote`. Null otherwise. */
+  quote: string | null;
+  /**
+   * Distinct structural spans that disagreed. Empty unless `status` is
+   * `conflict` (also empty when a parser failure fail-closes).
+   */
+  conflictingQuotes: string[];
+}
+
+/**
+ * Sentinel pin markers. The published dist is grepped for these exact
+ * sources (`Principal mandate \(verbatim quote\):` and `USER INSTRUCTION:`).
+ * Whitespace-flexible finders below sit next to them; they do not replace them.
+ */
+const LEGACY_MCP_LABEL = /Principal mandate \(verbatim quote\):/i;
+const LEGACY_SUITE_LABEL = /USER INSTRUCTION:/i;
+
+/** Original MCP cut. Do not widen: same-line fixtures depend on this shape. */
+const LEGACY_MCP_NEXT = /(?:\n|\s+)(?:Proposed action:|Agent reasoning:)/i;
+/** Original suite cut. Same-line one-liners stop before wallet / action. */
+const LEGACY_SUITE_NEXT = /(?:\n|\s+)(?:WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i;
+
+/**
+ * Extended sections stop at the same action / wallet boundaries as the
+ * legacy cuts, including same-line `Proposed action:`. Following mandate
+ * headers are line-start boundaries only, so a mid-sentence "mandate:"
+ * does not split the span.
+ */
+const EXTENDED_NEXT =
+  /(?:\n|\s+)(?:Proposed action:|Agent reasoning:|WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i;
+
+type MandateKind =
+  | 'mcp'
+  | 'suite'
+  | 'user_mandate'
+  | 'principal_instruction'
+  | 'principal_mandate'
+  | 'mandate';
+
+interface MandateMarker {
+  index: number;
+  end: number;
+  kind?: MandateKind;
+  /** Terminator closes the preamble. `seal` swallows labels until a body terminator. */
+  seal?: boolean;
+}
+
+interface MandateHit {
+  kind: MandateKind;
+  raw: string;
+  norm: string;
+  bounded: boolean;
+}
+
+const MANDATE_FINDERS: ReadonlyArray<{ kind: MandateKind; re: RegExp }> = [
+  { kind: 'mcp', re: LEGACY_MCP_LABEL },
+  { kind: 'mcp', re: /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]+quote[ \t]*\)[ \t]*:/i },
+  { kind: 'suite', re: LEGACY_SUITE_LABEL },
+  { kind: 'suite', re: /user[ \t]+instruction[ \t]*:/i },
+  { kind: 'user_mandate', re: /user[ \t]+mandate[ \t]*:/i },
+  { kind: 'principal_instruction', re: /principal[ \t]+instruction[ \t]*:/i },
+  { kind: 'principal_mandate', re: /principal[ \t]+mandate[ \t]*:/i },
+  { kind: 'mandate', re: /(?<![A-Za-z])mandate[ \t]*:/i },
+];
+
+const TERMINATOR_FINDERS: ReadonlyArray<{ seal: boolean; re: RegExp }> = [
+  { seal: false, re: /proposed[ \t]+action[ \t]*:/i },
+  { seal: false, re: /agent[ \t]+reasoning[ \t]*:/i },
+  { seal: false, re: /agent[ \t]+proposed[ \t]+action[ \t]*:/i },
+  { seal: false, re: /wallet[ \t]+balance[ \t]*:/i },
+  { seal: false, re: /context[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+output[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+result[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+response[ \t]*:/i },
+  { seal: true, re: /function[ \t]+output[ \t]*:/i },
+  { seal: true, re: /function[ \t]+result[ \t]*:/i },
+  { seal: true, re: /foreign[ \t]+quote[ \t]*:/i },
+  { seal: true, re: /quoted[ \t]+content[ \t]*:/i },
+  { seal: true, re: /quotation[ \t]*:/i },
+];
+
+/**
+ * Line-start only. Mid-sentence "tool output:" or "mandate:" must not
+ * truncate a span. Legacy MCP / suite cuts do not use this list — their
+ * inline next-regexes stay exactly as they were.
+ */
+const EXTENDED_LINE_BOUNDARIES: readonly RegExp[] = [
+  ...TERMINATOR_FINDERS.map(finder => finder.re),
+  /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]+quote[ \t]*\)[ \t]*:/i,
+  /user[ \t]+instruction[ \t]*:/i,
+  /user[ \t]+mandate[ \t]*:/i,
+  /principal[ \t]+instruction[ \t]*:/i,
+  /principal[ \t]+mandate[ \t]*:/i,
+  /(?<![A-Za-z])mandate[ \t]*:/i,
+];
+
+function absentExtraction(): MandateQuoteExtraction {
+  return { status: 'absent', quote: null, conflictingQuotes: [] };
+}
+
+function quoteExtraction(quote: string): MandateQuoteExtraction {
+  return { status: 'quote', quote, conflictingQuotes: [] };
+}
+
+function conflictExtraction(hits: readonly MandateHit[]): MandateQuoteExtraction {
+  const seen = new Set<string>();
+  const conflictingQuotes: string[] = [];
+  for (const hit of hits) {
+    if (seen.has(hit.norm)) continue;
+    seen.add(hit.norm);
+    conflictingQuotes.push(hit.raw);
+  }
+  return { status: 'conflict', quote: null, conflictingQuotes };
+}
+
+function mandateNorm(value: string): string {
+  return normalizeUnicodeForMatch(value).replace(/\s+/g, ' ').trim();
+}
+
+function isStructuralHeader(evidence: string, index: number): boolean {
+  let i = index - 1;
+  while (i >= 0 && (evidence[i] === ' ' || evidence[i] === '\t')) i--;
+  if (i >= 0 && evidence[i] === '\r') i--;
+  return i < 0 || evidence[i] === '\n';
+}
+
+/**
+ * Mask quoted content, fenced blocks, and markdown blockquotes so a label
+ * inside them is not a section header. An unclosed quote masks the rest:
+ * that fail-closes (the label is ignored) and never creates a quote.
+ */
+function buildQuoteMask(evidence: string): Uint8Array {
+  const mask = new Uint8Array(evidence.length);
+  const lines = evidence.split('\n');
+  let offset = 0;
+  let inFence = false;
+  let inDouble = false;
+  let inSmart = false;
+  let inTick = false;
+
+  for (const line of lines) {
+    const trimmed = line.trimStart();
+    const fence = /^(`{3,}|~{3,})/.test(trimmed);
+    const blockquote = !fence && trimmed.startsWith('>');
+    if (fence) {
+      for (let k = 0; k < line.length; k++) mask[offset + k] = 1;
+      inFence = !inFence;
+    } else if (inFence || blockquote) {
+      for (let k = 0; k < line.length; k++) mask[offset + k] = 1;
+    } else {
+      for (let k = 0; k < line.length; k++) {
+        const ch = line[k]!;
+        if (!inSmart && !inTick && ch === '"') {
+          inDouble = !inDouble;
+          mask[offset + k] = 1;
+          continue;
+        }
+        if (!inDouble && !inTick && (ch === '\u201C' || ch === '\u201E')) {
+          inSmart = true;
+          mask[offset + k] = 1;
+          continue;
+        }
+        if (!inDouble && !inTick && (ch === '\u201D' || ch === '\u201F')) {
+          inSmart = false;
+          mask[offset + k] = 1;
+          continue;
+        }
+        if (!inDouble && !inSmart && ch === '`') {
+          inTick = !inTick;
+          mask[offset + k] = 1;
+          continue;
+        }
+        if (inDouble || inSmart || inTick) mask[offset + k] = 1;
+      }
+    }
+    offset += line.length + 1;
+  }
+  return mask;
+}
+
+function rangeIsMasked(mask: Uint8Array, start: number, end: number): boolean {
+  const stop = Math.min(end, mask.length);
+  for (let i = start; i < stop; i++) {
+    if (mask[i]) return true;
+  }
+  return false;
+}
+
+function findPatternHits(evidence: string, re: RegExp): Array<{ index: number; end: number }> {
+  const flags = re.flags.includes('g') ? re.flags : `${re.flags}g`;
+  const copy = new RegExp(re.source, flags);
+  const hits: Array<{ index: number; end: number }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = copy.exec(evidence)) !== null) {
+    if (match[0].length === 0) {
+      copy.lastIndex += 1;
+      continue;
+    }
+    hits.push({ index: match.index, end: match.index + match[0].length });
+  }
+  return hits;
+}
+
+function collectMarkers(evidence: string): MandateMarker[] {
+  const markers: MandateMarker[] = [];
+  for (const finder of MANDATE_FINDERS) {
+    for (const hit of findPatternHits(evidence, finder.re)) {
+      markers.push({ index: hit.index, end: hit.end, kind: finder.kind });
+    }
+  }
+  for (const finder of TERMINATOR_FINDERS) {
+    for (const hit of findPatternHits(evidence, finder.re)) {
+      markers.push({ index: hit.index, end: hit.end, seal: finder.seal });
+    }
+  }
+  markers.sort((a, b) => a.index - b.index || b.end - a.end);
+  const kept: MandateMarker[] = [];
+  let coveredUntil = -1;
+  for (const marker of markers) {
+    if (marker.index < coveredUntil) continue;
+    kept.push(marker);
+    coveredUntil = marker.end;
+  }
+  return kept;
+}
+
+function earliestInlineCut(after: string, next: RegExp, mask: Uint8Array, base: number): number {
+  const flags = next.flags.includes('g') ? next.flags : `${next.flags}g`;
+  const re = new RegExp(next.source, flags);
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(after)) !== null) {
+    const leadLen = match[0].search(/\S/);
+    const labelAbs = base + match.index + (leadLen < 0 ? 0 : leadLen);
+    const labelEnd = base + match.index + match[0].length;
+    if (!rangeIsMasked(mask, labelAbs, labelEnd)) return match.index;
+    if (re.lastIndex <= match.index) re.lastIndex = match.index + 1;
+  }
+  return -1;
+}
+
+function earliestLineStartCut(
+  evidence: string,
+  from: number,
+  mask: Uint8Array,
+  patterns: readonly RegExp[],
+): number {
+  let best = -1;
+  for (const pattern of patterns) {
+    const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
+    const re = new RegExp(pattern.source, flags);
+    const slice = evidence.slice(from);
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(slice)) !== null) {
+      const abs = from + match.index;
+      if (!isStructuralHeader(evidence, abs) || rangeIsMasked(mask, abs, abs + match[0].length)) {
+        if (re.lastIndex <= match.index) re.lastIndex = match.index + 1;
+        continue;
+      }
+      if (best < 0 || abs < best) best = abs;
+      break;
+    }
+  }
+  return best < 0 ? -1 : best - from;
+}
+
+function cutMandateSpan(
+  evidence: string,
+  labelEnd: number,
+  inlineNext: RegExp,
+  mask: Uint8Array,
+  extraLineStart: readonly RegExp[],
+): { text: string; bounded: boolean } {
+  const after = evidence.slice(labelEnd);
+  const inlineAt = earliestInlineCut(after, inlineNext, mask, labelEnd);
+  const lineAt = earliestLineStartCut(evidence, labelEnd, mask, extraLineStart);
+  const cuts = [inlineAt, lineAt].filter(index => index >= 0);
+  if (cuts.length === 0) return { text: after.trim(), bounded: false };
+  const cut = Math.min(...cuts);
+  return { text: after.slice(0, cut).trim(), bounded: true };
+}
+
+function distinctHits(hits: readonly MandateHit[]): MandateHit[] {
+  const out: MandateHit[] = [];
+  const seen = new Set<string>();
+  for (const hit of hits) {
+    if (seen.has(hit.norm)) continue;
+    seen.add(hit.norm);
+    out.push(hit);
+  }
+  return out;
+}
+
+/** MCP host excerpt is a substring of the full `User mandate:` section. */
+function userMandateContainsExcerpt(userMandate: string, excerpt: string): boolean {
+  if (!excerpt) return false;
+  if (userMandate.includes(excerpt)) return true;
+  const outer = mandateNorm(userMandate);
+  const inner = mandateNorm(excerpt);
+  return inner.length > 0 && outer.includes(inner);
+}
+
+function acceptBoundedExtended(ext: MandateHit, hits: readonly MandateHit[]): MandateQuoteExtraction {
+  const same = hits.filter(hit =>
+    hit.norm === ext.norm && hit.kind !== 'mcp' && hit.kind !== 'suite',
+  );
+  const bounded = same.find(hit => hit.bounded);
+  if (!bounded) return absentExtraction();
+  return quoteExtraction(bounded.raw);
+}
+
+/**
+ * Legacy cascade (unchanged): a non-empty `Principal mandate (verbatim quote):`
+ * wins over `USER INSTRUCTION:` even when the texts differ. Any other
+ * disagreement, including two spans of the same label, is a conflict.
+ *
+ * The one designed exception is MCP's host-excerpt shape: `User mandate:`
+ * holds the full mandate and `Principal mandate (verbatim quote):` holds a
+ * substring of it. The cite stays the verbatim span. A verbatim span that is
+ * not contained in the user mandate is a conflict, not a silent MCP win.
+ */
+function resolveMandateHits(hits: readonly MandateHit[]): MandateQuoteExtraction {
+  if (hits.length === 0) return absentExtraction();
+
+  const mcp = distinctHits(hits.filter(hit => hit.kind === 'mcp'));
+  const suite = distinctHits(hits.filter(hit => hit.kind === 'suite'));
+  const extended = distinctHits(hits.filter(hit => hit.kind !== 'mcp' && hit.kind !== 'suite'));
+
+  if (mcp.length > 1) return conflictExtraction(mcp);
+  if (suite.length > 1) return conflictExtraction([...suite, ...mcp, ...extended]);
+
+  const legacy = mcp[0] ?? suite[0] ?? null;
+
+  if (extended.length === 0) {
+    return legacy ? quoteExtraction(legacy.raw) : absentExtraction();
+  }
+  if (extended.length > 1) {
+    return conflictExtraction([...extended, ...(legacy ? [legacy] : []), ...suite]);
+  }
+
+  const ext = extended[0]!;
+  if (legacy && ext.norm === legacy.norm) return quoteExtraction(legacy.raw);
+  if (!legacy) return acceptBoundedExtended(ext, hits);
+
+  const excerptOk =
+    ext.kind === 'user_mandate' &&
+    mcp.length === 1 &&
+    userMandateContainsExcerpt(ext.raw, mcp[0]!.raw) &&
+    suite.every(hit => hit.norm === ext.norm || hit.norm === mcp[0]!.norm);
+  if (excerptOk) return quoteExtraction(mcp[0]!.raw);
+
+  return conflictExtraction([legacy, ext, ...suite]);
+}
+
+function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExtraction {
+  const mask = buildQuoteMask(evidence);
+  const markers = collectMarkers(evidence);
+  let state: 'preamble' | 'sealed' | 'body' = 'preamble';
+  let sawPreambleLegacyHeader = false;
+  const hits: MandateHit[] = [];
+
+  for (const marker of markers) {
+    if (!isStructuralHeader(evidence, marker.index)) continue;
+    if (rangeIsMasked(mask, marker.index, marker.end)) continue;
+
+    if (!marker.kind) {
+      state = marker.seal ? 'sealed' : 'body';
+      continue;
+    }
+
+    const inPreamble = state === 'preamble';
+    if (state === 'sealed') continue;
+
+    const legacy = marker.kind === 'mcp' || marker.kind === 'suite';
+    if (inPreamble && legacy) sawPreambleLegacyHeader = true;
+
+    const inlineNext = marker.kind === 'mcp'
+      ? LEGACY_MCP_NEXT
+      : marker.kind === 'suite'
+        ? LEGACY_SUITE_NEXT
+        : EXTENDED_NEXT;
+    const span = cutMandateSpan(
+      evidence,
+      marker.end,
+      inlineNext,
+      mask,
+      // Legacy cuts stay on LEGACY_*_NEXT so existing spans do not move.
+      legacy ? [] : EXTENDED_LINE_BOUNDARIES,
+    );
+
+    if (!inPreamble) {
+      // After the action / tool section starts, an extended label is body
+      // text. A legacy label counts only as the existing fallback: the
+      // preamble already opened with `Principal mandate` or `USER INSTRUCTION`
+      // (an empty MCP header still falls through to the suite span).
+      if (!legacy || !sawPreambleLegacyHeader) continue;
+    }
+
+    if (!span.text || !evidence.includes(span.text)) continue;
+    // An extended label with no following section would swallow the rest of
+    // a research trace. Keep it only when another span can disagree with it.
+    const bounded = legacy || span.bounded;
+    hits.push({
+      kind: marker.kind,
+      raw: span.text,
+      norm: mandateNorm(span.text),
+      bounded,
+    });
+  }
+
+  return resolveMandateHits(hits);
+}
+
+/**
+ * Read structural mandate sections from host evidence.
+ *
+ * Counted labels, case-insensitive, with flexible internal whitespace and
+ * an optional space before the colon:
+ *   - `Principal mandate (verbatim quote):` (MCP; legacy priority)
+ *   - `USER INSTRUCTION:` (suite fallback when the MCP span is empty)
+ *   - `User mandate:`, `Principal instruction:`, `Principal mandate:`, `Mandate:`
+ *
+ * A label counts only as a line-start section header. Labels inside quotes,
+ * fenced blocks, blockquotes, tool-output / foreign-quote sections, or the
+ * proposed-action body do not. Extended labels (`Mandate:` and the other
+ * non-legacy forms) count only in the preamble, before the action / tool
+ * section, and only when a following section bounds the span.
+ *
+ * Disagreeing sections return `conflict` and no quote. The legacy pair is
+ * the exception already locked by regression tests: a non-empty MCP span
+ * wins over a different `USER INSTRUCTION:` span. MCP's host-excerpt shape
+ * (`User mandate:` full text containing `Principal mandate (verbatim quote):`)
+ * keeps the verbatim span.
+ */
+export function inspectMandateVerbatimQuote(evidence: string): MandateQuoteExtraction {
+  if (typeof evidence !== 'string' || evidence.length === 0) return absentExtraction();
+  try {
+    return inspectMandateVerbatimQuoteUnchecked(evidence);
+  } catch {
+    // Parser errors fail closed. They must not surface a quote.
+    return { status: 'conflict', quote: null, conflictingQuotes: [] };
+  }
+}
+
+/**
+ * Citeable mandate span, or null when none exists or the sections conflict.
+ *
+ * Prefer MCP `buildSentinelEvidence` labels, then suite `USER INSTRUCTION:`
  * (Sentinel #66 Track 1b). Same-line suite one-liners cut before
  * WALLET BALANCE / AGENT PROPOSED ACTION so the recovered quote is
  * the mandate, not the action blob.
@@ -418,40 +873,29 @@ export function appendReasoningNote(reasoning: unknown, note: string): string {
  * substring-match instead of stamping PROVENANCE DOWNGRADE on a missing cite
  * that the host already supplied. No minimum length — MCP's 20-char floor
  * applies only to optional host excerpts falling back to the full mandate,
- * not to the embedded span itself.
+ * not to the embedded span itself. A recovered span is still only a cite:
+ * it does not raise a score and it does not produce ALLOW.
  */
 export function extractMandateVerbatimQuote(evidence: string): string | null {
-  if (!evidence) return null;
-  const attempts: Array<{ label: RegExp; next: RegExp }> = [
-    {
-      label: /Principal mandate \(verbatim quote\):/i,
-      next: /(?:\n|\s+)(?:Proposed action:|Agent reasoning:)/i,
-    },
-    {
-      label: /USER INSTRUCTION:/i,
-      next: /(?:\n|\s+)(?:WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i,
-    },
-  ];
-  for (const { label, next } of attempts) {
-    const labelMatch = evidence.match(label);
-    if (!labelMatch || labelMatch.index === undefined) continue;
-    const after = evidence.slice(labelMatch.index + labelMatch[0].length);
-    const cut = after.search(next);
-    const raw = (cut === -1 ? after : after.slice(0, cut)).trim();
-    if (!raw) continue;
-    if (!evidence.includes(raw)) continue;
-    return raw;
-  }
-  return null;
+  const found = inspectMandateVerbatimQuote(evidence);
+  return found.status === 'quote' ? found.quote : null;
 }
 
-/** Recover a citeable quote from evidence only when the LLM omitted one. */
+/**
+ * Recover a citeable quote from evidence only when the LLM omitted one.
+ *
+ * A model-emitted quote is never replaced. If that quote is not the real
+ * mandate, substituting an extracted span would hide the fabrication and
+ * let provenance pass. Conflicted mandate sections also yield no quote.
+ */
 export function recoverCiteableQuote(
   quote: string | null,
   evidence: string,
 ): string | null {
   if (quote != null && quote.trim().length > 0) return quote;
-  return extractMandateVerbatimQuote(evidence);
+  const found = inspectMandateVerbatimQuote(evidence);
+  if (found.status !== 'quote') return null;
+  return found.quote;
 }
 
 /**
@@ -1375,8 +1819,10 @@ export async function evaluateItem(
     const evidence = goldStep ? resolveEvidenceSource(item, goldStep) : item.trace_steps;
 
     // Recover a citeable evidence span when the LLM omitted quote (MCP
-    // `Principal mandate` or suite `USER INSTRUCTION:`). Do not substitute when
-    // the model emitted a non-null quote — hallucinated cites still fail.
+    // `Principal mandate`, suite `USER INSTRUCTION:`, or another structural
+    // mandate label). Do not substitute when the model emitted a non-null
+    // quote — a fabricated cite must not be masked by a fallback span.
+    // Conflicting mandate sections recover nothing (fail closed).
     const evForProv = {
       ...ev,
       quote: recoverCiteableQuote(coerceQuote(ev.quote), evidence),
