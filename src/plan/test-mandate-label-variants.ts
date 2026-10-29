@@ -292,7 +292,7 @@ test('requirement 2: conflict floors the step and the verdict is not ALLOW', () 
   assert.equal(verdict.verdict, 'HOLD');
 });
 
-test('requirement 2: agreeing sections are one mandate; whitespace collapse is not a conflict', () => {
+test('requirement 2: internal spacing differences are a literal conflict', () => {
   const evidence = [
     'Mandate:',
     'Send 5 USDC to treasury',
@@ -302,9 +302,10 @@ test('requirement 2: agreeing sections are one mandate; whitespace collapse is n
     'transfer',
   ].join('\n');
   const found = inspectMandateVerbatimQuote(evidence);
-  assert.equal(found.status, 'quote');
-  assert.equal(found.quote, 'Send 5 USDC to treasury');
-  assert.deepEqual(found.conflictingQuotes, []);
+  assert.equal(found.status, 'conflict');
+  assert.equal(found.quote, null);
+  assert.ok(found.conflictingQuotes.includes('Send 5 USDC to treasury'));
+  assert.ok(found.conflictingQuotes.includes('Send  5   USDC to treasury'));
 });
 
 test('requirement 2: MCP host excerpt contained in User mandate stays the verbatim span', () => {

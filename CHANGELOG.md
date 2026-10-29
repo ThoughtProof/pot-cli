@@ -32,7 +32,12 @@ All notable changes to pot-cli will be documented in this file.
   after the action or tool section does not count, including legacy labels.
   `Principal mandate (verbatim):` is accepted as the same MCP header.
   Fenced blocks close only on the same character with a run at least as
-  long as the opener (`~` does not close `` ` ``). A detected mandate
+  long as the opener (`~` does not close `` ` ``), and only ASCII spaces
+  or tabs may follow that run. Section boundaries use that same ASCII
+  whitespace for both the span cut and the end of the mandate region,
+  including inline labels. Any other whitespace before a section label
+  recovers no mandate. Mandate texts are compared literally after outer
+  trim; internal spaces are not collapsed. A detected mandate
   conflict forces HOLD when the verdict would otherwise be ALLOW or
   CONDITIONAL_ALLOW, including when the model quoted one side and when
   only one critical step is present. BLOCK is left in place. A

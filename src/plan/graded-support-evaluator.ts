@@ -435,20 +435,6 @@ export interface MandateQuoteExtraction {
 const LEGACY_MCP_LABEL = /Principal mandate \(verbatim quote\):/i;
 const LEGACY_SUITE_LABEL = /USER INSTRUCTION:/i;
 
-/** Original MCP cut. Do not widen: same-line fixtures depend on this shape. */
-const LEGACY_MCP_NEXT = /(?:\n|\s+)(?:Proposed action:|Agent reasoning:)/i;
-/** Original suite cut. Same-line one-liners stop before wallet / action. */
-const LEGACY_SUITE_NEXT = /(?:\n|\s+)(?:WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i;
-
-/**
- * Extended sections stop at the same action / wallet boundaries as the
- * legacy cuts, including same-line `Proposed action:`. Following mandate
- * headers are line-start boundaries only, so a mid-sentence "mandate:"
- * does not split the span.
- */
-const EXTENDED_NEXT =
-  /(?:\n|\s+)(?:Proposed action:|Agent reasoning:|WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i;
-
 type MandateKind =
   | 'mcp'
   | 'suite'
@@ -502,22 +488,6 @@ const TERMINATOR_FINDERS: ReadonlyArray<{ seal: boolean; re: RegExp }> = [
   { seal: true, re: /quotation[ \t]*:/i },
 ];
 
-/**
- * Line-start only. Mid-sentence "tool output:" or "mandate:" must not
- * truncate a span. Legacy MCP / suite cuts do not use this list — their
- * inline next-regexes stay exactly as they were.
- */
-const EXTENDED_LINE_BOUNDARIES: readonly RegExp[] = [
-  ...TERMINATOR_FINDERS.map(finder => finder.re),
-  /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]+quote[ \t]*\)[ \t]*:/i,
-  /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]*\)[ \t]*:/i,
-  /user[ \t]+instruction[ \t]*:/i,
-  /user[ \t]+mandate[ \t]*:/i,
-  /principal[ \t]+instruction[ \t]*:/i,
-  /principal[ \t]+mandate[ \t]*:/i,
-  /(?<![A-Za-z])mandate[ \t]*:/i,
-];
-
 function absentExtraction(): MandateQuoteExtraction {
   return { status: 'absent', quote: null, conflictingQuotes: [] };
 }
@@ -537,15 +507,45 @@ function conflictExtraction(hits: readonly MandateHit[]): MandateQuoteExtraction
   return { status: 'conflict', quote: null, conflictingQuotes };
 }
 
-function mandateNorm(value: string): string {
-  return normalizeUnicodeForMatch(value).replace(/\s+/g, ' ').trim();
+/**
+ * How a matched section label sits in the evidence.
+ *
+ * Structural whitespace is ASCII space and tab only, plus a newline that
+ * starts the line. The same classification cuts a mandate span and closes
+ * the mandate region, for legacy and extended labels, on their own line or
+ * inline. Any other whitespace before a label (NBSP, VT, FF, BOM, EM SPACE)
+ * is ambiguous: the extraction fail-closes and recovers no mandate.
+ */
+type BoundaryPlacement = 'line' | 'inline' | 'ambiguous' | 'none';
+
+function isNonStructuralWhitespace(ch: string): boolean {
+  return ch !== ' ' && ch !== '\t' && ch !== '\n' && ch !== '\r' && /\s/.test(ch);
 }
 
-function isStructuralHeader(evidence: string, index: number): boolean {
-  let i = index - 1;
-  while (i >= 0 && (evidence[i] === ' ' || evidence[i] === '\t')) i--;
-  if (i >= 0 && evidence[i] === '\r') i--;
-  return i < 0 || evidence[i] === '\n';
+function classifySectionBoundary(evidence: string, labelIndex: number): BoundaryPlacement {
+  if (labelIndex <= 0) return 'line';
+  let i = labelIndex - 1;
+  if (evidence[i] === '\r' && (i === 0 || evidence[i - 1] === '\n')) return 'line';
+  let sawAscii = false;
+  while (i >= 0 && (evidence[i] === ' ' || evidence[i] === '\t')) {
+    sawAscii = true;
+    i--;
+  }
+  if (i < 0 || evidence[i] === '\n' || (evidence[i] === '\r' && (i === 0 || evidence[i - 1] === '\n'))) {
+    return 'line';
+  }
+  if (sawAscii) return 'inline';
+  if (isNonStructuralWhitespace(evidence[labelIndex - 1]!)) return 'ambiguous';
+  return 'none';
+}
+
+/** Index where the span before `labelIndex` ends, excluding its ASCII separator. */
+function spanCutBefore(evidence: string, labelIndex: number): number {
+  let i = labelIndex;
+  while (i > 0 && (evidence[i - 1] === ' ' || evidence[i - 1] === '\t')) i--;
+  if (i > 0 && evidence[i - 1] === '\r') return i - 1;
+  if (i > 0 && evidence[i - 1] === '\n') return i - 1;
+  return i;
 }
 
 /**
@@ -719,60 +719,6 @@ function collectMarkers(evidence: string): MandateMarker[] {
   return kept;
 }
 
-function earliestInlineCut(after: string, next: RegExp, mask: Uint8Array, base: number): number {
-  const flags = next.flags.includes('g') ? next.flags : `${next.flags}g`;
-  const re = new RegExp(next.source, flags);
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(after)) !== null) {
-    const leadLen = match[0].search(/\S/);
-    const labelAbs = base + match.index + (leadLen < 0 ? 0 : leadLen);
-    const labelEnd = base + match.index + match[0].length;
-    if (!rangeIsMasked(mask, labelAbs, labelEnd)) return match.index;
-    if (re.lastIndex <= match.index) re.lastIndex = match.index + 1;
-  }
-  return -1;
-}
-
-function earliestLineStartCut(
-  evidence: string,
-  from: number,
-  mask: Uint8Array,
-  patterns: readonly RegExp[],
-): number {
-  let best = -1;
-  for (const pattern of patterns) {
-    const flags = pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`;
-    const re = new RegExp(pattern.source, flags);
-    const slice = evidence.slice(from);
-    let match: RegExpExecArray | null;
-    while ((match = re.exec(slice)) !== null) {
-      const abs = from + match.index;
-      if (!isStructuralHeader(evidence, abs) || rangeIsMasked(mask, abs, abs + match[0].length)) {
-        if (re.lastIndex <= match.index) re.lastIndex = match.index + 1;
-        continue;
-      }
-      if (best < 0 || abs < best) best = abs;
-      break;
-    }
-  }
-  return best < 0 ? -1 : best - from;
-}
-
-function cutMandateSpan(
-  evidence: string,
-  labelEnd: number,
-  inlineNext: RegExp,
-  mask: Uint8Array,
-  extraLineStart: readonly RegExp[],
-): { text: string; bounded: boolean } {
-  const after = evidence.slice(labelEnd);
-  const inlineAt = earliestInlineCut(after, inlineNext, mask, labelEnd);
-  const lineAt = earliestLineStartCut(evidence, labelEnd, mask, extraLineStart);
-  const cuts = [inlineAt, lineAt].filter(index => index >= 0);
-  if (cuts.length === 0) return { text: after.trim(), bounded: false };
-  const cut = Math.min(...cuts);
-  return { text: after.slice(0, cut).trim(), bounded: true };
-}
 
 function distinctHits(hits: readonly MandateHit[]): MandateHit[] {
   const out: MandateHit[] = [];
@@ -785,13 +731,13 @@ function distinctHits(hits: readonly MandateHit[]): MandateHit[] {
   return out;
 }
 
-/** MCP host excerpt is a substring of the full `User mandate:` section. */
+/**
+ * MCP host excerpt is a literal substring of the full `User mandate:` section.
+ * Internal characters are not folded: a different space, NBSP, or BOM is a
+ * different target.
+ */
 function userMandateContainsExcerpt(userMandate: string, excerpt: string): boolean {
-  if (!excerpt) return false;
-  if (userMandate.includes(excerpt)) return true;
-  const outer = mandateNorm(userMandate);
-  const inner = mandateNorm(excerpt);
-  return inner.length > 0 && outer.includes(inner);
+  return excerpt.length > 0 && userMandate.includes(excerpt);
 }
 
 function acceptBoundedExtended(ext: MandateHit, hits: readonly MandateHit[]): MandateQuoteExtraction {
@@ -849,45 +795,43 @@ function resolveMandateHits(hits: readonly MandateHit[]): MandateQuoteExtraction
 function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExtraction {
   const mask = buildQuoteMask(evidence);
   const markers = collectMarkers(evidence);
-  let state: 'preamble' | 'sealed' | 'body' = 'preamble';
-  const hits: MandateHit[] = [];
+  const structural: MandateMarker[] = [];
 
   for (const marker of markers) {
-    if (!isStructuralHeader(evidence, marker.index)) continue;
     if (rangeIsMasked(mask, marker.index, marker.end)) continue;
+    const placement = classifySectionBoundary(evidence, marker.index);
+    if (placement === 'none') continue;
+    if (placement === 'ambiguous') return absentExtraction();
+    structural.push(marker);
+  }
 
+  let regionOpen = true;
+  const hits: MandateHit[] = [];
+
+  for (let n = 0; n < structural.length; n++) {
+    const marker = structural[n]!;
     if (!marker.kind) {
-      state = marker.seal ? 'sealed' : 'body';
+      // The same marker that ends a span also closes the mandate region,
+      // including an inline `Proposed action:`.
+      regionOpen = false;
       continue;
     }
-
-    const inPreamble = state === 'preamble';
-    if (!inPreamble) continue;
+    if (!regionOpen) continue;
 
     const legacy = marker.kind === 'mcp' || marker.kind === 'suite';
-    const inlineNext = marker.kind === 'mcp'
-      ? LEGACY_MCP_NEXT
-      : marker.kind === 'suite'
-        ? LEGACY_SUITE_NEXT
-        : EXTENDED_NEXT;
-    const span = cutMandateSpan(
-      evidence,
-      marker.end,
-      inlineNext,
-      mask,
-      // Legacy cuts stay on LEGACY_*_NEXT so existing spans do not move.
-      legacy ? [] : EXTENDED_LINE_BOUNDARIES,
-    );
-
-    if (!span.text || !evidence.includes(span.text)) continue;
-    // An extended label with no following section would swallow the rest of
-    // a research trace. Keep it only when another span can disagree with it.
-    const bounded = legacy || span.bounded;
+    const next = structural[n + 1];
+    const boundedByNext = next !== undefined;
+    const end = boundedByNext ? spanCutBefore(evidence, next.index) : evidence.length;
+    const text = evidence.slice(marker.end, Math.max(marker.end, end)).trim();
+    if (!text || !evidence.includes(text)) continue;
+    // Outer trim drops surrounding whitespace, including a leading NBSP or a
+    // trailing EM SPACE, so the recovered quote keeps the literal target.
+    // Identity is that trimmed string: internal spaces are not collapsed.
     hits.push({
       kind: marker.kind,
-      raw: span.text,
-      norm: mandateNorm(span.text),
-      bounded,
+      raw: text,
+      norm: text,
+      bounded: legacy || boundedByNext,
     });
   }
 
@@ -903,12 +847,14 @@ function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExt
  *   - `USER INSTRUCTION:` when that header itself is in the preamble
  *   - `User mandate:`, `Principal instruction:`, `Principal mandate:`, `Mandate:`
  *
- * A label counts only as a line-start section header in the preamble, before
- * the action or tool section. Legacy labels use that same boundary: an empty
- * mandate header does not license a `USER INSTRUCTION:` later in the action.
- * Labels inside quotes, fenced blocks (CommonMark fence matching), blockquotes,
- * tool output, or the proposed-action body do not count. Extended spans must
- * be bounded by a following section.
+ * A label counts only in the preamble. The same recognizer decides where a
+ * span ends and where the preamble ends: ASCII space, tab, or a new line
+ * before a section label, on its own line or inline. NBSP and other
+ * non-ASCII whitespace before a label is ambiguous and recovers nothing.
+ * Legacy labels use that boundary too. Labels inside quotes, fenced blocks,
+ * blockquotes, tool output, or the action body do not count. Extended spans
+ * must be bounded by a following section. Mandate texts are compared
+ * literally after outer trim; internal spaces are not collapsed.
  *
  * Disagreeing sections return `conflict` and no quote. The legacy pair is
  * the exception already locked by regression tests: a non-empty MCP span
