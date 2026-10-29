@@ -655,7 +655,7 @@ test('extractMandateVerbatimQuote: suite USER INSTRUCTION recovery', async () =>
   assert.ok(!violations.some(v => v.startsWith('PROV_FAIL_02')));
 });
 
-test('extractMandateVerbatimQuote: MCP span wins; empty MCP falls through to suite', async () => {
+test('extractMandateVerbatimQuote: MCP span wins; action-body suite label does not', async () => {
   const { extractMandateVerbatimQuote } = await import('./graded-support-evaluator.js');
   const both = [
     'Principal mandate (verbatim quote):',
@@ -669,6 +669,7 @@ test('extractMandateVerbatimQuote: MCP span wins; empty MCP falls through to sui
   ].join('\n');
   assert.equal(extractMandateVerbatimQuote(both), 'MCP span wins');
 
+  // An empty preamble header does not license USER INSTRUCTION inside the action.
   const emptyMcp = [
     'Principal mandate (verbatim quote):',
     'Proposed action:',
@@ -678,7 +679,15 @@ test('extractMandateVerbatimQuote: MCP span wins; empty MCP falls through to sui
     'AGENT PROPOSED ACTION:',
     'transfer',
   ].join('\n');
-  assert.equal(extractMandateVerbatimQuote(emptyMcp), 'suite mandate');
+  assert.equal(extractMandateVerbatimQuote(emptyMcp), null);
+
+  const suiteFirst = [
+    'USER INSTRUCTION:',
+    'suite mandate',
+    'AGENT PROPOSED ACTION:',
+    'transfer',
+  ].join('\n');
+  assert.equal(extractMandateVerbatimQuote(suiteFirst), 'suite mandate');
 });
 
 test('evaluateItem recovers a cite before PROV_FAIL_01', async () => {

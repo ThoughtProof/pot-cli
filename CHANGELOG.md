@@ -27,9 +27,16 @@ All notable changes to pot-cli will be documented in this file.
   is not a mandate section. Disagreeing sections return no quote.
   The MCP host-excerpt pair (`User mandate:` containing
   `Principal mandate (verbatim quote):`) still cites the verbatim span.
-  The two existing labels keep their cascade: a non-empty MCP span wins
-  over `USER INSTRUCTION:`. A model-emitted quote is never replaced by
-  an extracted span. Label recognition does not raise a score or emit ALLOW.
+  The two existing labels keep their cascade when both headers are in the
+  preamble: a non-empty MCP span wins over `USER INSTRUCTION:`. A label
+  after the action or tool section does not count, including legacy labels.
+  `Principal mandate (verbatim):` is accepted as the same MCP header.
+  Fenced blocks close only on the same character with a run at least as
+  long as the opener (`~` does not close `` ` ``). A detected mandate
+  conflict forces HOLD when the verdict would otherwise be ALLOW or
+  CONDITIONAL_ALLOW, including when the model quoted one side and when
+  only one critical step is present. BLOCK is left in place. A
+  model-emitted quote is never replaced by an extracted span.
 
 ## [0.8.11] - 2026-10-09
 
