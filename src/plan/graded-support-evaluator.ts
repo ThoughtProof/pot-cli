@@ -583,7 +583,7 @@ function closesFence(
 ): boolean {
   return marker.char === open.char
     && marker.length >= open.length
-    && marker.rest.trim() === '';
+    && /^[ \t]*\r?$/.test(marker.rest);
 }
 
 /**

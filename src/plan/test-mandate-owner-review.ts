@@ -156,3 +156,29 @@ test('RETAINED FUNCTIONAL GAP: the originally failing verbatim alias is recogniz
   assert.equal(evaluator.extractMandateVerbatimQuote(cases.missingAlias), REAL);
   assert.equal(result.verdict, 'ALLOW');
 });
+
+// CommonMark permits only ASCII space/tab after the closing marker.
+// A final CR here belongs to a CRLF line ending (the mask splits on LF).
+const fenceWhitespaceVariants = [
+  ['CONTROL ASCII space', '```', ' ', 'ALLOW'],
+  ['CONTROL ASCII tab', '```', '\t', 'ALLOW'],
+  ['CONTROL CRLF line ending', '```', '\r', 'ALLOW'],
+  ['NBSP U+00A0', '```', '\u00a0', 'HOLD'],
+  ['vertical tab U+000B', '```', '\u000b', 'HOLD'],
+  ['form feed U+000C', '```', '\u000c', 'HOLD'],
+  ['BOM U+FEFF', '```', '\ufeff', 'HOLD'],
+  ['EM SPACE U+2003', '```', '\u2003', 'HOLD'],
+  ['tilde fence with NBSP U+00A0', '~~~', '\u00a0', 'HOLD'],
+] as const;
+
+for (const [name, marker, tail, expected] of fenceWhitespaceVariants) {
+  test(`fence closing whitespace: ${name}`, async () => {
+    const evidence = [marker + 'text', marker + tail, 'Mandate:', OTHER,
+      'Proposed action:', 'transfer', marker].join('\n');
+    const result = await evaluate(evidence);
+    assert.equal(result.verdict, expected);
+    const expectedQuote = expected === 'ALLOW' ? OTHER : null;
+    assert.equal(evaluator.extractMandateVerbatimQuote(evidence), expectedQuote);
+    assert.ok(result.step_evaluations.every(step => step.quote === expectedQuote));
+  });
+}
