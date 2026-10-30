@@ -408,8 +408,484 @@ export function appendReasoningNote(reasoning: unknown, note: string): string {
 }
 
 /**
- * Host evidence embeds a citeable mandate span. Prefer MCP
- * `buildSentinelEvidence` labels, then suite `USER INSTRUCTION:`
+ * Result of reading mandate sections out of host evidence.
+ *
+ * `conflict` is fail-closed: callers must not pick one of the spans. It also
+ * covers ambiguous preamble boundaries and parser failures.
+ * `absent` means no structural mandate section was found. Neither status
+ * is an authorization decision — this module never promotes a verdict.
+ */
+export type MandateQuoteStatus = 'quote' | 'absent' | 'conflict';
+
+export interface MandateQuoteExtraction {
+  status: MandateQuoteStatus;
+  /** Citeable span when `status` is `quote`. Null otherwise. */
+  quote: string | null;
+  /**
+   * Distinct structural spans that disagreed. Empty unless `status` is
+   * `conflict` (also empty when an ambiguous boundary or parser failure closes
+   * the extraction before the spans can be resolved).
+   */
+  conflictingQuotes: string[];
+}
+
+/**
+ * Sentinel pin markers. The published dist is grepped for these exact
+ * sources (`Principal mandate \(verbatim quote\):` and `USER INSTRUCTION:`).
+ * Whitespace-flexible finders below sit next to them; they do not replace them.
+ */
+const LEGACY_MCP_LABEL = /Principal mandate \(verbatim quote\):/i;
+const LEGACY_SUITE_LABEL = /USER INSTRUCTION:/i;
+
+type MandateKind =
+  | 'mcp'
+  | 'suite'
+  | 'user_mandate'
+  | 'principal_instruction'
+  | 'principal_mandate'
+  | 'mandate';
+
+interface MandateMarker {
+  index: number;
+  end: number;
+  kind?: MandateKind;
+  /** Terminator closes the preamble. `seal` swallows labels until a body terminator. */
+  seal?: boolean;
+}
+
+interface MandateHit {
+  kind: MandateKind;
+  raw: string;
+  norm: string;
+  bounded: boolean;
+}
+
+const MANDATE_FINDERS: ReadonlyArray<{ kind: MandateKind; re: RegExp }> = [
+  { kind: 'mcp', re: LEGACY_MCP_LABEL },
+  { kind: 'mcp', re: /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]+quote[ \t]*\)[ \t]*:/i },
+  // Original problem alias. Longer `verbatim quote` form is listed first so
+  // this does not consume it.
+  { kind: 'mcp', re: /principal[ \t]+mandate[ \t]*\([ \t]*verbatim[ \t]*\)[ \t]*:/i },
+  { kind: 'suite', re: LEGACY_SUITE_LABEL },
+  { kind: 'suite', re: /user[ \t]+instruction[ \t]*:/i },
+  { kind: 'user_mandate', re: /user[ \t]+mandate[ \t]*:/i },
+  { kind: 'principal_instruction', re: /principal[ \t]+instruction[ \t]*:/i },
+  { kind: 'principal_mandate', re: /principal[ \t]+mandate[ \t]*:/i },
+  { kind: 'mandate', re: /(?<![A-Za-z])mandate[ \t]*:/i },
+];
+
+const TERMINATOR_FINDERS: ReadonlyArray<{ seal: boolean; re: RegExp }> = [
+  { seal: false, re: /proposed[ \t]+action[ \t]*:/i },
+  { seal: false, re: /agent[ \t]+reasoning[ \t]*:/i },
+  { seal: false, re: /agent[ \t]+proposed[ \t]+action[ \t]*:/i },
+  { seal: false, re: /wallet[ \t]+balance[ \t]*:/i },
+  { seal: false, re: /context[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+output[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+result[ \t]*:/i },
+  { seal: true, re: /tool[ \t]+response[ \t]*:/i },
+  { seal: true, re: /function[ \t]+output[ \t]*:/i },
+  { seal: true, re: /function[ \t]+result[ \t]*:/i },
+  { seal: true, re: /foreign[ \t]+quote[ \t]*:/i },
+  { seal: true, re: /quoted[ \t]+content[ \t]*:/i },
+  { seal: true, re: /quotation[ \t]*:/i },
+];
+
+function absentExtraction(): MandateQuoteExtraction {
+  return { status: 'absent', quote: null, conflictingQuotes: [] };
+}
+
+function quoteExtraction(quote: string): MandateQuoteExtraction {
+  return { status: 'quote', quote, conflictingQuotes: [] };
+}
+
+function conflictExtraction(hits: readonly MandateHit[]): MandateQuoteExtraction {
+  const seen = new Set<string>();
+  const conflictingQuotes: string[] = [];
+  for (const hit of hits) {
+    if (seen.has(hit.norm)) continue;
+    seen.add(hit.norm);
+    conflictingQuotes.push(hit.raw);
+  }
+  return { status: 'conflict', quote: null, conflictingQuotes };
+}
+
+/**
+ * How a matched section label sits in the evidence.
+ *
+ * Structural whitespace is ASCII space and tab only, plus a newline that
+ * starts the line. The same classification cuts a mandate span and closes
+ * the mandate region, for legacy and extended labels, on their own line or
+ * inline. Any other whitespace before a label (NBSP, VT, FF, BOM, EM SPACE)
+ * is ambiguous: the extraction returns a blocking conflict and no mandate.
+ */
+type BoundaryPlacement = 'line' | 'inline' | 'ambiguous' | 'none';
+
+function isNonStructuralWhitespace(ch: string): boolean {
+  return ch !== ' ' && ch !== '\t' && ch !== '\n' && ch !== '\r' && /\s/.test(ch);
+}
+
+function classifySectionBoundary(evidence: string, labelIndex: number): BoundaryPlacement {
+  if (labelIndex <= 0) return 'line';
+  let i = labelIndex - 1;
+  if (evidence[i] === '\r' && (i === 0 || evidence[i - 1] === '\n')) return 'line';
+  let sawAscii = false;
+  while (i >= 0 && (evidence[i] === ' ' || evidence[i] === '\t')) {
+    sawAscii = true;
+    i--;
+  }
+  if (i < 0 || evidence[i] === '\n' || (evidence[i] === '\r' && (i === 0 || evidence[i - 1] === '\n'))) {
+    return 'line';
+  }
+  // Check the character before the whole ASCII run. A trailing space or tab
+  // must not hide an NBSP (or another non-structural separator) before it.
+  if (i >= 0 && isNonStructuralWhitespace(evidence[i]!)) return 'ambiguous';
+  if (sawAscii) return 'inline';
+  return 'none';
+}
+
+/** Index where the span before `labelIndex` ends, excluding its ASCII separator. */
+function spanCutBefore(evidence: string, labelIndex: number): number {
+  let i = labelIndex;
+  while (i > 0 && (evidence[i - 1] === ' ' || evidence[i - 1] === '\t')) i--;
+  if (i > 0 && evidence[i - 1] === '\r') return i - 1;
+  if (i > 0 && evidence[i - 1] === '\n') return i - 1;
+  return i;
+}
+
+/**
+ * CommonMark fence marker: 0–3 spaces, then a run of backticks or tildes.
+ * Indent of 4 or more is not a fence. Returns null when the line is not
+ * fence-shaped.
+ */
+function parseFenceMarker(line: string): { char: '`' | '~'; length: number; rest: string } | null {
+  let indent = 0;
+  while (indent < line.length && indent < 3 && line[indent] === ' ') indent++;
+  if (line[indent] === ' ') return null;
+  const marker = /^(`{3,}|~{3,})/.exec(line.slice(indent));
+  if (!marker) return null;
+  const token = marker[1]!;
+  return {
+    char: token[0] as '`' | '~',
+    length: token.length,
+    rest: line.slice(indent + token.length),
+  };
+}
+
+/** Backtick info strings cannot contain backticks. An invalid opener is ambiguous. */
+function isOpeningFence(marker: { char: '`' | '~'; rest: string }): boolean {
+  return !(marker.char === '`' && marker.rest.includes('`'));
+}
+
+/**
+ * Close only with the same character and a run at least as long as the opener.
+ * A closing fence has no info string. A shorter run or the other character
+ * does not end the block.
+ */
+function closesFence(
+  marker: { char: '`' | '~'; length: number; rest: string },
+  open: { char: '`' | '~'; length: number },
+): boolean {
+  return marker.char === open.char
+    && marker.length >= open.length
+    && /^[ \t]*\r?$/.test(marker.rest);
+}
+
+/**
+ * Mask quoted content, fenced blocks, and markdown blockquotes so a label
+ * inside them is not a section header.
+ *
+ * Fences follow CommonMark: same character, closing length >= opening length,
+ * backticks and tildes do not close each other. An unclosed fence masks
+ * through the end of the evidence. A fence-shaped line that is not a valid
+ * opener (backticks inside the info string) is ambiguous and masks the rest.
+ * Both fail closed: text in that region is not a mandate.
+ */
+function buildQuoteMask(evidence: string): Uint8Array {
+  const mask = new Uint8Array(evidence.length);
+  const lines = evidence.split('\n');
+  let offset = 0;
+  let openFence: { char: '`' | '~'; length: number } | null = null;
+  let fenceAmbiguous = false;
+  let inDouble = false;
+  let inSmart = false;
+  let inTick = false;
+
+  const maskLine = (line: string) => {
+    for (let k = 0; k < line.length; k++) mask[offset + k] = 1;
+  };
+
+  for (const line of lines) {
+    if (fenceAmbiguous) {
+      maskLine(line);
+      offset += line.length + 1;
+      continue;
+    }
+
+    const marker = parseFenceMarker(line);
+    if (openFence) {
+      if (marker && closesFence(marker, openFence)) openFence = null;
+      // Shorter or different fence markers stay inside the open block.
+      maskLine(line);
+      offset += line.length + 1;
+      continue;
+    }
+
+    if (marker) {
+      maskLine(line);
+      if (isOpeningFence(marker)) {
+        openFence = { char: marker.char, length: marker.length };
+      } else {
+        fenceAmbiguous = true;
+      }
+      offset += line.length + 1;
+      continue;
+    }
+
+    const trimmed = line.trimStart();
+    if (trimmed.startsWith('>')) {
+      maskLine(line);
+      offset += line.length + 1;
+      continue;
+    }
+
+    for (let k = 0; k < line.length; k++) {
+      const ch = line[k]!;
+      if (!inSmart && !inTick && ch === '"') {
+        inDouble = !inDouble;
+        mask[offset + k] = 1;
+        continue;
+      }
+      if (!inDouble && !inTick && (ch === '\u201C' || ch === '\u201E')) {
+        inSmart = true;
+        mask[offset + k] = 1;
+        continue;
+      }
+      if (!inDouble && !inTick && (ch === '\u201D' || ch === '\u201F')) {
+        inSmart = false;
+        mask[offset + k] = 1;
+        continue;
+      }
+      if (!inDouble && !inSmart && ch === '`') {
+        inTick = !inTick;
+        mask[offset + k] = 1;
+        continue;
+      }
+      if (inDouble || inSmart || inTick) mask[offset + k] = 1;
+    }
+    offset += line.length + 1;
+  }
+  return mask;
+}
+
+function rangeIsMasked(mask: Uint8Array, start: number, end: number): boolean {
+  const stop = Math.min(end, mask.length);
+  for (let i = start; i < stop; i++) {
+    if (mask[i]) return true;
+  }
+  return false;
+}
+
+function findPatternHits(evidence: string, re: RegExp): Array<{ index: number; end: number }> {
+  const flags = re.flags.includes('g') ? re.flags : `${re.flags}g`;
+  const copy = new RegExp(re.source, flags);
+  const hits: Array<{ index: number; end: number }> = [];
+  let match: RegExpExecArray | null;
+  while ((match = copy.exec(evidence)) !== null) {
+    if (match[0].length === 0) {
+      copy.lastIndex += 1;
+      continue;
+    }
+    hits.push({ index: match.index, end: match.index + match[0].length });
+  }
+  return hits;
+}
+
+function collectMarkers(evidence: string): MandateMarker[] {
+  const markers: MandateMarker[] = [];
+  for (const finder of MANDATE_FINDERS) {
+    for (const hit of findPatternHits(evidence, finder.re)) {
+      markers.push({ index: hit.index, end: hit.end, kind: finder.kind });
+    }
+  }
+  for (const finder of TERMINATOR_FINDERS) {
+    for (const hit of findPatternHits(evidence, finder.re)) {
+      markers.push({ index: hit.index, end: hit.end, seal: finder.seal });
+    }
+  }
+  markers.sort((a, b) => a.index - b.index || b.end - a.end);
+  const kept: MandateMarker[] = [];
+  let coveredUntil = -1;
+  for (const marker of markers) {
+    if (marker.index < coveredUntil) continue;
+    kept.push(marker);
+    coveredUntil = marker.end;
+  }
+  return kept;
+}
+
+
+function distinctHits(hits: readonly MandateHit[]): MandateHit[] {
+  const out: MandateHit[] = [];
+  const seen = new Set<string>();
+  for (const hit of hits) {
+    if (seen.has(hit.norm)) continue;
+    seen.add(hit.norm);
+    out.push(hit);
+  }
+  return out;
+}
+
+/**
+ * MCP host excerpt is a literal substring of the full `User mandate:` section.
+ * Internal characters are not folded: a different space, NBSP, or BOM is a
+ * different target.
+ */
+function userMandateContainsExcerpt(userMandate: string, excerpt: string): boolean {
+  return excerpt.length > 0 && userMandate.includes(excerpt);
+}
+
+function acceptBoundedExtended(ext: MandateHit, hits: readonly MandateHit[]): MandateQuoteExtraction {
+  const same = hits.filter(hit =>
+    hit.norm === ext.norm && hit.kind !== 'mcp' && hit.kind !== 'suite',
+  );
+  const bounded = same.find(hit => hit.bounded);
+  if (!bounded) return absentExtraction();
+  return quoteExtraction(bounded.raw);
+}
+
+/**
+ * Legacy cascade (unchanged): a non-empty `Principal mandate (verbatim quote):`
+ * wins over `USER INSTRUCTION:` even when the texts differ. Any other
+ * disagreement, including two spans of the same label, is a conflict.
+ *
+ * The one designed exception is MCP's host-excerpt shape: `User mandate:`
+ * holds the full mandate and `Principal mandate (verbatim quote):` holds a
+ * substring of it. The cite stays the verbatim span. A verbatim span that is
+ * not contained in the user mandate is a conflict, not a silent MCP win.
+ */
+function resolveMandateHits(hits: readonly MandateHit[]): MandateQuoteExtraction {
+  if (hits.length === 0) return absentExtraction();
+
+  const mcp = distinctHits(hits.filter(hit => hit.kind === 'mcp'));
+  const suite = distinctHits(hits.filter(hit => hit.kind === 'suite'));
+  const extended = distinctHits(hits.filter(hit => hit.kind !== 'mcp' && hit.kind !== 'suite'));
+
+  if (mcp.length > 1) return conflictExtraction(mcp);
+  if (suite.length > 1) return conflictExtraction([...suite, ...mcp, ...extended]);
+
+  const legacy = mcp[0] ?? suite[0] ?? null;
+
+  if (extended.length === 0) {
+    return legacy ? quoteExtraction(legacy.raw) : absentExtraction();
+  }
+  if (extended.length > 1) {
+    return conflictExtraction([...extended, ...(legacy ? [legacy] : []), ...suite]);
+  }
+
+  const ext = extended[0]!;
+  if (legacy && ext.norm === legacy.norm) return quoteExtraction(legacy.raw);
+  if (!legacy) return acceptBoundedExtended(ext, hits);
+
+  const excerptOk =
+    ext.kind === 'user_mandate' &&
+    mcp.length === 1 &&
+    userMandateContainsExcerpt(ext.raw, mcp[0]!.raw) &&
+    suite.every(hit => hit.norm === ext.norm || hit.norm === mcp[0]!.norm);
+  if (excerptOk) return quoteExtraction(mcp[0]!.raw);
+
+  return conflictExtraction([legacy, ext, ...suite]);
+}
+
+function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExtraction {
+  const mask = buildQuoteMask(evidence);
+  const markers = collectMarkers(evidence);
+  const structural: MandateMarker[] = [];
+
+  for (const marker of markers) {
+    if (rangeIsMasked(mask, marker.index, marker.end)) continue;
+    const placement = classifySectionBoundary(evidence, marker.index);
+    if (placement === 'none') continue;
+    // `absent` only disables quote recovery; a real model quote can still
+    // pass provenance. Keep ambiguous preamble structure in the verdict gate.
+    if (placement === 'ambiguous') return conflictExtraction([]);
+    structural.push(marker);
+    // Scope the boundary scan as well as extraction to the preamble. Labels
+    // in action/tool content must not erase an already established conflict.
+    if (!marker.kind) break;
+  }
+
+  let regionOpen = true;
+  const hits: MandateHit[] = [];
+
+  for (let n = 0; n < structural.length; n++) {
+    const marker = structural[n]!;
+    if (!marker.kind) {
+      // The same marker that ends a span also closes the mandate region,
+      // including an inline `Proposed action:`.
+      regionOpen = false;
+      continue;
+    }
+    if (!regionOpen) continue;
+
+    const legacy = marker.kind === 'mcp' || marker.kind === 'suite';
+    const next = structural[n + 1];
+    const boundedByNext = next !== undefined;
+    const end = boundedByNext ? spanCutBefore(evidence, next.index) : evidence.length;
+    const text = evidence.slice(marker.end, Math.max(marker.end, end)).trim();
+    if (!text || !evidence.includes(text)) continue;
+    // Outer trim drops surrounding whitespace, including a leading NBSP or a
+    // trailing EM SPACE, so the recovered quote keeps the literal target.
+    // Identity is that trimmed string: internal spaces are not collapsed.
+    hits.push({
+      kind: marker.kind,
+      raw: text,
+      norm: text,
+      bounded: legacy || boundedByNext,
+    });
+  }
+
+  return resolveMandateHits(hits);
+}
+
+/**
+ * Read structural mandate sections from host evidence.
+ *
+ * Counted labels, case-insensitive, with flexible internal whitespace and
+ * an optional space before the colon:
+ *   - `Principal mandate (verbatim quote):` and `Principal mandate (verbatim):`
+ *   - `USER INSTRUCTION:` when that header itself is in the preamble
+ *   - `User mandate:`, `Principal instruction:`, `Principal mandate:`, `Mandate:`
+ *
+ * A label counts only in the preamble. The same recognizer decides where a
+ * span ends and where the preamble ends: ASCII space, tab, or a new line
+ * before a section label, on its own line or inline. NBSP and other
+ * non-ASCII whitespace before a label in the preamble is an ambiguous
+ * boundary: it returns a blocking conflict and recovers nothing.
+ * Legacy labels use that boundary too. Labels inside quotes, fenced blocks,
+ * blockquotes, tool output, or the action body do not count. Extended spans
+ * must be bounded by a following section. Mandate texts are compared
+ * literally after outer trim; internal spaces are not collapsed.
+ *
+ * Disagreeing sections return `conflict` and no quote. The legacy pair is
+ * the exception already locked by regression tests: a non-empty MCP span
+ * wins over a different `USER INSTRUCTION:` span. MCP's host-excerpt shape
+ * (`User mandate:` full text containing `Principal mandate (verbatim quote):`)
+ * keeps the verbatim span.
+ */
+export function inspectMandateVerbatimQuote(evidence: string): MandateQuoteExtraction {
+  if (typeof evidence !== 'string' || evidence.length === 0) return absentExtraction();
+  try {
+    return inspectMandateVerbatimQuoteUnchecked(evidence);
+  } catch {
+    // Parser errors fail closed. They must not surface a quote.
+    return { status: 'conflict', quote: null, conflictingQuotes: [] };
+  }
+}
+
+/**
+ * Citeable mandate span, or null when none exists or the sections conflict.
+ *
+ * Prefer MCP `buildSentinelEvidence` labels, then suite `USER INSTRUCTION:`
  * (Sentinel #66 Track 1b). Same-line suite one-liners cut before
  * WALLET BALANCE / AGENT PROPOSED ACTION so the recovered quote is
  * the mandate, not the action blob.
@@ -418,40 +894,29 @@ export function appendReasoningNote(reasoning: unknown, note: string): string {
  * substring-match instead of stamping PROVENANCE DOWNGRADE on a missing cite
  * that the host already supplied. No minimum length — MCP's 20-char floor
  * applies only to optional host excerpts falling back to the full mandate,
- * not to the embedded span itself.
+ * not to the embedded span itself. A recovered span is still only a cite:
+ * it does not raise a score and it does not produce ALLOW.
  */
 export function extractMandateVerbatimQuote(evidence: string): string | null {
-  if (!evidence) return null;
-  const attempts: Array<{ label: RegExp; next: RegExp }> = [
-    {
-      label: /Principal mandate \(verbatim quote\):/i,
-      next: /(?:\n|\s+)(?:Proposed action:|Agent reasoning:)/i,
-    },
-    {
-      label: /USER INSTRUCTION:/i,
-      next: /(?:\n|\s+)(?:WALLET BALANCE:|AGENT PROPOSED ACTION:|AGENT REASONING:)/i,
-    },
-  ];
-  for (const { label, next } of attempts) {
-    const labelMatch = evidence.match(label);
-    if (!labelMatch || labelMatch.index === undefined) continue;
-    const after = evidence.slice(labelMatch.index + labelMatch[0].length);
-    const cut = after.search(next);
-    const raw = (cut === -1 ? after : after.slice(0, cut)).trim();
-    if (!raw) continue;
-    if (!evidence.includes(raw)) continue;
-    return raw;
-  }
-  return null;
+  const found = inspectMandateVerbatimQuote(evidence);
+  return found.status === 'quote' ? found.quote : null;
 }
 
-/** Recover a citeable quote from evidence only when the LLM omitted one. */
+/**
+ * Recover a citeable quote from evidence only when the LLM omitted one.
+ *
+ * A model-emitted quote is never replaced. If that quote is not the real
+ * mandate, substituting an extracted span would hide the fabrication and
+ * let provenance pass. Conflicted mandate sections also yield no quote.
+ */
 export function recoverCiteableQuote(
   quote: string | null,
   evidence: string,
 ): string | null {
   if (quote != null && quote.trim().length > 0) return quote;
-  return extractMandateVerbatimQuote(evidence);
+  const found = inspectMandateVerbatimQuote(evidence);
+  if (found.status !== 'quote') return null;
+  return found.quote;
 }
 
 /**
@@ -1363,6 +1828,9 @@ export async function evaluateItem(
 
   // ── Apply provenance checks and score floors (Tier 2 results only) ──
   const allViolations: string[] = [];
+  // A structural conflict in the trace holds the item even when a step is
+  // scored against the answer, or when Tier-1 returned before quote recovery.
+  let mandateConflict = inspectMandateVerbatimQuote(item.trace_steps ?? '').status === 'conflict';
   const processedEvals: StepEvaluation[] = mergedEvals.map(ev => {
     // Skip provenance for Tier-1 results (no quotes to check)
     if (ev.reasoning?.startsWith('[TIER1')) return ev;
@@ -1373,10 +1841,14 @@ export async function evaluateItem(
     // would PROV_FAIL_02 against trace_steps and get force-downgraded.
     const goldStep = item.gold_plan_steps.find(g => `step_${g.index}` === ev.step_id);
     const evidence = goldStep ? resolveEvidenceSource(item, goldStep) : item.trace_steps;
+    if (inspectMandateVerbatimQuote(evidence).status === 'conflict') mandateConflict = true;
 
     // Recover a citeable evidence span when the LLM omitted quote (MCP
-    // `Principal mandate` or suite `USER INSTRUCTION:`). Do not substitute when
-    // the model emitted a non-null quote — hallucinated cites still fail.
+    // `Principal mandate`, suite `USER INSTRUCTION:`, or another structural
+    // mandate label). Do not substitute when the model emitted a non-null
+    // quote — a fabricated cite must not be masked by a fallback span.
+    // Conflicting mandate sections recover nothing. The model quote is kept
+    // and still checked; the conflict gate below blocks ALLOW either way.
     const evForProv = {
       ...ev,
       quote: recoverCiteableQuote(coerceQuote(ev.quote), evidence),
@@ -1401,7 +1873,23 @@ export async function evaluateItem(
   });
 
   // ── Derive verdict ──
-  const { verdict, reasoning: verdictReasoning, conditions, lowConfidence } = deriveVerdict(processedEvals, item.gold_plan_steps);
+  const derived = deriveVerdict(processedEvals, item.gold_plan_steps);
+  let verdict = derived.verdict;
+  let verdictReasoning = derived.reasoning;
+  let conditions = derived.conditions;
+  const lowConfidence = derived.lowConfidence;
+
+  // Conflict is independent of the model quote and of how many critical
+  // steps there are. One partial step would otherwise be CONDITIONAL_ALLOW,
+  // and a quote of one side would otherwise be ALLOW. BLOCK stays BLOCK.
+  if (mandateConflict) {
+    allViolations.push('MANDATE_CONFLICT: structural mandate sections disagree or have ambiguous boundaries');
+    if (verdict === 'ALLOW' || verdict === 'CONDITIONAL_ALLOW') {
+      verdict = 'HOLD';
+      conditions = undefined;
+      verdictReasoning = `${verdictReasoning} [MANDATE CONFLICT: conflicting or ambiguous structural mandate sections block ALLOW]`;
+    }
+  }
 
   return {
     id: item.id,

@@ -18,6 +18,30 @@ All notable changes to pot-cli will be documented in this file.
 - `npm run test:package` packs the build, installs it in a clean consumer
   without the development lockfile, and checks `--version` and
   `ask --dry-run`. Both checks reproduced the `0.8.11` import failure.
+- `inspectMandateVerbatimQuote()` reports `quote`, `absent`, or `conflict`.
+  `extractMandateVerbatimQuote()` now also accepts structural
+  `Mandate:`, `User mandate:`, `Principal instruction:`, and bare
+  `Principal mandate:` headers (case-insensitive, flexible internal
+  whitespace, optional space before the colon). A label inside quotes,
+  a blockquote, a fenced block, tool output, or the proposed-action body
+  is not a mandate section. Disagreeing sections return no quote.
+  The MCP host-excerpt pair (`User mandate:` containing
+  `Principal mandate (verbatim quote):`) still cites the verbatim span.
+  The two existing labels keep their cascade when both headers are in the
+  preamble: a non-empty MCP span wins over `USER INSTRUCTION:`. A label
+  after the action or tool section does not count, including legacy labels.
+  `Principal mandate (verbatim):` is accepted as the same MCP header.
+  Fenced blocks close only on the same character with a run at least as
+  long as the opener (`~` does not close `` ` ``), and only ASCII spaces
+  or tabs may follow that run. Section boundaries use that same ASCII
+  whitespace for both the span cut and the end of the mandate region,
+  including inline labels. Any other whitespace before a section label
+  recovers no mandate. Mandate texts are compared literally after outer
+  trim; internal spaces are not collapsed. A detected mandate
+  conflict forces HOLD when the verdict would otherwise be ALLOW or
+  CONDITIONAL_ALLOW, including when the model quoted one side and when
+  only one critical step is present. BLOCK is left in place. A
+  model-emitted quote is never replaced by an extracted span.
 
 ## [0.8.11] - 2026-10-09
 
