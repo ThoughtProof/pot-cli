@@ -410,7 +410,8 @@ export function appendReasoningNote(reasoning: unknown, note: string): string {
 /**
  * Result of reading mandate sections out of host evidence.
  *
- * `conflict` is fail-closed: callers must not pick one of the spans.
+ * `conflict` is fail-closed: callers must not pick one of the spans. It also
+ * covers ambiguous preamble boundaries and parser failures.
  * `absent` means no structural mandate section was found. Neither status
  * is an authorization decision — this module never promotes a verdict.
  */
@@ -422,7 +423,8 @@ export interface MandateQuoteExtraction {
   quote: string | null;
   /**
    * Distinct structural spans that disagreed. Empty unless `status` is
-   * `conflict` (also empty when a parser failure fail-closes).
+   * `conflict` (also empty when an ambiguous boundary or parser failure closes
+   * the extraction before the spans can be resolved).
    */
   conflictingQuotes: string[];
 }
@@ -514,7 +516,7 @@ function conflictExtraction(hits: readonly MandateHit[]): MandateQuoteExtraction
  * starts the line. The same classification cuts a mandate span and closes
  * the mandate region, for legacy and extended labels, on their own line or
  * inline. Any other whitespace before a label (NBSP, VT, FF, BOM, EM SPACE)
- * is ambiguous: the extraction fail-closes and recovers no mandate.
+ * is ambiguous: the extraction returns a blocking conflict and no mandate.
  */
 type BoundaryPlacement = 'line' | 'inline' | 'ambiguous' | 'none';
 
@@ -534,8 +536,10 @@ function classifySectionBoundary(evidence: string, labelIndex: number): Boundary
   if (i < 0 || evidence[i] === '\n' || (evidence[i] === '\r' && (i === 0 || evidence[i - 1] === '\n'))) {
     return 'line';
   }
+  // Check the character before the whole ASCII run. A trailing space or tab
+  // must not hide an NBSP (or another non-structural separator) before it.
+  if (i >= 0 && isNonStructuralWhitespace(evidence[i]!)) return 'ambiguous';
   if (sawAscii) return 'inline';
-  if (isNonStructuralWhitespace(evidence[labelIndex - 1]!)) return 'ambiguous';
   return 'none';
 }
 
@@ -801,8 +805,13 @@ function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExt
     if (rangeIsMasked(mask, marker.index, marker.end)) continue;
     const placement = classifySectionBoundary(evidence, marker.index);
     if (placement === 'none') continue;
-    if (placement === 'ambiguous') return absentExtraction();
+    // `absent` only disables quote recovery; a real model quote can still
+    // pass provenance. Keep ambiguous preamble structure in the verdict gate.
+    if (placement === 'ambiguous') return conflictExtraction([]);
     structural.push(marker);
+    // Scope the boundary scan as well as extraction to the preamble. Labels
+    // in action/tool content must not erase an already established conflict.
+    if (!marker.kind) break;
   }
 
   let regionOpen = true;
@@ -850,7 +859,8 @@ function inspectMandateVerbatimQuoteUnchecked(evidence: string): MandateQuoteExt
  * A label counts only in the preamble. The same recognizer decides where a
  * span ends and where the preamble ends: ASCII space, tab, or a new line
  * before a section label, on its own line or inline. NBSP and other
- * non-ASCII whitespace before a label is ambiguous and recovers nothing.
+ * non-ASCII whitespace before a label in the preamble is an ambiguous
+ * boundary: it returns a blocking conflict and recovers nothing.
  * Legacy labels use that boundary too. Labels inside quotes, fenced blocks,
  * blockquotes, tool output, or the action body do not count. Extended spans
  * must be bounded by a following section. Mandate texts are compared
@@ -1873,11 +1883,11 @@ export async function evaluateItem(
   // steps there are. One partial step would otherwise be CONDITIONAL_ALLOW,
   // and a quote of one side would otherwise be ALLOW. BLOCK stays BLOCK.
   if (mandateConflict) {
-    allViolations.push('MANDATE_CONFLICT: structural mandate sections disagree');
+    allViolations.push('MANDATE_CONFLICT: structural mandate sections disagree or have ambiguous boundaries');
     if (verdict === 'ALLOW' || verdict === 'CONDITIONAL_ALLOW') {
       verdict = 'HOLD';
       conditions = undefined;
-      verdictReasoning = `${verdictReasoning} [MANDATE CONFLICT: disagreeing structural mandate sections block ALLOW]`;
+      verdictReasoning = `${verdictReasoning} [MANDATE CONFLICT: conflicting or ambiguous structural mandate sections block ALLOW]`;
     }
   }
 
